@@ -657,11 +657,25 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
+    function cleanSleepHrs(raw) {
+      if (raw === null || raw === undefined || raw === '') return null;
+      let v = parseFloat(String(raw).replace(/[^0-9.\-]/g, ''));
+      if (!Number.isFinite(v) || v <= 0) return null;
+      if (v > 120) v = v / 3600; // Shortcuts Duration returns seconds
+      else if (v > 24) v = v / 60; // minutes
+      return Number(v.toFixed(1));
+    }
+
     function renderAppleFitnessBento() {
       const h = state.health;
-      const movePct = Math.min(1, h.moveCal / h.moveGoal);
-      const exPct = Math.min(1, h.exMin / h.exGoal);
-      const standPct = Math.min(1, h.standHr / h.standGoal);
+      const moveDisp = Math.round(Number(h.moveCal) || 0);
+      const exDisp = Math.round(Number(h.exMin) || 0);
+      const standDisp = Math.round(Number(h.standHr) || 0);
+      const sleepHrsDisp = cleanSleepHrs(h.sleepHrs);
+      const sleepScoreDisp = h.sleepScore !== null ? Math.round(Number(h.sleepScore)) : null;
+      const movePct = Math.min(1, moveDisp / h.moveGoal);
+      const exPct = Math.min(1, exDisp / h.exGoal);
+      const standPct = Math.min(1, standDisp / h.standGoal);
 
       const r1 = 36, c1 = 2 * Math.PI * r1;
       const r2 = 27, c2 = 2 * Math.PI * r2;
@@ -675,8 +689,8 @@
         <div class="mb-4">
           <div class="flex items-center justify-between mb-2.5">
             <div class="text-lg font-bold tracking-tight text-white">Summary</div>
-            <button id="btnHealthConnect" class="px-3 py-1 rounded-full text-[11px] font-bold ${h.connected ? 'bg-[#22C55E]/15 text-[#22C55E] border border-[#22C55E]/30' : 'bg-[#1C1C1E] text-[#92E82A] border border-[#2C2C2E]'}">
-              ${h.connected ? 'Apple Health Synced' : 'Connect Apple Health'}
+            <button id="btnHealthConnect" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-[#92E82A] border border-[#2C2C2E]">
+              Health
             </button>
           </div>
 
@@ -697,16 +711,16 @@
               <div class="space-y-1.5">
                 <div>
                   <div class="text-[11px] text-[#8E8E93] font-medium">Move</div>
-                  <div class="text-sm font-bold text-[#FA114F] tabular-nums">${h.moveCal}/${h.moveGoal} <span class="text-[11px]">CAL</span></div>
+                  <div class="text-sm font-bold text-[#FA114F] tabular-nums">${moveDisp}/${h.moveGoal} <span class="text-[11px]">CAL</span></div>
                 </div>
                 <div class="flex gap-4">
                   <div>
                     <div class="text-[11px] text-[#8E8E93] font-medium">Exercise</div>
-                    <div class="text-sm font-bold text-[#92E82A] tabular-nums">${h.exMin}/${h.exGoal} <span class="text-[11px]">MIN</span></div>
+                    <div class="text-sm font-bold text-[#92E82A] tabular-nums">${exDisp}/${h.exGoal} <span class="text-[11px]">MIN</span></div>
                   </div>
                   <div>
                     <div class="text-[11px] text-[#8E8E93] font-medium">Stand</div>
-                    <div class="text-sm font-bold text-[#00F5EA] tabular-nums">${h.standHr}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
+                    <div class="text-sm font-bold text-[#00F5EA] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
                   </div>
                 </div>
               </div>
@@ -747,7 +761,7 @@
                 <div class="text-xs font-semibold text-white">Sleep Score</div>
                 <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
               </div>
-              <div class="text-xl font-bold text-[#A78BFA] tabular-nums">${h.sleepScore !== null ? `${h.sleepScore}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${h.sleepHrs !== null ? `${h.sleepHrs}h` : 'No data'}</span></div>
+              <div class="text-xl font-bold text-[#A78BFA] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
               <div class="flex items-end gap-1.5 h-8 mt-2">
                 ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#8B5CF6]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
               </div>
@@ -776,14 +790,18 @@
     (function applyHealthUrlParams() {
       try {
         const p = new URLSearchParams(window.location.search);
+        const numParam = (k) => {
+          const v = parseFloat(String(p.get(k) || '').replace(/[^0-9.\-]/g, ''));
+          return Number.isFinite(v) ? v : 0;
+        };
         if (p.has('move') || p.has('ex') || p.has('stand') || p.has('sleep') || p.has('health_sync')) {
           state.health.connected = true;
-          if (p.has('move')) state.health.moveCal = Number(p.get('move')) || 0;
-          if (p.has('ex')) state.health.exMin = Number(p.get('ex')) || 0;
-          if (p.has('stand')) state.health.standHr = Number(p.get('stand')) || 0;
-          if (p.has('sleep')) state.health.sleepScore = Number(p.get('sleep')) || 84;
-          if (p.has('sleep_hrs')) state.health.sleepHrs = Number(p.get('sleep_hrs')) || 7.5;
-          if (p.has('readiness')) state.health.readiness = Number(p.get('readiness')) || 8;
+          if (p.has('move')) state.health.moveCal = Math.round(numParam('move'));
+          if (p.has('ex')) state.health.exMin = Math.round(numParam('ex'));
+          if (p.has('stand')) state.health.standHr = Math.round(numParam('stand'));
+          if (p.has('sleep')) state.health.sleepScore = Math.min(100, Math.max(0, Math.round(numParam('sleep')) || 84));
+          if (p.has('sleep_hrs')) state.health.sleepHrs = cleanSleepHrs(p.get('sleep_hrs')) ?? 7.5;
+          if (p.has('readiness')) state.health.readiness = Math.min(10, Math.max(1, Number(numParam('readiness').toFixed(1)) || 8));
           window.history.replaceState({}, '', window.location.pathname);
           persistState();
         }
@@ -797,40 +815,17 @@
       if (!btn) return;
       btn.addEventListener('click', () => {
         const baseUrl = window.location.origin + window.location.pathname;
-        const shortcutUrlExample = `${baseUrl}?health_sync=1&move=520&ex=42&stand=10&sleep=86&sleep_hrs=7.6&readiness=8`;
-        openModal('Apple Health Integration', `
+        const shortcutUrl = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&sleep=86&readiness=8`;
+        openModal('Apple Shortcuts Sync URL', `
           <div class="space-y-3 text-xs">
-            <div class="bg-[#2C2C2E]/70 rounded-xl p-3 text-[#E5E5EA] leading-relaxed">
-              <strong class="text-white">Why Safari doesn't pop a HealthKit prompt:</strong> Apple only allows native iOS apps (installed via Xcode / TestFlight from <code class="text-[#92E82A]">hybrid-strength-app.zip</code>) to show the system Apple Health permission dialog.
-            </div>
-            <div class="bg-[#2C2C2E]/70 rounded-xl p-3 space-y-1.5">
-              <div class="font-bold text-[#92E82A]">iPhone Web Workaround (Apple Shortcuts)</div>
-              <div class="text-[#8E8E93]">Create an Apple Shortcut on your iPhone that reads <strong>Move, Exercise, Stand & Sleep</strong> from Apple Health and opens this URL format:</div>
-              <div class="bg-[#0B0B0D] rounded-lg p-2 text-[10px] text-[#00F5EA] break-all font-mono select-all">${shortcutUrlExample}</div>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <div><label class="text-[10px] font-bold text-[#8E8E93]">MOVE (CAL)</label><input id="inpMoveCal" type="number" value="${state.health.moveCal || 480}" class="num-input mt-1" /></div>
-              <div><label class="text-[10px] font-bold text-[#8E8E93]">EXERCISE (M)</label><input id="inpExMin" type="number" value="${state.health.exMin || 35}" class="num-input mt-1" /></div>
-              <div><label class="text-[10px] font-bold text-[#8E8E93]">STAND (HR)</label><input id="inpStandHr" type="number" value="${state.health.standHr || 9}" class="num-input mt-1" /></div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div><label class="text-[10px] font-bold text-[#8E8E93]">SLEEP SCORE (0-100)</label><input id="inpSleepScore" type="number" value="${state.health.sleepScore ?? 84}" class="num-input mt-1" /></div>
-              <div><label class="text-[10px] font-bold text-[#8E8E93]">READINESS (1-10)</label><input id="inpReadiness" type="number" max="10" min="1" value="${state.health.readiness ?? 8}" class="num-input mt-1" /></div>
-            </div>
-            <button id="btnApplyHealth" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Apply Health Summary</button>
+            <div class="text-[#8E8E93]">Use this URL in your iPhone <strong>Shortcuts</strong> app to sync Apple Health data automatically:</div>
+            <div class="bg-[#0B0B0D] border border-[#2C2C2E] rounded-xl p-3 text-[11px] text-[#00F5EA] break-all font-mono select-all">${shortcutUrl}</div>
+            <button id="btnCopyShortcutUrl" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Copy Shortcut URL</button>
           </div>
         `);
-        document.getElementById('btnApplyHealth').addEventListener('click', () => {
-          state.health.connected = true;
-          state.health.moveCal = Number(document.getElementById('inpMoveCal').value) || 0;
-          state.health.exMin = Number(document.getElementById('inpExMin').value) || 0;
-          state.health.standHr = Number(document.getElementById('inpStandHr').value) || 0;
-          state.health.sleepHrs = 7.4;
-          state.health.sleepScore = Number(document.getElementById('inpSleepScore').value) || 84;
-          state.health.readiness = Number(document.getElementById('inpReadiness').value) || 8;
-          document.getElementById('modalOverlay').classList.add('hidden');
-          persistState();
-          render();
+        document.getElementById('btnCopyShortcutUrl').addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(shortcutUrl); } catch (e) {}
+          document.getElementById('btnCopyShortcutUrl').textContent = 'Copied ✓';
         });
       });
     }
