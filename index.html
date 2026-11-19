@@ -23,27 +23,26 @@
       --success: #22C55E;
       --danger: #EF4444;
     }
-    body {
+    html, body {
+      width: 100%;
+      height: 100%;
       background: #000000;
       color: #FFFFFF;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      min-height: 100dvh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       padding: 0;
+      overflow: hidden;
     }
     .duo-shell {
+      position: fixed;
+      inset: 0;
       width: 100%;
-      height: 100dvh;
+      height: 100%;
       background: var(--bg);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      position: relative;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
+      padding: 0;
     }
     .duo-grid {
       flex: 1;
@@ -70,17 +69,12 @@
     @media (min-width: 768px) {
       body { padding: 0; }
       .duo-shell {
-        width: 100%;
-        height: 100dvh;
         max-width: none;
         max-height: none;
         border: none;
         border-radius: 0;
         box-shadow: none;
-        padding-top: env(safe-area-inset-top);
-        padding-bottom: env(safe-area-inset-bottom);
-        padding-left: env(safe-area-inset-left);
-        padding-right: env(safe-area-inset-right);
+        padding: 0;
       }
       .duo-grid {
         flex-direction: row;
@@ -103,11 +97,15 @@
         flex-direction: column;
         justify-content: space-between;
         align-items: center;
-        width: 68px;
+        width: auto;
+        min-width: 72px;
         background: #08080A;
         border-left: 1px solid #1F1F26;
-        padding: 16px 8px;
-        shrink: 0;
+        padding-top: max(16px, env(safe-area-inset-top));
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+        padding-left: 10px;
+        padding-right: max(12px, env(safe-area-inset-right));
+        flex-shrink: 0;
       }
       .bottom-nav {
         display: none;
@@ -149,7 +147,7 @@
 <body>
   <div class="duo-shell">
     <!-- Mobile-only top header -->
-    <div class="md:hidden px-5 pt-3 pb-2 flex items-center justify-between border-b border-[#1F1F26] bg-[#0B0B0D]">
+    <div class="md:hidden px-5 pb-2 flex items-center justify-between border-b border-[#1F1F26] bg-[#000000]" style="padding-top: max(12px, env(safe-area-inset-top));">
       <span class="text-[11px] font-bold tracking-widest text-[#92E82A]">APEX HYBRID</span>
       <span id="unitBadgeMobile" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#1C1C1E] text-[#8E8E93]">LB</span>
     </div>
@@ -189,6 +187,13 @@
       <!-- CENTER/RIGHT WORKSPACE PANE -->
       <main class="right-pane">
         <div id="mainContent" class="scroll-area"></div>
+
+        <!-- Docked Start Workout Footer (Today tab) -->
+        <div id="todayFooter" class="hidden px-4 py-2.5 bg-[#000000]/95 border-t border-[#1C1C1E]">
+          <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#92E82A] text-[#000000] font-extrabold text-sm tracking-wide shadow-lg">
+            START WORKOUT
+          </button>
+        </div>
 
         <!-- Floating Rest Timer Bar -->
         <div id="restTimerBar" class="hidden bg-[#2C2C2E] border-t border-[#2D2D37] px-4 py-2.5 relative">
@@ -855,8 +860,20 @@
       }));
     }
 
+    document.getElementById('btnStartToday').addEventListener('click', () => {
+      if (state.activeSession) switchTab('train');
+      else startWorkoutForDay(state.currentDayIdx);
+    });
+
     function render() {
       persistState();
+      const tf = document.getElementById('todayFooter');
+      if (state.tab === 'today') {
+        tf.classList.remove('hidden');
+        document.getElementById('btnStartToday').textContent = state.activeSession ? 'RESUME WORKOUT' : 'START WORKOUT';
+      } else {
+        tf.classList.add('hidden');
+      }
       document.getElementById('unitBadgeMobile').textContent = state.unit.toUpperCase();
       document.getElementById('unitBadgeRail').textContent = state.unit.toUpperCase();
       renderLeftPane();
@@ -913,7 +930,7 @@
           </div>
 
           <!-- Compact Apple Fitness+ Horizontal Thumbnail Rows -->
-          <div class="space-y-3 mb-24">
+          <div class="space-y-3 pb-4">
             ${day.items.map((it, i) => {
               const ex = EXERCISES[it.exId];
               const pr = state.peakWeights[ex.id];
@@ -938,11 +955,7 @@
             }).join('')}
           </div>
 
-          <div class="sticky bottom-0 z-30 pt-5 pb-2 bg-gradient-to-t from-[#000000] via-[#000000]/95 to-transparent">
-            <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#92E82A] text-[#000000] font-extrabold text-sm tracking-wide shadow-2xl">
-              ${state.activeSession ? 'RESUME WORKOUT' : 'START WORKOUT'}
-            </button>
-          </div>
+
         `;
 
         wireHealthButton();
@@ -955,10 +968,6 @@
           state.currentDayIdx = 0;
           render();
         }));
-        document.getElementById('btnStartToday').addEventListener('click', () => {
-          if (state.activeSession) switchTab('train');
-          else startWorkoutForDay(state.currentDayIdx);
-        });
         root.querySelectorAll('.today-alt-btn').forEach((btn) => {
           btn.addEventListener('click', () => {
             const ex = EXERCISES[btn.dataset.exid];
