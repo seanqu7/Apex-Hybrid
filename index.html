@@ -2025,7 +2025,7 @@
 
                 ${state.nutrition.mode === 'ai' ? `
                   <div class="space-y-2.5">
-                    <div class="text-[#8E8E93]">Describe any meal and <strong>Gemini 2.5 Flash</strong> will estimate calories, macros, fiber, sodium & water.</div>
+                    <div class="text-[#8E8E93]">Describe any meal and <strong>Gemini 3.8 Flash</strong> will estimate calories, macros, fiber, sodium & water.</div>
                     <select id="mMealSel" class="num-input text-left px-3">
                       ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `<option ${state.nutrition.mealTarget === m ? 'selected' : ''}>${m}</option>`).join('')}
                     </select>
@@ -2078,7 +2078,7 @@
               if (state.nutrition.geminiKey) {
                 aiBtn.textContent = 'Analyzing with Gemini...';
                 try {
-                  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
+                  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2278,7 +2278,7 @@
             const orig = btnEl.textContent;
             btnEl.textContent = 'Analyzing...';
             try {
-              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
