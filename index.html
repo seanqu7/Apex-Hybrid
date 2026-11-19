@@ -553,7 +553,9 @@
         usdaKey: '',
         mode: 'quick',
         mealTarget: 'Breakfast',
-        logs: []
+        selectedDate: new Date().toISOString().slice(0, 10),
+        logs: [],
+        logsByDate: {}
       },
       health: saved.health || {
         connected: false,
@@ -812,13 +814,90 @@
       { name: '3 Eggs & 80g Oats Breakfast', meal: 'Breakfast', cal: 525, p: 32, c: 54, f: 19 },
     ];
 
+    function getActiveNutritionDate() {
+      if (!state.nutrition.selectedDate) state.nutrition.selectedDate = new Date().toISOString().slice(0, 10);
+      return state.nutrition.selectedDate;
+    }
+
+    function getActiveNutritionLogs() {
+      const d = getActiveNutritionDate();
+      if (!state.nutrition.logsByDate) state.nutrition.logsByDate = {};
+      if (state.nutrition.logs && state.nutrition.logs.length && !state.nutrition.logsByDate[d]) {
+        state.nutrition.logsByDate[d] = state.nutrition.logs;
+        state.nutrition.logsByDate[getActiveNutritionDate()] = [];
+      }
+      if (!state.nutrition.logsByDate[d]) state.nutrition.logsByDate[d] = [];
+      return state.nutrition.logsByDate[d];
+    }
+
     function getNutritionTotals() {
-      return state.nutrition.logs.reduce((acc, item) => ({
+      return getActiveNutritionLogs().reduce((acc, item) => ({
         cal: acc.cal + (item.cal || 0),
         p: acc.p + (item.p || 0),
         c: acc.c + (item.c || 0),
         f: acc.f + (item.f || 0),
       }), { cal: 0, p: 0, c: 0, f: 0 });
+    }
+
+    function parseCsvLine(line) {
+      const out = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+          else inQ = !inQ;
+        } else if (ch === ',' && !inQ) {
+          out.push(cur); cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      out.push(cur);
+      return out;
+    }
+
+    function importFoodnomsCsv(csvText) {
+      const lines = csvText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+      if (lines.length < 2) return { count: 0, days: 0, latestDate: null };
+      const headers = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
+      const idx = (name) => headers.indexOf(name);
+      const iDay = idx('day'), iName = idx('name'), iBrand = idx('brand'), iMeal = idx('meal type');
+      const iPortion = idx('portion'), iCal = idx('energy (cal)'), iCarb = idx('total carbs (g)');
+      const iPro = idx('protein (g)'), iFat = idx('total fat (g)');
+      if (iDay < 0 || iName < 0 || iCal < 0) return { count: 0, days: 0, latestDate: null };
+
+      if (!state.nutrition.logsByDate) state.nutrition.logsByDate = {};
+      const touchedDays = new Set();
+      let count = 0;
+      const toNum = (v) => Number(String(v || '0').replace(/,/g, '')) || 0;
+
+      for (let r = 1; r < lines.length; r++) {
+        const cols = parseCsvLine(lines[r]);
+        const day = (cols[iDay] || '').trim();
+        const name = (cols[iName] || '').trim();
+        if (!day || !name) continue;
+        const brand = iBrand >= 0 ? (cols[iBrand] || '').trim() : '';
+        const portion = iPortion >= 0 ? (cols[iPortion] || '').trim() : '';
+        const meal = (iMeal >= 0 ? (cols[iMeal] || '').trim() : '') || 'Snacks';
+        const label = [name, brand ? `(${brand})` : '', portion ? `• ${portion}` : ''].filter(Boolean).join(' ');
+
+        if (!state.nutrition.logsByDate[day]) state.nutrition.logsByDate[day] = [];
+        state.nutrition.logsByDate[day].push({
+          name: label,
+          meal,
+          cal: toNum(cols[iCal]),
+          p: toNum(cols[iPro]),
+          c: toNum(cols[iCarb]),
+          f: toNum(cols[iFat]),
+        });
+        touchedDays.add(day);
+        count++;
+      }
+      const sortedDays = Array.from(touchedDays).sort();
+      const latestDate = sortedDays.length ? sortedDays[sortedDays.length - 1] : null;
+      if (latestDate) state.nutrition.selectedDate = latestDate;
+      return { count, days: touchedDays.size, latestDate };
     }
 
     function renderLeftPane() {
@@ -1219,12 +1298,15 @@
         const rCal = 34, cCal = 2 * Math.PI * rCal;
 
         root.innerHTML = `
-          <div class="flex items-center justify-between mb-3">
-            <div>
+          <div class="flex items-center justify-between mb-3 gap-2">
+            <div class="min-w-0">
               <div class="text-xl font-bold text-white">Nutrition & Macros</div>
-              <div class="text-xs text-[#8E8E93]">MacroLens AI + USDA Grounded Tracker</div>
+              <div class="text-xs text-[#8E8E93]">MacroLens AI + Foodnoms CSV / USDA</div>
             </div>
-            <button id="btnMacroGoals" class="px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-xs font-bold text-[#92E82A]">Targets</button>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <input id="nutriDatePick" type="date" value="${getActiveNutritionDate()}" class="bg-[#1C1C1E] border border-[#2C2C2E] text-white text-[11px] font-semibold rounded-full px-2.5 py-1.5 outline-none" />
+              <button id="btnMacroGoals" class="px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-xs font-bold text-[#92E82A]">Targets</button>
+            </div>
           </div>
 
           <!-- Apple Fitness Macro Rings Card -->
@@ -1337,9 +1419,9 @@
           <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
             <div class="flex items-center justify-between mb-2">
               <div class="text-sm font-bold text-white">Today's Food Log</div>
-              ${state.nutrition.logs.length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear Day</button>` : ''}
+              ${getActiveNutritionLogs().length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear Day</button>` : ''}
             </div>
-            ${state.nutrition.logs.length ? state.nutrition.logs.map((item, idx) => `
+            ${getActiveNutritionLogs().length ? getActiveNutritionLogs().map((item, idx) => `
               <div class="flex items-center justify-between py-2 border-t border-[#2C2C2E] text-xs">
                 <div>
                   <div class="text-white font-semibold">${item.name}</div>
@@ -1353,12 +1435,12 @@
           <!-- Nutrition-Only Backup & Restore -->
           <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mt-3">
             <div class="text-[10px] font-bold text-[#92E82A] mb-1">NUTRITION BACKUP & RESTORE</div>
-            <div class="text-xs text-[#8E8E93] mb-2.5">Export or import only your food logs and macro targets separately from your workouts.</div>
+            <div class="text-xs text-[#8E8E93] mb-2.5">Supports Foodnoms CSV exports (Foodnoms Food Log.csv) and Nutrition JSON backups.</div>
             <div class="grid grid-cols-2 gap-2">
               <button id="btnExportNutrition" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Nutrition (.json)</button>
               <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
                 Import Nutrition
-                <input id="inpImportNutrition" type="file" accept=".json,application/json" class="hidden" />
+                <input id="inpImportNutrition" type="file" accept=".json,.csv,text/csv,application/json" class="hidden" />
               </label>
             </div>
           </div>
@@ -1380,17 +1462,17 @@
           const c = Number(document.getElementById('qCarb').value) || 0;
           const f = Number(document.getElementById('qFat').value) || 0;
           if (!cal && !p && !c && !f) return;
-          state.nutrition.logs.unshift({ name, meal: state.nutrition.mealTarget, cal, p, c, f });
+          getActiveNutritionLogs().unshift({ name, meal: state.nutrition.mealTarget, cal, p, c, f });
           render();
         });
         root.querySelectorAll('.add-usda-food').forEach((b) => b.addEventListener('click', () => {
           const f = USDA_GROUNDED_FOODS[Number(b.dataset.idx)];
-          state.nutrition.logs.unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f });
+          getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f });
           render();
         }));
         root.querySelectorAll('.add-saved-meal').forEach((b) => b.addEventListener('click', () => {
           const sm = SAVED_MEALS_PRESETS[Number(b.dataset.idx)];
-          state.nutrition.logs.unshift({ name: sm.name, meal: state.nutrition.mealTarget, cal: sm.cal, p: sm.p, c: sm.c, f: sm.f });
+          getActiveNutritionLogs().unshift({ name: sm.name, meal: state.nutrition.mealTarget, cal: sm.cal, p: sm.p, c: sm.c, f: sm.f });
           render();
         }));
         const aiBtn = document.getElementById('btnRunAiParse');
@@ -1410,7 +1492,7 @@
               const data = await res.json();
               const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
               const items = Array.isArray(parsed) ? parsed : [parsed];
-              items.forEach((it) => state.nutrition.logs.unshift({ name: it.name, meal: state.nutrition.mealTarget, cal: Number(it.cal)||0, p: Number(it.p)||0, c: Number(it.c)||0, f: Number(it.f)||0 }));
+              items.forEach((it) => getActiveNutritionLogs().unshift({ name: it.name, meal: state.nutrition.mealTarget, cal: Number(it.cal)||0, p: Number(it.p)||0, c: Number(it.c)||0, f: Number(it.f)||0 }));
               render();
               return;
             } catch (err) {
@@ -1421,15 +1503,15 @@
           // Offline/Demo keyword matcher against USDA grounded foods
           const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
           const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
-          list.forEach((f) => state.nutrition.logs.unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f }));
+          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f }));
           render();
         });
         root.querySelectorAll('.del-food-btn').forEach((b) => b.addEventListener('click', () => {
-          state.nutrition.logs.splice(Number(b.dataset.idx), 1);
+          getActiveNutritionLogs().splice(Number(b.dataset.idx), 1);
           render();
         }));
         const clrBtn = document.getElementById('btnClearFoodLog');
-        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logs = []; render(); });
+        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logsByDate[getActiveNutritionDate()] = []; render(); });
         document.getElementById('btnExportNutrition').addEventListener('click', () => {
           const payload = { type: 'apex-hybrid-nutrition', version: 1, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
           const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -1442,21 +1524,36 @@
           a.remove();
           URL.revokeObjectURL(url);
         });
+        document.getElementById('nutriDatePick').addEventListener('change', (e) => {
+          if (e.target.value) { state.nutrition.selectedDate = e.target.value; render(); }
+        });
         document.getElementById('inpImportNutrition').addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
           if (!file) return;
           const reader = new FileReader();
           reader.onload = () => {
+            const raw = String(reader.result || '');
+            if (file.name.toLowerCase().endsWith('.csv') || raw.trim().startsWith('"day",')) {
+              const res = importFoodnomsCsv(raw);
+              if (res.count === 0) {
+                openModal('Import Error', '<div class="text-[#FA114F]">Could not parse Foodnoms CSV columns.</div>');
+                return;
+              }
+              persistState();
+              render();
+              openModal('Foodnoms CSV Imported', `<div class="text-white font-semibold">Imported ${res.count} food entries across ${res.days} day(s). Showing ${res.latestDate}.</div>`);
+              return;
+            }
             try {
-              const data = JSON.parse(String(reader.result || '{}'));
-              const nutri = data.nutrition || (data.logs && data.goals ? data : null);
+              const data = JSON.parse(raw);
+              const nutri = data.nutrition || (data.goals ? data : null);
               if (!nutri) throw new Error('Missing nutrition data');
               state.nutrition = nutri;
               persistState();
               render();
-              openModal('Nutrition Restored', `<div class="text-white font-semibold">Restored ${state.nutrition.logs.length} food log item(s) and macro targets.</div>`);
+              openModal('Nutrition Restored', `<div class="text-white font-semibold">Restored nutrition logs and macro targets.</div>`);
             } catch (err) {
-              openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition backup JSON file.</div>');
+              openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition JSON or CSV file.</div>');
             }
           };
           reader.readAsText(file);
