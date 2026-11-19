@@ -1349,6 +1349,19 @@
               </div>
             `).join('') : '<div class="text-xs text-[#636366]">No meals logged yet today.</div>'}
           </div>
+
+          <!-- Nutrition-Only Backup & Restore -->
+          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mt-3">
+            <div class="text-[10px] font-bold text-[#92E82A] mb-1">NUTRITION BACKUP & RESTORE</div>
+            <div class="text-xs text-[#8E8E93] mb-2.5">Export or import only your food logs and macro targets separately from your workouts.</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btnExportNutrition" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Nutrition (.json)</button>
+              <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
+                Import Nutrition
+                <input id="inpImportNutrition" type="file" accept=".json,application/json" class="hidden" />
+              </label>
+            </div>
+          </div>
         `;
 
         root.querySelectorAll('.nutri-mode-btn').forEach((b) => b.addEventListener('click', () => {
@@ -1417,6 +1430,37 @@
         }));
         const clrBtn = document.getElementById('btnClearFoodLog');
         if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logs = []; render(); });
+        document.getElementById('btnExportNutrition').addEventListener('click', () => {
+          const payload = { type: 'apex-hybrid-nutrition', version: 1, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `apex-hybrid-nutrition-${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        });
+        document.getElementById('inpImportNutrition').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = JSON.parse(String(reader.result || '{}'));
+              const nutri = data.nutrition || (data.logs && data.goals ? data : null);
+              if (!nutri) throw new Error('Missing nutrition data');
+              state.nutrition = nutri;
+              persistState();
+              render();
+              openModal('Nutrition Restored', `<div class="text-white font-semibold">Restored ${state.nutrition.logs.length} food log item(s) and macro targets.</div>`);
+            } catch (err) {
+              openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition backup JSON file.</div>');
+            }
+          };
+          reader.readAsText(file);
+        });
         document.getElementById('btnMacroGoals').addEventListener('click', () => {
           openModal('Macro Targets & AI Key', `
             <div class="space-y-2.5">
@@ -1560,12 +1604,12 @@
           </div>
 
           <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-4">
-            <div class="text-[10px] font-bold text-[#92E82A] mb-1">ICLOUD / GITHUB BACKUP & RESTORE</div>
-            <div class="text-xs text-[#8E8E93] mb-3">Data auto-saves in your browser. Export a JSON backup to save to iCloud Drive, or import a backup file anytime.</div>
+            <div class="text-[10px] font-bold text-[#92E82A] mb-1">TRAINING BACKUP & RESTORE</div>
+            <div class="text-xs text-[#8E8E93] mb-3">Export or import your workouts, Peak Weights / PRs, and Apple Health entries separately from nutrition.</div>
             <div class="grid grid-cols-2 gap-2">
-              <button id="btnExportBackup" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Backup (.json)</button>
+              <button id="btnExportBackup" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Training (.json)</button>
               <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
-                Import Backup
+                Import Training
                 <input id="inpImportBackup" type="file" accept=".json,application/json" class="hidden" />
               </label>
             </div>
@@ -1584,13 +1628,12 @@
             history: state.history,
             peakWeights: state.peakWeights,
             health: state.health,
-            nutrition: state.nutrition,
           };
           const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `apex-hybrid-backup-${new Date().toISOString().slice(0, 10)}.json`;
+          a.download = `apex-hybrid-training-${new Date().toISOString().slice(0, 10)}.json`;
           document.body.appendChild(a);
           a.click();
           a.remove();
@@ -1610,7 +1653,6 @@
               if (Array.isArray(data.history)) state.history = data.history;
               if (data.peakWeights) state.peakWeights = data.peakWeights;
               if (data.health) state.health = data.health;
-              if (data.nutrition) state.nutrition = data.nutrition;
               persistState();
               render();
               openModal('Backup Restored', `<div class="text-white font-semibold">Restored ${state.history.length} workout(s) and ${Object.keys(state.peakWeights).length} PR(s).</div>`);
