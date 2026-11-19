@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="apple-mobile-web-app-title" content="APEX HYBRID" />
   <title>APEX HYBRID — Training & Nutrition</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -548,9 +545,13 @@
       history: Array.isArray(saved.history) ? saved.history : [],
       peakWeights: saved.peakWeights || {},
       nutrition: saved.nutrition || {
-        goals: { calories: 2250, protein: 165, carbs: 230, fat: 70 },
+        goals: { calories: 2250, protein: 165, carbs: 230, fat: 70, water: 64, fiber: 28, sodium: 2300, caffeine: 400 },
         geminiKey: '',
         usdaKey: '',
+        subTab: 'today',
+        trendRange: 7,
+        trendMetric: 'cal',
+        nutrientScope: 'day',
         mode: 'quick',
         mealTarget: 'Breakfast',
         selectedDate: new Date().toISOString().slice(0, 10),
@@ -814,29 +815,114 @@
       { name: '3 Eggs & 80g Oats Breakfast', meal: 'Breakfast', cal: 525, p: 32, c: 54, f: 19 },
     ];
 
+    const FOODNOMS_MICRO_SCHEMA = [
+      // Carbs & Fats Breakdown
+      { key: 'fiber', csv: 'fiber (g)', label: 'Fiber', unit: 'g', cat: 'Carbs & Fats', goal: 28, color: '#92E82A' },
+      { key: 'sugars', csv: 'sugars (g)', label: 'Total Sugars', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#00F5EA' },
+      { key: 'addedSug', csv: 'added sug. (g)', label: 'Added Sugars', unit: 'g', cat: 'Carbs & Fats', goal: 50, limit: true, color: '#FA114F' },
+      { key: 'sugarAlc', csv: 'sugar alc. (g)', label: 'Sugar Alcohols', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#8E8E93' },
+      { key: 'satFat', csv: 'sat. fat (g)', label: 'Saturated Fat', unit: 'g', cat: 'Carbs & Fats', goal: 20, limit: true, color: '#FA114F' },
+      { key: 'monoFat', csv: 'mono. fat (g)', label: 'Monounsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#BF5AF2' },
+      { key: 'polyFat', csv: 'poly. fat (g)', label: 'Polyunsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#BF5AF2' },
+      { key: 'transFat', csv: 'trans fat (g)', label: 'Trans Fat', unit: 'g', cat: 'Carbs & Fats', goal: 2, limit: true, color: '#FA114F' },
+      { key: 'cholesterol', csv: 'cholesterol (mg)', label: 'Cholesterol', unit: 'mg', cat: 'Carbs & Fats', goal: 300, limit: true, color: '#FF9F0A' },
+      // Hydration & Stimulants
+      { key: 'water', csv: 'water (fl oz)', label: 'Water', unit: 'fl oz', cat: 'Hydration & Stimulants', goal: 64, color: '#00F5EA' },
+      { key: 'caffeine', csv: 'caffeine (mg)', label: 'Caffeine', unit: 'mg', cat: 'Hydration & Stimulants', goal: 400, limit: true, color: '#FF9F0A' },
+      { key: 'alcohol', csv: 'alcohol (std. drink)', label: 'Alcohol', unit: 'std', cat: 'Hydration & Stimulants', goal: 2, limit: true, color: '#FA114F' },
+      // Minerals (14)
+      { key: 'calcium', csv: 'calcium (mg)', label: 'Calcium', unit: 'mg', cat: 'Minerals', goal: 1000, color: '#38BDF8' },
+      { key: 'chloride', csv: 'chloride (mg)', label: 'Chloride', unit: 'mg', cat: 'Minerals', goal: 2300, color: '#38BDF8' },
+      { key: 'iron', csv: 'iron (mg)', label: 'Iron', unit: 'mg', cat: 'Minerals', goal: 18, color: '#FA114F' },
+      { key: 'magnesium', csv: 'magnesium (mg)', label: 'Magnesium', unit: 'mg', cat: 'Minerals', goal: 420, color: '#92E82A' },
+      { key: 'phosphorus', csv: 'phosphorus (mg)', label: 'Phosphorus', unit: 'mg', cat: 'Minerals', goal: 1250, color: '#38BDF8' },
+      { key: 'potassium', csv: 'potassium (mg)', label: 'Potassium', unit: 'mg', cat: 'Minerals', goal: 4700, color: '#92E82A' },
+      { key: 'sodium', csv: 'sodium (mg)', label: 'Sodium', unit: 'mg', cat: 'Minerals', goal: 2300, limit: true, color: '#FF9F0A' },
+      { key: 'zinc', csv: 'zinc (mg)', label: 'Zinc', unit: 'mg', cat: 'Minerals', goal: 11, color: '#38BDF8' },
+      { key: 'chromium', csv: 'chromium (mcg)', label: 'Chromium', unit: 'mcg', cat: 'Minerals', goal: 35, color: '#38BDF8' },
+      { key: 'copper', csv: 'copper (mg)', label: 'Copper', unit: 'mg', cat: 'Minerals', goal: 0.9, color: '#38BDF8' },
+      { key: 'iodine', csv: 'iodine (mcg)', label: 'Iodine', unit: 'mcg', cat: 'Minerals', goal: 150, color: '#38BDF8' },
+      { key: 'manganese', csv: 'manganese (mg)', label: 'Manganese', unit: 'mg', cat: 'Minerals', goal: 2.3, color: '#38BDF8' },
+      { key: 'molybdenum', csv: 'molybdenum (mcg)', label: 'Molybdenum', unit: 'mcg', cat: 'Minerals', goal: 45, color: '#38BDF8' },
+      { key: 'selenium', csv: 'selenium (mcg)', label: 'Selenium', unit: 'mcg', cat: 'Minerals', goal: 55, color: '#38BDF8' },
+      // Vitamins (13)
+      { key: 'vitA', csv: 'vit. a (mcg)', label: 'Vitamin A', unit: 'mcg', cat: 'Vitamins', goal: 900, color: '#FF9F0A' },
+      { key: 'vitC', csv: 'vit. c (mg)', label: 'Vitamin C', unit: 'mg', cat: 'Vitamins', goal: 90, color: '#FF9F0A' },
+      { key: 'vitD', csv: 'vit. d (mcg)', label: 'Vitamin D', unit: 'mcg', cat: 'Vitamins', goal: 20, color: '#FF9F0A' },
+      { key: 'vitE', csv: 'vit. e (mg)', label: 'Vitamin E', unit: 'mg', cat: 'Vitamins', goal: 15, color: '#FF9F0A' },
+      { key: 'vitK', csv: 'vit. k (mcg)', label: 'Vitamin K', unit: 'mcg', cat: 'Vitamins', goal: 120, color: '#92E82A' },
+      { key: 'thiamin', csv: 'thiamin (mg)', label: 'Thiamin (B1)', unit: 'mg', cat: 'Vitamins', goal: 1.2, color: '#BF5AF2' },
+      { key: 'riboflavin', csv: 'riboflavin (mg)', label: 'Riboflavin (B2)', unit: 'mg', cat: 'Vitamins', goal: 1.3, color: '#BF5AF2' },
+      { key: 'niacin', csv: 'niacin (mg)', label: 'Niacin (B3)', unit: 'mg', cat: 'Vitamins', goal: 16, color: '#BF5AF2' },
+      { key: 'pantoAcid', csv: 'panto. acid (mg)', label: 'Pantothenic Acid (B5)', unit: 'mg', cat: 'Vitamins', goal: 5, color: '#BF5AF2' },
+      { key: 'vitB6', csv: 'vit. b6 (mg)', label: 'Vitamin B6', unit: 'mg', cat: 'Vitamins', goal: 1.7, color: '#BF5AF2' },
+      { key: 'biotin', csv: 'biotin (mcg)', label: 'Biotin (B7)', unit: 'mcg', cat: 'Vitamins', goal: 30, color: '#BF5AF2' },
+      { key: 'folate', csv: 'folate (mcg)', label: 'Folate (B9)', unit: 'mcg', cat: 'Vitamins', goal: 400, color: '#BF5AF2' },
+      { key: 'vitB12', csv: 'vit. b12 (mcg)', label: 'Vitamin B12', unit: 'mcg', cat: 'Vitamins', goal: 2.4, color: '#BF5AF2' },
+    ];
+
+    function ensureNutriDefaults() {
+      if (!state.nutrition.subTab) state.nutrition.subTab = 'today';
+      if (!state.nutrition.trendRange) state.nutrition.trendRange = 7;
+      if (!state.nutrition.trendMetric) state.nutrition.trendMetric = 'cal';
+      if (!state.nutrition.nutrientScope) state.nutrition.nutrientScope = 'day';
+      if (!state.nutrition.logsByDate) state.nutrition.logsByDate = {};
+      if (!state.nutrition.goals) state.nutrition.goals = { calories: 2250, protein: 165, carbs: 230, fat: 70, water: 64, fiber: 28, sodium: 2300, caffeine: 400 };
+    }
+
     function getActiveNutritionDate() {
+      ensureNutriDefaults();
       if (!state.nutrition.selectedDate) state.nutrition.selectedDate = new Date().toISOString().slice(0, 10);
       return state.nutrition.selectedDate;
     }
 
-    function getActiveNutritionLogs() {
-      const d = getActiveNutritionDate();
-      if (!state.nutrition.logsByDate) state.nutrition.logsByDate = {};
-      if (state.nutrition.logs && state.nutrition.logs.length && !state.nutrition.logsByDate[d]) {
-        state.nutrition.logsByDate[d] = state.nutrition.logs;
-        state.nutrition.logsByDate[getActiveNutritionDate()] = [];
-      }
-      if (!state.nutrition.logsByDate[d]) state.nutrition.logsByDate[d] = [];
-      return state.nutrition.logsByDate[d];
+    function shiftDateStr(dateStr, deltaDays) {
+      const [y, m, d] = dateStr.split('-').map(Number);
+      const dt = new Date(Date.UTC(y, m - 1, d + deltaDays));
+      return dt.toISOString().slice(0, 10);
     }
 
-    function getNutritionTotals() {
-      return getActiveNutritionLogs().reduce((acc, item) => ({
-        cal: acc.cal + (item.cal || 0),
-        p: acc.p + (item.p || 0),
-        c: acc.c + (item.c || 0),
-        f: acc.f + (item.f || 0),
-      }), { cal: 0, p: 0, c: 0, f: 0 });
+    function getLogsForDate(dateStr) {
+      ensureNutriDefaults();
+      if (!state.nutrition.logsByDate[dateStr]) state.nutrition.logsByDate[dateStr] = [];
+      return state.nutrition.logsByDate[dateStr];
+    }
+
+    function getActiveNutritionLogs() {
+      const d = getActiveNutritionDate();
+      ensureNutriDefaults();
+      if (state.nutrition.logs && state.nutrition.logs.length && !state.nutrition.logsByDate[d]) {
+        state.nutrition.logsByDate[d] = state.nutrition.logs;
+        state.nutrition.logs = [];
+      }
+      return getLogsForDate(d);
+    }
+
+    function sumNutritionItems(items) {
+      const tot = { cal: 0, p: 0, c: 0, f: 0, micros: {} };
+      FOODNOMS_MICRO_SCHEMA.forEach((m) => { tot.micros[m.key] = 0; });
+      (items || []).forEach((item) => {
+        tot.cal += Number(item.cal) || 0;
+        tot.p += Number(item.p) || 0;
+        tot.c += Number(item.c) || 0;
+        tot.f += Number(item.f) || 0;
+        const im = item.micros || {};
+        FOODNOMS_MICRO_SCHEMA.forEach((m) => {
+          tot.micros[m.key] += Number(im[m.key]) || 0;
+        });
+      });
+      return tot;
+    }
+
+    function getNutritionTotals(dateStr) {
+      return sumNutritionItems(dateStr ? getLogsForDate(dateStr) : getActiveNutritionLogs());
+    }
+
+    function getAllLoggedNutritionDates() {
+      ensureNutriDefaults();
+      return Object.keys(state.nutrition.logsByDate)
+        .filter((d) => (state.nutrition.logsByDate[d] || []).length > 0)
+        .sort();
     }
 
     function parseCsvLine(line) {
@@ -862,15 +948,21 @@
       if (lines.length < 2) return { count: 0, days: 0, latestDate: null };
       const headers = parseCsvLine(lines[0]).map((h) => h.trim().toLowerCase());
       const idx = (name) => headers.indexOf(name);
-      const iDay = idx('day'), iName = idx('name'), iBrand = idx('brand'), iMeal = idx('meal type');
-      const iPortion = idx('portion'), iCal = idx('energy (cal)'), iCarb = idx('total carbs (g)');
+      const iDay = idx('day'), iTime = idx('time'), iTz = idx('time zone');
+      const iName = idx('name'), iBrand = idx('brand'), iMeal = idx('meal type');
+      const iPortion = idx('portion'), iAcc = idx('accuracy');
+      const iCal = idx('energy (cal)'), iCarb = idx('total carbs (g)');
       const iPro = idx('protein (g)'), iFat = idx('total fat (g)');
       if (iDay < 0 || iName < 0 || iCal < 0) return { count: 0, days: 0, latestDate: null };
 
-      if (!state.nutrition.logsByDate) state.nutrition.logsByDate = {};
-      const touchedDays = new Set();
+      const microIndices = FOODNOMS_MICRO_SCHEMA.map((m) => ({ key: m.key, idx: idx(m.csv) }));
+      ensureNutriDefaults();
+      const groupedByDay = {};
       let count = 0;
-      const toNum = (v) => Number(String(v || '0').replace(/,/g, '')) || 0;
+      const toNum = (v) => {
+        const s = String(v || '').replace(/,/g, '').trim();
+        return s ? (Number(s) || 0) : 0;
+      };
 
       for (let r = 1; r < lines.length; r++) {
         const cols = parseCsvLine(lines[r]);
@@ -879,25 +971,67 @@
         if (!day || !name) continue;
         const brand = iBrand >= 0 ? (cols[iBrand] || '').trim() : '';
         const portion = iPortion >= 0 ? (cols[iPortion] || '').trim() : '';
-        const meal = (iMeal >= 0 ? (cols[iMeal] || '').trim() : '') || 'Snacks';
-        const label = [name, brand ? `(${brand})` : '', portion ? `• ${portion}` : ''].filter(Boolean).join(' ');
+        const time = iTime >= 0 ? (cols[iTime] || '').trim() : '';
+        const tz = iTz >= 0 ? (cols[iTz] || '').trim() : '';
+        const accuracy = iAcc >= 0 ? (cols[iAcc] || '').trim() : '';
+        const meal = (iMeal >= 0 ? (cols[iMeal] || '').trim() : '') || 'Other';
 
-        if (!state.nutrition.logsByDate[day]) state.nutrition.logsByDate[day] = [];
-        state.nutrition.logsByDate[day].push({
-          name: label,
+        const micros = {};
+        microIndices.forEach((mi) => {
+          if (mi.idx >= 0) {
+            const val = toNum(cols[mi.idx]);
+            if (val !== 0) micros[mi.key] = val;
+          }
+        });
+
+        if (!groupedByDay[day]) groupedByDay[day] = [];
+        groupedByDay[day].push({
+          name,
+          brand,
+          portion,
+          time,
+          tz,
+          accuracy,
           meal,
           cal: toNum(cols[iCal]),
           p: toNum(cols[iPro]),
           c: toNum(cols[iCarb]),
           f: toNum(cols[iFat]),
+          micros,
         });
-        touchedDays.add(day);
         count++;
       }
-      const sortedDays = Array.from(touchedDays).sort();
-      const latestDate = sortedDays.length ? sortedDays[sortedDays.length - 1] : null;
+
+      const importedDays = Object.keys(groupedByDay).sort();
+      importedDays.forEach((d) => {
+        state.nutrition.logsByDate[d] = groupedByDay[d];
+      });
+      const latestDate = importedDays.length ? importedDays[importedDays.length - 1] : null;
       if (latestDate) state.nutrition.selectedDate = latestDate;
-      return { count, days: touchedDays.size, latestDate };
+      return { count, days: importedDays.length, latestDate };
+    }
+
+    function exportFoodnomsCsv() {
+      const headers = [
+        'day', 'time', 'time zone', 'name', 'brand', 'meal type', 'portion', 'accuracy',
+        'energy (Cal)', 'total carbs (g)', 'protein (g)', 'total fat (g)',
+        ...FOODNOMS_MICRO_SCHEMA.map((m) => m.csv)
+      ];
+      const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const rows = [headers.map(esc).join(',')];
+      const dates = Object.keys(state.nutrition.logsByDate || {}).sort();
+      dates.forEach((d) => {
+        (state.nutrition.logsByDate[d] || []).forEach((it) => {
+          const ms = it.micros || {};
+          const row = [
+            d, it.time || '', it.tz || '', it.name || '', it.brand || '', it.meal || '', it.portion || '', it.accuracy || '',
+            it.cal || 0, it.c || 0, it.p || 0, it.f || 0,
+            ...FOODNOMS_MICRO_SCHEMA.map((m) => ms[m.key] || '')
+          ];
+          rows.push(row.map(esc).join(','));
+        });
+      });
+      return rows.join('\n');
     }
 
     function renderLeftPane() {
@@ -1292,167 +1426,597 @@
       }
 
       else if (state.tab === 'nutrition') {
-        const tot = getNutritionTotals();
+        ensureNutriDefaults();
+        const activeDate = getActiveNutritionDate();
+        const logs = getActiveNutritionLogs();
+        const tot = sumNutritionItems(logs);
         const g = state.nutrition.goals;
+        const loggedDates = getAllLoggedNutritionDates();
+        const latestLoggedDate = loggedDates.length ? loggedDates[loggedDates.length - 1] : activeDate;
+        const subTab = state.nutrition.subTab || 'today';
+
         const calPct = Math.min(100, Math.round((tot.cal / Math.max(1, g.calories)) * 100));
         const rCal = 34, cCal = 2 * Math.PI * rCal;
+        const pCal = tot.p * 4, cCarb = tot.c * 4, fCal = tot.f * 9;
+        const macroCalSum = Math.max(1, pCal + cCarb + fCal);
+        const pShare = Math.round((pCal / macroCalSum) * 100);
+        const cShare = Math.round((cCarb / macroCalSum) * 100);
+        const fShare = Math.max(0, 100 - pShare - cShare);
+
+        const MEAL_ORDER = ['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack', 'Snacks', 'Other'];
+        const mealBuckets = {};
+        logs.forEach((it, idx) => {
+          const m = it.meal || 'Other';
+          if (!mealBuckets[m]) mealBuckets[m] = [];
+          mealBuckets[m].push({ ...it, _idx: idx });
+        });
+        const orderedMeals = [
+          ...MEAL_ORDER.filter((m) => mealBuckets[m] && mealBuckets[m].length),
+          ...Object.keys(mealBuckets).filter((m) => !MEAL_ORDER.includes(m))
+        ];
+
+        // Trends data calculation
+        const rangeDays = state.nutrition.trendRange === 'all'
+          ? Math.max(7, loggedDates.length || 7)
+          : Number(state.nutrition.trendRange) || 7;
+        const trendDates = [];
+        if (state.nutrition.trendRange === 'all' && loggedDates.length) {
+          loggedDates.forEach((d) => trendDates.push(d));
+        } else {
+          for (let i = rangeDays - 1; i >= 0; i--) {
+            trendDates.push(shiftDateStr(activeDate, -i));
+          }
+        }
+        const metricKey = state.nutrition.trendMetric || 'cal';
+        const metricMeta = {
+          cal: { label: 'Calories', unit: 'Cal', color: '#FA114F', goal: g.calories },
+          p: { label: 'Protein', unit: 'g', color: '#92E82A', goal: g.protein },
+          c: { label: 'Carbs', unit: 'g', color: '#00F5EA', goal: g.carbs },
+          f: { label: 'Fat', unit: 'g', color: '#BF5AF2', goal: g.fat },
+          fiber: { label: 'Fiber', unit: 'g', color: '#92E82A', goal: g.fiber || 28 },
+          sodium: { label: 'Sodium', unit: 'mg', color: '#FF9F0A', goal: g.sodium || 2300 },
+          water: { label: 'Water', unit: 'fl oz', color: '#00F5EA', goal: g.water || 64 },
+          caffeine: { label: 'Caffeine', unit: 'mg', color: '#FF9F0A', goal: g.caffeine || 400 },
+        }[metricKey] || { label: 'Calories', unit: 'Cal', color: '#FA114F', goal: g.calories };
+
+        const getMetricVal = (dayTot) => {
+          if (metricKey === 'cal' || metricKey === 'p' || metricKey === 'c' || metricKey === 'f') return dayTot[metricKey] || 0;
+          return (dayTot.micros && dayTot.micros[metricKey]) || 0;
+        };
+
+        const trendSeries = trendDates.map((d) => {
+          const dt = getNutritionTotals(d);
+          const hasData = (state.nutrition.logsByDate[d] || []).length > 0;
+          return { date: d, tot: dt, val: getMetricVal(dt), hasData };
+        });
+        const nonEmptySeries = trendSeries.filter((x) => x.hasData);
+        const avgVal = nonEmptySeries.length ? nonEmptySeries.reduce((s, x) => s + x.val, 0) / nonEmptySeries.length : 0;
+        const totalVal = nonEmptySeries.reduce((s, x) => s + x.val, 0);
+        const maxVal = Math.max(metricMeta.goal || 1, ...trendSeries.map((x) => x.val), 1);
+        const onTargetCount = nonEmptySeries.filter((x) => {
+          if (!metricMeta.goal) return false;
+          return metricKey === 'sodium' || metricKey === 'caffeine'
+            ? x.val <= metricMeta.goal
+            : x.val >= metricMeta.goal * 0.85 && x.val <= metricMeta.goal * 1.15;
+        }).length;
+
+        // Nutrients scope (selected day vs 7-day average)
+        const nutScope = state.nutrition.nutrientScope || 'day';
+        let scopeTot = tot;
+        let scopeDaysCount = 1;
+        if (nutScope === '7d') {
+          const last7 = [];
+          for (let i = 6; i >= 0; i--) last7.push(shiftDateStr(activeDate, -i));
+          const active7 = last7.filter((d) => (state.nutrition.logsByDate[d] || []).length > 0);
+          scopeDaysCount = Math.max(1, active7.length);
+          const sum7 = { cal: 0, p: 0, c: 0, f: 0, micros: {} };
+          FOODNOMS_MICRO_SCHEMA.forEach((m) => { sum7.micros[m.key] = 0; });
+          active7.forEach((d) => {
+            const dt = getNutritionTotals(d);
+            sum7.cal += dt.cal; sum7.p += dt.p; sum7.c += dt.c; sum7.f += dt.f;
+            FOODNOMS_MICRO_SCHEMA.forEach((m) => { sum7.micros[m.key] += dt.micros[m.key] || 0; });
+          });
+          scopeTot = {
+            cal: sum7.cal / scopeDaysCount,
+            p: sum7.p / scopeDaysCount,
+            c: sum7.c / scopeDaysCount,
+            f: sum7.f / scopeDaysCount,
+            micros: Object.fromEntries(FOODNOMS_MICRO_SCHEMA.map((m) => [m.key, (sum7.micros[m.key] || 0) / scopeDaysCount]))
+          };
+        }
+
+        const renderTrendChartSvg = () => {
+          const W = 360, H = 155, padL = 8, padR = 8, padT = 18, padB = 22;
+          const plotW = W - padL - padR, plotH = H - padT - padB;
+          const n = Math.max(1, trendSeries.length);
+          const step = plotW / n;
+          const barW = Math.max(4, Math.min(24, step * 0.64));
+          const goalY = metricMeta.goal ? (padT + plotH - Math.min(1, metricMeta.goal / maxVal) * plotH) : null;
+          const avgY = avgVal > 0 ? (padT + plotH - Math.min(1, avgVal / maxVal) * plotH) : null;
+
+          const bars = trendSeries.map((pt, i) => {
+            const x = padL + i * step + (step - barW) / 2;
+            const h = pt.val > 0 ? Math.max(3, (pt.val / maxVal) * plotH) : 2;
+            const y = padT + plotH - h;
+            const isSel = pt.date === activeDate;
+            const labelEvery = n <= 8 ? 1 : n <= 16 ? 2 : Math.ceil(n / 6);
+            const showLbl = (i % labelEvery === 0) || i === n - 1;
+            const shortD = pt.date.slice(5);
+            return `
+              <g class="trend-bar-hit cursor-pointer" data-date="${pt.date}">
+                <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3"
+                  fill="${pt.hasData ? metricMeta.color : '#2C2C2E'}" opacity="${isSel ? '1' : (pt.hasData ? '0.82' : '0.45')}"
+                  stroke="${isSel ? '#FFFFFF' : 'none'}" stroke-width="${isSel ? '1.5' : '0'}" />
+                ${showLbl ? `<text x="${(x + barW / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" fill="${isSel ? '#FFFFFF' : '#8E8E93'}" font-size="8.5" font-weight="${isSel ? '700' : '500'}">${shortD}</text>` : ''}
+              </g>
+            `;
+          }).join('');
+
+          return `
+            <svg viewBox="0 0 ${W} ${H}" class="w-full h-40 overflow-visible">
+              ${goalY !== null ? `
+                <line x1="${padL}" y1="${goalY.toFixed(1)}" x2="${W - padR}" y2="${goalY.toFixed(1)}" stroke="#92E82A" stroke-width="1" stroke-dasharray="4 3" opacity="0.7" />
+                <text x="${W - padR}" y="${Math.max(10, goalY - 4).toFixed(1)}" text-anchor="end" fill="#92E82A" font-size="8.5" font-weight="700">Goal ${Math.round(metricMeta.goal)}</text>
+              ` : ''}
+              ${avgY !== null ? `
+                <line x1="${padL}" y1="${avgY.toFixed(1)}" x2="${W - padR}" y2="${avgY.toFixed(1)}" stroke="#FFFFFF" stroke-width="1" stroke-dasharray="2 3" opacity="0.55" />
+                <text x="${padL}" y="${Math.max(10, avgY - 4).toFixed(1)}" text-anchor="start" fill="#FFFFFF" font-size="8.5" font-weight="600">Avg ${Math.round(avgVal)}</text>
+              ` : ''}
+              ${bars}
+            </svg>
+          `;
+        };
 
         root.innerHTML = `
-          <div class="flex items-center justify-between mb-3 gap-2">
+          <!-- FoodNoms Header + Date Stepper -->
+          <div class="flex items-center justify-between mb-2.5 gap-2">
             <div class="min-w-0">
-              <div class="text-xl font-bold text-white">Nutrition & Macros</div>
-              <div class="text-xs text-[#8E8E93]">MacroLens AI + Foodnoms CSV / USDA</div>
+              <div class="text-xl font-bold text-white">Nutrition</div>
+              <div class="text-[11px] text-[#8E8E93]">${loggedDates.length ? `${loggedDates.length} logged days • FoodNoms + MacroLens` : 'MacroLens AI + FoodNoms CSV / USDA'}</div>
             </div>
-            <div class="flex items-center gap-1.5 shrink-0">
-              <input id="nutriDatePick" type="date" value="${getActiveNutritionDate()}" class="bg-[#1C1C1E] border border-[#2C2C2E] text-white text-[11px] font-semibold rounded-full px-2.5 py-1.5 outline-none" />
-              <button id="btnMacroGoals" class="px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-xs font-bold text-[#92E82A]">Targets</button>
-            </div>
-          </div>
-
-          <!-- Apple Fitness Macro Rings Card -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-3 flex items-center gap-4">
-            <div class="relative w-20 h-20 shrink-0 flex items-center justify-center">
-              <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-                <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#3A0D18" stroke-width="7" />
-                <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#FA114F" stroke-width="7" stroke-linecap="round"
-                  stroke-dasharray="${cCal}" stroke-dashoffset="${cCal * (1 - calPct / 100)}" />
-              </svg>
-              <div class="absolute text-center">
-                <div class="text-xs font-extrabold text-white leading-none">${Math.round(tot.cal)}</div>
-                <div class="text-[9px] text-[#8E8E93]">/${g.calories}</div>
-              </div>
-            </div>
-            <div class="flex-1 space-y-2">
-              ${[
-                { label: 'Protein', val: tot.p, goal: g.protein, color: '#92E82A' },
-                { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#00F5EA' },
-                { label: 'Fat', val: tot.f, goal: g.fat, color: '#BF5AF2' },
-              ].map((m) => {
-                const pct = Math.min(100, Math.round((m.val / Math.max(1, m.goal)) * 100));
-                return `
-                  <div>
-                    <div class="flex justify-between text-[11px] mb-0.5">
-                      <span class="text-[#8E8E93] font-medium">${m.label}</span>
-                      <span class="font-bold text-white tabular-nums">${Math.round(m.val)} / ${m.goal}g</span>
-                    </div>
-                    <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
-                      <div class="h-full rounded-full" style="width:${pct}%; background:${m.color}"></div>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
+            <div class="flex items-center gap-1 shrink-0">
+              <button id="btnNutriPrevDay" class="w-7 h-7 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-bold flex items-center justify-center">‹</button>
+              <input id="nutriDatePick" type="date" value="${activeDate}" class="bg-[#1C1C1E] border border-[#2C2C2E] text-white text-[11px] font-semibold rounded-full px-2.5 py-1 outline-none" />
+              <button id="btnNutriNextDay" class="w-7 h-7 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-bold flex items-center justify-center">›</button>
+              <button id="btnMacroGoals" class="px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-[11px] font-bold text-[#92E82A]">Targets</button>
             </div>
           </div>
 
-          <!-- 4-Mode Segmented Control -->
+          <!-- Top FoodNoms Sub-Tab Bar -->
           <div class="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#1C1C1E] mb-3">
             ${[
-              { id: 'quick', label: 'Quick Add' },
-              { id: 'search', label: 'USDA DB' },
-              { id: 'ai', label: 'Ask AI' },
-              { id: 'saved', label: 'Saved' },
+              { id: 'today', label: 'Today' },
+              { id: 'trends', label: 'Trends' },
+              { id: 'nutrients', label: 'Nutrients' },
+              { id: 'log', label: 'Log / Sync' },
             ].map((t) => `
-              <button class="nutri-mode-btn py-2 rounded-xl text-[11px] font-bold ${state.nutrition.mode === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-mode="${t.id}">${t.label}</button>
+              <button class="nutri-subtab-btn py-2 rounded-xl text-[11px] font-bold ${subTab === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-subtab="${t.id}">${t.label}</button>
             `).join('')}
           </div>
 
-          <!-- Target Meal Selector -->
-          <div class="flex gap-1.5 mb-3">
-            ${['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map((m) => `
-              <button class="nutri-meal-btn flex-1 py-1.5 rounded-full text-[11px] font-bold ${state.nutrition.mealTarget === m ? 'bg-[#2C2C2E] text-[#92E82A] border border-[#92E82A]/40' : 'bg-[#1C1C1E] text-[#8E8E93]'}" data-meal="${m}">${m}</button>
-            `).join('')}
-          </div>
-
-          <!-- Mode Body -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-3">
-            ${state.nutrition.mode === 'quick' ? `
-              <div class="space-y-2">
-                <input id="qFoodName" type="text" placeholder="Food or meal name" class="num-input text-left px-3" />
-                <div class="grid grid-cols-4 gap-1.5">
-                  <input id="qCal" type="number" placeholder="kcal" class="num-input" />
-                  <input id="qPro" type="number" placeholder="P (g)" class="num-input" />
-                  <input id="qCarb" type="number" placeholder="C (g)" class="num-input" />
-                  <input id="qFat" type="number" placeholder="F (g)" class="num-input" />
+          ${subTab === 'today' ? `
+            <!-- Apple Fitness Calorie & Macro Ring Card -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-2.5">
+              <div class="flex items-center gap-4">
+                <div class="relative w-20 h-20 shrink-0 flex items-center justify-center">
+                  <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#3A0D18" stroke-width="7" />
+                    <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#FA114F" stroke-width="7" stroke-linecap="round"
+                      stroke-dasharray="${cCal}" stroke-dashoffset="${cCal * (1 - calPct / 100)}" />
+                  </svg>
+                  <div class="absolute text-center">
+                    <div class="text-xs font-extrabold text-white leading-none">${Math.round(tot.cal)}</div>
+                    <div class="text-[9px] text-[#8E8E93]">/${g.calories}</div>
+                  </div>
                 </div>
-                <button id="btnLogQuickFood" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Log to ${state.nutrition.mealTarget}</button>
-              </div>
-            ` : state.nutrition.mode === 'search' ? `
-              <div class="space-y-2">
-                <input id="usdaSearchInp" type="text" placeholder="Filter USDA grounded foods..." class="num-input text-left px-3" />
-                <div id="usdaResultsList" class="space-y-1.5 max-h-48 overflow-y-auto">
-                  ${USDA_GROUNDED_FOODS.map((f, idx) => `
-                    <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
+                <div class="flex-1 space-y-2">
+                  ${[
+                    { label: 'Protein', val: tot.p, goal: g.protein, color: '#92E82A', share: pShare },
+                    { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#00F5EA', share: cShare },
+                    { label: 'Fat', val: tot.f, goal: g.fat, color: '#BF5AF2', share: fShare },
+                  ].map((m) => {
+                    const pct = Math.min(100, Math.round((m.val / Math.max(1, m.goal)) * 100));
+                    return `
                       <div>
-                        <div class="font-bold text-white">${f.name}</div>
-                        <div class="text-[10px] text-[#8E8E93]">Per 100g: ${f.per100.cal} kcal • ${f.per100.p}P / ${f.per100.c}C / ${f.per100.f}F</div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                          <span class="text-[#8E8E93] font-medium">${m.label} <span class="text-[9px] text-[#636366]">(${m.share}%)</span></span>
+                          <span class="font-bold text-white tabular-nums">${Math.round(m.val)} / ${m.goal}g</span>
+                        </div>
+                        <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
+                          <div class="h-full rounded-full" style="width:${pct}%; background:${m.color}"></div>
+                        </div>
                       </div>
-                      <button class="add-usda-food px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">+ 100g</button>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+              <!-- Macro Split Bar -->
+              <div class="mt-3 pt-2.5 border-t border-[#2C2C2E]">
+                <div class="flex justify-between text-[10px] text-[#8E8E93] mb-1">
+                  <span>Remaining: <strong class="text-white">${Math.round(g.calories - tot.cal)} Cal</strong></span>
+                  <span>Split: ${pShare}% P • ${cShare}% C • ${fShare}% F</span>
+                </div>
+                <div class="h-1.5 rounded-full overflow-hidden flex bg-[#2C2C2E]">
+                  <div style="width:${pShare}%; background:#92E82A"></div>
+                  <div style="width:${cShare}%; background:#00F5EA"></div>
+                  <div style="width:${fShare}%; background:#BF5AF2"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Daily Highlights Strip (Water, Caffeine, Fiber, Sodium, Added Sug, Sat Fat) -->
+            <div class="grid grid-cols-3 gap-2 mb-2.5">
+              ${[
+                { label: 'Water', val: `${Math.round(tot.micros.water || 0)}`, unit: `/ ${g.water || 64} oz`, color: '#00F5EA' },
+                { label: 'Fiber', val: `${Math.round(tot.micros.fiber || 0)}`, unit: `/ ${g.fiber || 28}g`, color: '#92E82A' },
+                { label: 'Sodium', val: `${Math.round(tot.micros.sodium || 0)}`, unit: `/ ${g.sodium || 2300}mg`, color: '#FF9F0A' },
+                { label: 'Caffeine', val: `${Math.round(tot.micros.caffeine || 0)}`, unit: `/ ${g.caffeine || 400}mg`, color: '#FF9F0A' },
+                { label: 'Added Sug', val: `${Math.round(tot.micros.addedSug || 0)}`, unit: 'g', color: '#FA114F' },
+                { label: 'Sat. Fat', val: `${Math.round(tot.micros.satFat || 0)}`, unit: 'g', color: '#BF5AF2' },
+              ].map((k) => `
+                <div class="bg-[#1C1C1E] rounded-2xl p-2.5">
+                  <div class="text-[10px] text-[#8E8E93] font-medium">${k.label}</div>
+                  <div class="text-sm font-bold tabular-nums mt-0.5" style="color:${k.color}">${k.val} <span class="text-[10px] text-[#636366] font-normal">${k.unit}</span></div>
+                </div>
+              `).join('')}
+            </div>
+
+            <!-- Daily Calorie Distribution by Meal Chart -->
+            ${orderedMeals.length ? `
+              <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="text-xs font-bold text-white">Daily Meal Distribution</div>
+                  <div class="text-[10px] text-[#8E8E93]">${logs.length} items</div>
+                </div>
+                <div class="space-y-2">
+                  ${orderedMeals.map((m) => {
+                    const mt = sumNutritionItems(mealBuckets[m]);
+                    const pct = Math.min(100, Math.round((mt.cal / Math.max(1, tot.cal)) * 100));
+                    return `
+                      <div>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                          <span class="text-white font-semibold">${m}</span>
+                          <span class="text-[#8E8E93] tabular-nums"><strong class="text-white">${Math.round(mt.cal)}</strong> Cal (${pct}%) • ${Math.round(mt.p)}P</span>
+                        </div>
+                        <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
+                          <div class="h-full rounded-full bg-[#FA114F]" style="width:${pct}%"></div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Meal-Grouped Food Log -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
+              <div class="flex items-center justify-between mb-2">
+                <div class="text-sm font-bold text-white">Food Log • ${activeDate}</div>
+                <div class="flex items-center gap-2">
+                  ${activeDate !== latestLoggedDate && loggedDates.length ? `<button id="btnJumpLatestNutri" class="text-[11px] text-[#00F5EA] font-semibold">Latest (${latestLoggedDate.slice(5)})</button>` : ''}
+                  ${logs.length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear Day</button>` : ''}
+                </div>
+              </div>
+              ${orderedMeals.length ? orderedMeals.map((m) => {
+                const items = mealBuckets[m];
+                const mt = sumNutritionItems(items);
+                return `
+                  <div class="mt-2.5 pt-2 border-t border-[#2C2C2E]">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <span class="text-[11px] font-bold text-[#92E82A] uppercase tracking-wider">${m}</span>
+                      <span class="text-[10px] text-[#8E8E93] tabular-nums">${Math.round(mt.cal)} Cal • ${Math.round(mt.p)}P / ${Math.round(mt.c)}C / ${Math.round(mt.f)}F</span>
                     </div>
+                    ${items.map((item) => `
+                      <div class="flex items-center justify-between py-1.5 text-xs">
+                        <button class="food-detail-btn text-left flex-1 min-w-0 pr-2" data-idx="${item._idx}">
+                          <div class="text-white font-semibold truncate">${item.name}${item.brand ? ` <span class="text-[#8E8E93] font-normal">(${item.brand})</span>` : ''}</div>
+                          <div class="text-[10px] text-[#8E8E93]">${[item.time, item.portion, `${Math.round(item.cal)} Cal`, `${Math.round(item.p)}P / ${Math.round(item.c)}C / ${Math.round(item.f)}F`].filter(Boolean).join(' • ')}</div>
+                        </button>
+                        <button class="del-food-btn text-[#8E8E93] hover:text-[#FA114F] px-2 font-bold shrink-0" data-idx="${item._idx}">✕</button>
+                      </div>
+                    `).join('')}
+                  </div>
+                `;
+              }).join('') : `<div class="text-xs text-[#636366] py-2">No meals logged on ${activeDate}. Tap <strong>Log / Sync</strong> to add food or import your Foodnoms CSV.</div>`}
+            </div>
+
+          ` : subTab === 'trends' ? `
+            <!-- Weekly & Multi-Day Trends -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
+              <div class="flex items-center justify-between gap-2 mb-2.5">
+                <div class="flex gap-1 bg-[#0B0B0D] p-1 rounded-xl">
+                  ${[
+                    { id: 7, label: '7D' },
+                    { id: 14, label: '14D' },
+                    { id: 30, label: '30D' },
+                    { id: 'all', label: 'All' },
+                  ].map((r) => `
+                    <button class="nutri-range-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${String(state.nutrition.trendRange) === String(r.id) ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-range="${r.id}">${r.label}</button>
                   `).join('')}
                 </div>
+                <div class="text-[10px] text-[#8E8E93] tabular-nums">${trendDates[0]?.slice(5)} → ${trendDates[trendDates.length - 1]?.slice(5)}</div>
               </div>
-            ` : state.nutrition.mode === 'ai' ? `
-              <div class="space-y-2">
-                <textarea id="aiMealPrompt" rows="2" placeholder="Describe your meal (e.g. 200g grilled chicken, 150g white rice, 1 tbsp olive oil)..." class="w-full bg-[#2C2C2E] text-white text-xs rounded-xl p-3 outline-none"></textarea>
-                <div class="flex gap-2">
-                  <button id="btnRunAiParse" class="flex-1 py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">
+
+              <!-- Metric Pills -->
+              <div class="flex gap-1.5 overflow-x-auto pb-2 mb-2">
+                ${[
+                  { id: 'cal', label: 'Calories' },
+                  { id: 'p', label: 'Protein' },
+                  { id: 'c', label: 'Carbs' },
+                  { id: 'f', label: 'Fat' },
+                  { id: 'fiber', label: 'Fiber' },
+                  { id: 'sodium', label: 'Sodium' },
+                  { id: 'water', label: 'Water' },
+                  { id: 'caffeine', label: 'Caffeine' },
+                ].map((m) => `
+                  <button class="nutri-metric-btn px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${metricKey === m.id ? 'bg-[#2C2C2E] text-white border border-[#92E82A]/60' : 'bg-[#0B0B0D] text-[#8E8E93]'}" data-metric="${m.id}">${m.label}</button>
+                `).join('')}
+              </div>
+
+              ${renderTrendChartSvg()}
+
+              <div class="grid grid-cols-3 gap-2 mt-2 pt-2.5 border-t border-[#2C2C2E] text-center">
+                <div>
+                  <div class="text-[10px] text-[#8E8E93]">Daily Avg</div>
+                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(avgVal)} <span class="text-[10px] text-[#8E8E93]">${metricMeta.unit}</span></div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-[#8E8E93]">Period Total</div>
+                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(totalVal).toLocaleString()} <span class="text-[10px] text-[#8E8E93]">${metricMeta.unit}</span></div>
+                </div>
+                <div>
+                  <div class="text-[10px] text-[#8E8E93]">Days Logged</div>
+                  <div class="text-sm font-bold text-[#92E82A] tabular-nums">${nonEmptySeries.length}/${trendDates.length} <span class="text-[10px] text-[#8E8E93]">(${onTargetCount} hit)</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Macro Split Stacked Bar Chart -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
+              <div class="text-xs font-bold text-white mb-2">Macro Ratio Trend (Protein / Carbs / Fat)</div>
+              <div class="space-y-1.5">
+                ${trendSeries.slice(-7).map((pt) => {
+                  const pc = pt.tot.p * 4, cc = pt.tot.c * 4, fc = pt.tot.f * 9;
+                  const s = Math.max(1, pc + cc + fc);
+                  const pp = pt.hasData ? Math.round((pc / s) * 100) : 0;
+                  const cp = pt.hasData ? Math.round((cc / s) * 100) : 0;
+                  const fp = pt.hasData ? Math.max(0, 100 - pp - cp) : 0;
+                  return `
+                    <button class="trend-bar-hit w-full flex items-center gap-2 text-left" data-date="${pt.date}">
+                      <span class="w-11 text-[10px] text-[#8E8E93] tabular-nums">${pt.date.slice(5)}</span>
+                      <div class="flex-1 h-2.5 rounded-full bg-[#2C2C2E] overflow-hidden flex">
+                        ${pt.hasData ? `<div style="width:${pp}%; background:#92E82A"></div><div style="width:${cp}%; background:#00F5EA"></div><div style="width:${fp}%; background:#BF5AF2"></div>` : ''}
+                      </div>
+                      <span class="w-20 text-right text-[10px] text-[#8E8E93] tabular-nums">${pt.hasData ? `${pp}/${cp}/${fp}%` : '—'}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- Daily Breakdown Table -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
+              <div class="text-xs font-bold text-white mb-2">Daily Breakdown (Tap a Day to View)</div>
+              <div class="space-y-1 max-h-64 overflow-y-auto">
+                ${trendSeries.slice().reverse().map((pt) => {
+                  const delta = Math.round(pt.tot.cal - g.calories);
+                  return `
+                    <button class="trend-bar-hit w-full flex items-center justify-between py-1.5 px-2 rounded-xl ${pt.date === activeDate ? 'bg-[#2C2C2E]' : 'hover:bg-[#2C2C2E]/50'} text-[11px]" data-date="${pt.date}">
+                      <span class="font-semibold text-white tabular-nums">${pt.date}</span>
+                      <span class="text-[#8E8E93] tabular-nums">${pt.hasData ? `${Math.round(pt.tot.cal)} Cal • ${Math.round(pt.tot.p)}P / ${Math.round(pt.tot.c)}C / ${Math.round(pt.tot.f)}F` : 'No entries'}</span>
+                      <span class="font-bold tabular-nums ${!pt.hasData ? 'text-[#636366]' : (delta > 150 ? 'text-[#FA114F]' : 'text-[#92E82A]')}">${pt.hasData ? `${delta >= 0 ? '+' : ''}${delta}` : '—'}</span>
+                    </button>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+          ` : subTab === 'nutrients' ? `
+            <!-- Full FoodNoms Micronutrient & Health Dashboard -->
+            <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-2.5 mb-2.5">
+              <div class="text-xs font-semibold text-white">All FoodNoms Nutrients (40+)</div>
+              <div class="flex gap-1 bg-[#0B0B0D] p-1 rounded-xl">
+                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === 'day' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="day">Day (${activeDate.slice(5)})</button>
+                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === '7d' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="7d">7-Day Avg</button>
+              </div>
+            </div>
+
+            ${['Carbs & Fats', 'Hydration & Stimulants', 'Minerals', 'Vitamins'].map((cat) => {
+              const fields = FOODNOMS_MICRO_SCHEMA.filter((m) => m.cat === cat);
+              return `
+                <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
+                  <div class="text-xs font-bold text-[#92E82A] uppercase tracking-wider mb-2.5">${cat}</div>
+                  <div class="space-y-2.5">
+                    ${fields.map((m) => {
+                      const val = scopeTot.micros[m.key] || 0;
+                      const dispVal = val >= 10 ? Math.round(val) : Number(val.toFixed(1));
+                      const pct = m.goal ? Math.min(100, Math.round((val / m.goal) * 100)) : (val > 0 ? 100 : 0);
+                      const overLimit = m.limit && m.goal && val > m.goal;
+                      return `
+                        <div>
+                          <div class="flex justify-between text-[11px] mb-1">
+                            <span class="text-white font-medium">${m.label}</span>
+                            <span class="tabular-nums font-bold ${overLimit ? 'text-[#FA114F]' : 'text-white'}">
+                              ${dispVal} <span class="text-[#8E8E93] font-normal">${m.unit}${m.goal ? ` / ${m.goal} ${m.unit}` : ''}</span>
+                            </span>
+                          </div>
+                          <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
+                            <div class="h-full rounded-full" style="width:${pct}%; background:${overLimit ? '#FA114F' : m.color}"></div>
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+
+          ` : `
+            <!-- Log / Sync View -->
+            <div class="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#1C1C1E] mb-3">
+              ${[
+                { id: 'quick', label: 'Quick Add' },
+                { id: 'search', label: 'USDA DB' },
+                { id: 'ai', label: 'Ask AI' },
+                { id: 'saved', label: 'Saved' },
+              ].map((t) => `
+                <button class="nutri-mode-btn py-2 rounded-xl text-[11px] font-bold ${state.nutrition.mode === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-mode="${t.id}">${t.label}</button>
+              `).join('')}
+            </div>
+
+            <div class="grid grid-cols-3 gap-1.5 mb-3">
+              ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `
+                <button class="nutri-meal-btn py-1.5 rounded-full text-[11px] font-bold ${state.nutrition.mealTarget === m ? 'bg-[#2C2C2E] text-[#92E82A] border border-[#92E82A]/40' : 'bg-[#1C1C1E] text-[#8E8E93]'}" data-meal="${m}">${m}</button>
+              `).join('')}
+            </div>
+
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-3">
+              ${state.nutrition.mode === 'quick' ? `
+                <div class="space-y-2">
+                  <input id="qFoodName" type="text" placeholder="Food or meal name" class="num-input text-left px-3" />
+                  <div class="grid grid-cols-4 gap-1.5">
+                    <input id="qCal" type="number" placeholder="kcal" class="num-input" />
+                    <input id="qPro" type="number" placeholder="P (g)" class="num-input" />
+                    <input id="qCarb" type="number" placeholder="C (g)" class="num-input" />
+                    <input id="qFat" type="number" placeholder="F (g)" class="num-input" />
+                  </div>
+                  <div class="grid grid-cols-4 gap-1.5">
+                    <input id="qFiber" type="number" placeholder="Fiber g" class="num-input" />
+                    <input id="qSodium" type="number" placeholder="Sod mg" class="num-input" />
+                    <input id="qWater" type="number" placeholder="H2O oz" class="num-input" />
+                    <input id="qCaff" type="number" placeholder="Caff mg" class="num-input" />
+                  </div>
+                  <button id="btnLogQuickFood" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Log to ${state.nutrition.mealTarget}</button>
+                </div>
+              ` : state.nutrition.mode === 'search' ? `
+                <div class="space-y-2">
+                  <input id="usdaSearchInp" type="text" placeholder="Filter USDA grounded foods..." class="num-input text-left px-3" />
+                  <div id="usdaResultsList" class="space-y-1.5 max-h-48 overflow-y-auto">
+                    ${USDA_GROUNDED_FOODS.map((f, idx) => `
+                      <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
+                        <div>
+                          <div class="font-bold text-white">${f.name}</div>
+                          <div class="text-[10px] text-[#8E8E93]">Per 100g: ${f.per100.cal} kcal • ${f.per100.p}P / ${f.per100.c}C / ${f.per100.f}F</div>
+                        </div>
+                        <button class="add-usda-food px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">+ 100g</button>
+                      </div>
+                    `).join('')}
+                  </div>
+                </div>
+              ` : state.nutrition.mode === 'ai' ? `
+                <div class="space-y-2">
+                  <textarea id="aiMealPrompt" rows="2" placeholder="Describe your meal (e.g. 200g grilled chicken, 150g white rice, 1 tbsp olive oil)..." class="w-full bg-[#2C2C2E] text-white text-xs rounded-xl p-3 outline-none"></textarea>
+                  <button id="btnRunAiParse" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">
                     ${state.nutrition.geminiKey ? 'Analyze with Gemini 2.5 Flash' : 'Smart Parse (Demo / Add Key in Targets)'}
                   </button>
                 </div>
-              </div>
-            ` : `
-              <div class="space-y-1.5">
-                ${SAVED_MEALS_PRESETS.map((sm, idx) => `
-                  <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
-                    <div>
-                      <div class="font-bold text-white">${sm.name}</div>
-                      <div class="text-[10px] text-[#8E8E93]">${sm.cal} kcal • ${sm.p}P / ${sm.c}C / ${sm.f}F</div>
+              ` : `
+                <div class="space-y-1.5">
+                  ${SAVED_MEALS_PRESETS.map((sm, idx) => `
+                    <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
+                      <div>
+                        <div class="font-bold text-white">${sm.name}</div>
+                        <div class="text-[10px] text-[#8E8E93]">${sm.cal} kcal • ${sm.p}P / ${sm.c}C / ${sm.f}F</div>
+                      </div>
+                      <button class="add-saved-meal px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">Log</button>
                     </div>
-                    <button class="add-saved-meal px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">Log</button>
-                  </div>
-                `).join('')}
-              </div>
-            `}
-          </div>
-
-          <!-- Logged Food Items -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-sm font-bold text-white">Today's Food Log</div>
-              ${getActiveNutritionLogs().length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear Day</button>` : ''}
-            </div>
-            ${getActiveNutritionLogs().length ? getActiveNutritionLogs().map((item, idx) => `
-              <div class="flex items-center justify-between py-2 border-t border-[#2C2C2E] text-xs">
-                <div>
-                  <div class="text-white font-semibold">${item.name}</div>
-                  <div class="text-[10px] text-[#8E8E93]">${item.meal} • ${Math.round(item.cal)} kcal (${Math.round(item.p)}P / ${Math.round(item.c)}C / ${Math.round(item.f)}F)</div>
+                  `).join('')}
                 </div>
-                <button class="del-food-btn text-[#8E8E93] hover:text-[#FA114F] px-2 font-bold" data-idx="${idx}">✕</button>
-              </div>
-            `).join('') : '<div class="text-xs text-[#636366]">No meals logged yet today.</div>'}
-          </div>
-
-          <!-- Nutrition-Only Backup & Restore -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mt-3">
-            <div class="text-[10px] font-bold text-[#92E82A] mb-1">NUTRITION BACKUP & RESTORE</div>
-            <div class="text-xs text-[#8E8E93] mb-2.5">Supports Foodnoms CSV exports (Foodnoms Food Log.csv) and Nutrition JSON backups.</div>
-            <div class="grid grid-cols-2 gap-2">
-              <button id="btnExportNutrition" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Nutrition (.json)</button>
-              <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
-                Import Nutrition
-                <input id="inpImportNutrition" type="file" accept=".json,.csv,text/csv,application/json" class="hidden" />
-              </label>
+              `}
             </div>
-          </div>
+
+            <!-- Nutrition-Only Backup & Restore -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
+              <div class="text-[10px] font-bold text-[#92E82A] mb-1">NUTRITION BACKUP & RESTORE</div>
+              <div class="text-xs text-[#8E8E93] mb-2.5">Import your full <strong>Foodnoms Food Log.csv</strong> (all 51 columns & dates) or export Nutrition backups separately from training.</div>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="py-2.5 px-2 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs text-center cursor-pointer">
+                  Import CSV/JSON
+                  <input id="inpImportNutrition" type="file" accept=".json,.csv,text/csv,application/json" class="hidden" />
+                </label>
+                <button id="btnExportNutritionCsv" class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs">Export CSV</button>
+                <button id="btnExportNutrition" class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs">Export JSON</button>
+              </div>
+            </div>
+          `}
         `;
 
-        root.querySelectorAll('.nutri-mode-btn').forEach((b) => b.addEventListener('click', () => {
-          state.nutrition.mode = b.dataset.mode;
+        // Wire common header controls
+        document.getElementById('nutriDatePick').addEventListener('change', (e) => {
+          if (e.target.value) { state.nutrition.selectedDate = e.target.value; render(); }
+        });
+        document.getElementById('btnNutriPrevDay').addEventListener('click', () => {
+          state.nutrition.selectedDate = shiftDateStr(activeDate, -1); render();
+        });
+        document.getElementById('btnNutriNextDay').addEventListener('click', () => {
+          state.nutrition.selectedDate = shiftDateStr(activeDate, 1); render();
+        });
+        root.querySelectorAll('.nutri-subtab-btn').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.subTab = b.dataset.subtab; render();
+        }));
+        const jumpLatest = document.getElementById('btnJumpLatestNutri');
+        if (jumpLatest) jumpLatest.addEventListener('click', () => {
+          state.nutrition.selectedDate = latestLoggedDate; render();
+        });
+
+        // Wire Today handlers
+        root.querySelectorAll('.food-detail-btn').forEach((b) => b.addEventListener('click', () => {
+          const item = getActiveNutritionLogs()[Number(b.dataset.idx)];
+          if (!item) return;
+          const ms = item.micros || {};
+          const nonZero = FOODNOMS_MICRO_SCHEMA.filter((m) => (ms[m.key] || 0) > 0);
+          openModal(item.name, `
+            <div class="space-y-2.5 text-xs">
+              <div class="text-[#8E8E93]">${[item.brand, item.portion, item.meal, item.time, item.accuracy].filter(Boolean).join(' • ')}</div>
+              <div class="grid grid-cols-4 gap-2 text-center bg-[#2C2C2E] rounded-xl p-2.5">
+                <div><div class="text-[10px] text-[#8E8E93]">Calories</div><div class="font-bold text-[#FA114F]">${Math.round(item.cal)}</div></div>
+                <div><div class="text-[10px] text-[#8E8E93]">Protein</div><div class="font-bold text-[#92E82A]">${Math.round(item.p)}g</div></div>
+                <div><div class="text-[10px] text-[#8E8E93]">Carbs</div><div class="font-bold text-[#00F5EA]">${Math.round(item.c)}g</div></div>
+                <div><div class="text-[10px] text-[#8E8E93]">Fat</div><div class="font-bold text-[#BF5AF2]">${Math.round(item.f)}g</div></div>
+              </div>
+              ${nonZero.length ? `
+                <div class="max-h-60 overflow-y-auto space-y-1 border-t border-[#2C2C2E] pt-2">
+                  ${nonZero.map((m) => `
+                    <div class="flex justify-between py-0.5">
+                      <span class="text-[#8E8E93]">${m.label}</span>
+                      <span class="text-white font-semibold tabular-nums">${Number((ms[m.key] || 0).toFixed(2))} ${m.unit}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : '<div class="text-[#636366]">No micronutrient breakdown recorded for this entry.</div>'}
+            </div>
+          `);
+        }));
+        root.querySelectorAll('.del-food-btn').forEach((b) => b.addEventListener('click', () => {
+          getActiveNutritionLogs().splice(Number(b.dataset.idx), 1); render();
+        }));
+        const clrBtn = document.getElementById('btnClearFoodLog');
+        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logsByDate[activeDate] = []; render(); });
+
+        // Wire Trends handlers
+        root.querySelectorAll('.nutri-range-btn').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.trendRange = b.dataset.range === 'all' ? 'all' : Number(b.dataset.range); render();
+        }));
+        root.querySelectorAll('.nutri-metric-btn').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.trendMetric = b.dataset.metric; render();
+        }));
+        root.querySelectorAll('.trend-bar-hit').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.selectedDate = b.dataset.date;
+          state.nutrition.subTab = 'today';
           render();
         }));
+
+        // Wire Nutrients handlers
+        root.querySelectorAll('.nutri-scope-btn').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.nutrientScope = b.dataset.scope; render();
+        }));
+
+        // Wire Log / Sync handlers
+        root.querySelectorAll('.nutri-mode-btn').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.mode = b.dataset.mode; render();
+        }));
         root.querySelectorAll('.nutri-meal-btn').forEach((b) => b.addEventListener('click', () => {
-          state.nutrition.mealTarget = b.dataset.meal;
-          render();
+          state.nutrition.mealTarget = b.dataset.meal; render();
         }));
         const qBtn = document.getElementById('btnLogQuickFood');
         if (qBtn) qBtn.addEventListener('click', () => {
@@ -1461,18 +2025,28 @@
           const p = Number(document.getElementById('qPro').value) || 0;
           const c = Number(document.getElementById('qCarb').value) || 0;
           const f = Number(document.getElementById('qFat').value) || 0;
-          if (!cal && !p && !c && !f) return;
-          getActiveNutritionLogs().unshift({ name, meal: state.nutrition.mealTarget, cal, p, c, f });
+          const fiber = Number(document.getElementById('qFiber')?.value) || 0;
+          const sodium = Number(document.getElementById('qSodium')?.value) || 0;
+          const water = Number(document.getElementById('qWater')?.value) || 0;
+          const caffeine = Number(document.getElementById('qCaff')?.value) || 0;
+          if (!cal && !p && !c && !f && !water && !caffeine) return;
+          getActiveNutritionLogs().unshift({
+            name, meal: state.nutrition.mealTarget, cal, p, c, f,
+            micros: { fiber, sodium, water, caffeine }
+          });
+          state.nutrition.subTab = 'today';
           render();
         });
         root.querySelectorAll('.add-usda-food').forEach((b) => b.addEventListener('click', () => {
           const f = USDA_GROUNDED_FOODS[Number(b.dataset.idx)];
-          getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f });
+          getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} });
+          state.nutrition.subTab = 'today';
           render();
         }));
         root.querySelectorAll('.add-saved-meal').forEach((b) => b.addEventListener('click', () => {
           const sm = SAVED_MEALS_PRESETS[Number(b.dataset.idx)];
-          getActiveNutritionLogs().unshift({ name: sm.name, meal: state.nutrition.mealTarget, cal: sm.cal, p: sm.p, c: sm.c, f: sm.f });
+          getActiveNutritionLogs().unshift({ name: sm.name, meal: state.nutrition.mealTarget, cal: sm.cal, p: sm.p, c: sm.c, f: sm.f, micros: {} });
+          state.nutrition.subTab = 'today';
           render();
         }));
         const aiBtn = document.getElementById('btnRunAiParse');
@@ -1492,7 +2066,8 @@
               const data = await res.json();
               const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
               const items = Array.isArray(parsed) ? parsed : [parsed];
-              items.forEach((it) => getActiveNutritionLogs().unshift({ name: it.name, meal: state.nutrition.mealTarget, cal: Number(it.cal)||0, p: Number(it.p)||0, c: Number(it.c)||0, f: Number(it.f)||0 }));
+              items.forEach((it) => getActiveNutritionLogs().unshift({ name: it.name, meal: state.nutrition.mealTarget, cal: Number(it.cal)||0, p: Number(it.p)||0, c: Number(it.c)||0, f: Number(it.f)||0, micros: {} }));
+              state.nutrition.subTab = 'today';
               render();
               return;
             } catch (err) {
@@ -1500,34 +2075,32 @@
               return;
             }
           }
-          // Offline/Demo keyword matcher against USDA grounded foods
           const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
           const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
-          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f }));
+          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} }));
+          state.nutrition.subTab = 'today';
           render();
         });
-        root.querySelectorAll('.del-food-btn').forEach((b) => b.addEventListener('click', () => {
-          getActiveNutritionLogs().splice(Number(b.dataset.idx), 1);
-          render();
-        }));
-        const clrBtn = document.getElementById('btnClearFoodLog');
-        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logsByDate[getActiveNutritionDate()] = []; render(); });
-        document.getElementById('btnExportNutrition').addEventListener('click', () => {
-          const payload = { type: 'apex-hybrid-nutrition', version: 1, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
+
+        const expJsonBtn = document.getElementById('btnExportNutrition');
+        if (expJsonBtn) expJsonBtn.addEventListener('click', () => {
+          const payload = { type: 'apex-hybrid-nutrition', version: 2, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
           const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
-          a.href = url;
-          a.download = `apex-hybrid-nutrition-${new Date().toISOString().slice(0, 10)}.json`;
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          URL.revokeObjectURL(url);
+          a.href = url; a.download = `apex-hybrid-nutrition-${new Date().toISOString().slice(0, 10)}.json`;
+          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         });
-        document.getElementById('nutriDatePick').addEventListener('change', (e) => {
-          if (e.target.value) { state.nutrition.selectedDate = e.target.value; render(); }
+        const expCsvBtn = document.getElementById('btnExportNutritionCsv');
+        if (expCsvBtn) expCsvBtn.addEventListener('click', () => {
+          const blob = new Blob([exportFoodnomsCsv()], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = `apex-hybrid-food-log-${new Date().toISOString().slice(0, 10)}.csv`;
+          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
         });
-        document.getElementById('inpImportNutrition').addEventListener('change', (e) => {
+        const impInput = document.getElementById('inpImportNutrition');
+        if (impInput) impInput.addEventListener('change', (e) => {
           const file = e.target.files && e.target.files[0];
           if (!file) return;
           const reader = new FileReader();
@@ -1539,9 +2112,10 @@
                 openModal('Import Error', '<div class="text-[#FA114F]">Could not parse Foodnoms CSV columns.</div>');
                 return;
               }
+              state.nutrition.subTab = 'trends';
               persistState();
               render();
-              openModal('Foodnoms CSV Imported', `<div class="text-white font-semibold">Imported ${res.count} food entries across ${res.days} day(s). Showing ${res.latestDate}.</div>`);
+              openModal('Foodnoms CSV Imported', `<div class="text-white font-semibold">Imported ${res.count} food entries across ${res.days} day(s) with all 51 nutrient columns. Showing ${res.latestDate}.</div>`);
               return;
             }
             try {
@@ -1551,21 +2125,24 @@
               state.nutrition = nutri;
               persistState();
               render();
-              openModal('Nutrition Restored', `<div class="text-white font-semibold">Restored nutrition logs and macro targets.</div>`);
+              openModal('Nutrition Restored', '<div class="text-white font-semibold">Restored nutrition logs and macro targets.</div>');
             } catch (err) {
               openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition JSON or CSV file.</div>');
             }
           };
           reader.readAsText(file);
         });
+
         document.getElementById('btnMacroGoals').addEventListener('click', () => {
-          openModal('Macro Targets & AI Key', `
+          openModal('Nutrition Targets & AI Key', `
             <div class="space-y-2.5">
               <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">CALORIES</label><input id="gCal" type="number" value="${g.calories}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">PROTEIN (G)</label><input id="gPro" type="number" value="${g.protein}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">CARBS (G)</label><input id="gCarb" type="number" value="${g.carbs}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">FAT (G)</label><input id="gFat" type="number" value="${g.fat}" class="num-input mt-1" /></div>
+                <div><label class="text-[10px] text-[#8E8E93] font-bold">FIBER (G)</label><input id="gFib" type="number" value="${g.fiber || 28}" class="num-input mt-1" /></div>
+                <div><label class="text-[10px] text-[#8E8E93] font-bold">WATER (FL OZ)</label><input id="gWat" type="number" value="${g.water || 64}" class="num-input mt-1" /></div>
               </div>
               <div><label class="text-[10px] text-[#8E8E93] font-bold">GEMINI API KEY (OPTIONAL)</label><input id="gGeminiKey" type="password" value="${state.nutrition.geminiKey}" placeholder="AIza..." class="num-input text-left px-3 mt-1" /></div>
               <button id="btnSaveGoals" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Save Targets</button>
@@ -1577,6 +2154,10 @@
               protein: Number(document.getElementById('gPro').value) || 165,
               carbs: Number(document.getElementById('gCarb').value) || 230,
               fat: Number(document.getElementById('gFat').value) || 70,
+              fiber: Number(document.getElementById('gFib').value) || 28,
+              water: Number(document.getElementById('gWat').value) || 64,
+              sodium: g.sodium || 2300,
+              caffeine: g.caffeine || 400,
             };
             state.nutrition.geminiKey = document.getElementById('gGeminiKey').value.trim();
             document.getElementById('modalOverlay').classList.add('hidden');
