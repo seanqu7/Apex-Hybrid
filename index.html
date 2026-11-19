@@ -156,34 +156,6 @@
       <span id="unitBadgeMobile" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-[#1C1C1E] text-[#8E8E93]">LB</span>
     </div>
 
-    <!-- Mobile Bottom Tab Bar (Apple Fitness+ Floating Glass Pill) -->
-    <nav class="bottom-nav h-[56px] mx-3 mt-1.5 mb-2 rounded-full bg-[#1C1C1E]/95 backdrop-blur-xl border border-[#38383A]/80 grid-cols-6 items-center text-center p-1.5 gap-0.5 shadow-2xl">
-      <button class="tab-btn active h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="today">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
-        <span>Today</span>
-      </button>
-      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="train">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M4 9.5v5"/><path d="M20 9.5v5"/><path d="M6.5 5v14"/><path d="M17.5 5v14"/><path d="M2 11v2"/><path d="M22 11v2"/></svg>
-        <span>Train</span>
-      </button>
-      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="program">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Program</span>
-      </button>
-      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="progress">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Progress</span>
-      </button>
-      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="nutrition">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
-        <span>Nutrition</span>
-      </button>
-      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="profile">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/></svg>
-        <span>Profile</span>
-      </button>
-    </nav>
-
     <div class="duo-grid">
       <!-- LEFT PANE (Duo Plan Overview Timeline) -->
       <aside id="leftPane" class="left-pane"></aside>
@@ -252,6 +224,34 @@
         </div>
       </aside>
     </div>
+
+    <!-- Mobile Bottom Tab Bar (Apple Fitness+ Floating Glass Pill) -->
+    <nav class="bottom-nav h-[56px] mx-3 mt-1.5 rounded-full bg-[#1C1C1E]/95 backdrop-blur-xl border border-[#38383A]/80 grid-cols-6 items-center text-center p-1.5 gap-0.5 shadow-2xl shrink-0" style="margin-bottom: max(8px, env(safe-area-inset-bottom));">
+      <button class="tab-btn active h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="today">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <span>Today</span>
+      </button>
+      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="train">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M4 9.5v5"/><path d="M20 9.5v5"/><path d="M6.5 5v14"/><path d="M17.5 5v14"/><path d="M2 11v2"/><path d="M22 11v2"/></svg>
+        <span>Train</span>
+      </button>
+      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="program">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Program</span>
+      </button>
+      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="progress">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Progress</span>
+      </button>
+      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="nutrition">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>
+        <span>Nutrition</span>
+      </button>
+      <button class="tab-btn text-[#8E8E93] h-12 flex flex-col items-center justify-center gap-0.5 text-[10px] font-semibold tracking-wide" data-tab="profile">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-3.5 3.6-6 8-6s8 2.5 8 6"/></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
 
     <!-- In-App Modal -->
     <div id="modalOverlay" class="hidden absolute inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-4">
@@ -524,6 +524,8 @@
           completedDays: state.completedDays,
           history: state.history,
           peakWeights: state.peakWeights,
+          roundNumber: state.roundNumber,
+          savedRounds: state.savedRounds,
           health: state.health,
           nutrition: state.nutrition,
         };
@@ -544,6 +546,8 @@
       activeSession: null,
       history: Array.isArray(saved.history) ? saved.history : [],
       peakWeights: saved.peakWeights || {},
+      roundNumber: saved.roundNumber || 1,
+      savedRounds: Array.isArray(saved.savedRounds) ? saved.savedRounds : [],
       nutrition: saved.nutrition || {
         goals: { calories: 2250, protein: 165, carbs: 230, fat: 70, water: 64, fiber: 28, sodium: 2300, caffeine: 400 },
         geminiKey: '',
@@ -677,7 +681,7 @@
           </div>
 
           <!-- Activity Rings Card -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-2.5 flex items-center justify-between">
+          <a href="fitness://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-4 mb-2.5 flex items-center justify-between no-underline">
             <div class="flex items-center gap-4">
               <svg class="w-24 h-24 -rotate-90 shrink-0" viewBox="0 0 90 90">
                 <circle cx="45" cy="45" r="${r1}" fill="none" stroke="#3A0D18" stroke-width="7.5" />
@@ -707,7 +711,8 @@
                 </div>
               </div>
             </div>
-          </div>
+            <span class="text-[10px] font-bold text-[#8E8E93] self-start">Fitness ↗</span>
+          </a>
 
           <!-- Nutrition Macro Strip (MacroLens Integration) -->
           <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
@@ -737,16 +742,22 @@
 
           <!-- 2-Column Sleep & Readiness Bento -->
           <div class="grid grid-cols-2 gap-2.5">
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
-              <div class="text-xs font-semibold text-white mb-0.5">Sleep Score</div>
+            <a href="x-apple-health://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-3.5 no-underline">
+              <div class="flex items-center justify-between mb-0.5">
+                <div class="text-xs font-semibold text-white">Sleep Score</div>
+                <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
+              </div>
               <div class="text-xl font-bold text-[#A78BFA] tabular-nums">${h.sleepScore !== null ? `${h.sleepScore}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${h.sleepHrs !== null ? `${h.sleepHrs}h` : 'No data'}</span></div>
               <div class="flex items-end gap-1.5 h-8 mt-2">
                 ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#8B5CF6]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
               </div>
-            </div>
+            </a>
 
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 flex flex-col items-center justify-between">
-              <div class="w-full text-xs font-semibold text-white">Readiness</div>
+            <a href="x-apple-health://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-3.5 flex flex-col items-center justify-between no-underline">
+              <div class="w-full flex items-center justify-between">
+                <div class="text-xs font-semibold text-white">Readiness</div>
+                <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
+              </div>
               <svg class="w-28 h-14 mt-1" viewBox="0 0 100 54">
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2C2C2E" stroke-width="8" stroke-linecap="round" />
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#38BDF8" stroke-width="8" stroke-linecap="round"
@@ -756,11 +767,28 @@
                 <div class="text-lg font-bold text-[#38BDF8] leading-none">${readyVal}</div>
                 <div class="text-[10px] text-[#8E8E93] mt-0.5">${readyLabel}</div>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       `;
     }
+
+    (function applyHealthUrlParams() {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        if (p.has('move') || p.has('ex') || p.has('stand') || p.has('sleep') || p.has('health_sync')) {
+          state.health.connected = true;
+          if (p.has('move')) state.health.moveCal = Number(p.get('move')) || 0;
+          if (p.has('ex')) state.health.exMin = Number(p.get('ex')) || 0;
+          if (p.has('stand')) state.health.standHr = Number(p.get('stand')) || 0;
+          if (p.has('sleep')) state.health.sleepScore = Number(p.get('sleep')) || 84;
+          if (p.has('sleep_hrs')) state.health.sleepHrs = Number(p.get('sleep_hrs')) || 7.5;
+          if (p.has('readiness')) state.health.readiness = Number(p.get('readiness')) || 8;
+          window.history.replaceState({}, '', window.location.pathname);
+          persistState();
+        }
+      } catch (e) {}
+    })();
 
     function wireHealthButton() {
       const goN = document.getElementById('btnGoNutri');
@@ -768,29 +796,40 @@
       const btn = document.getElementById('btnHealthConnect');
       if (!btn) return;
       btn.addEventListener('click', () => {
-        openModal('Apple Health & Readiness', `
-          <p class="text-xs text-[#8E8E93] mb-3">In the native iOS app, HealthKit syncs your Activity Rings, Sleep, and HRV automatically and writes completed workouts back to Apple Fitness. Test it here by syncing sample data or entering today's Sleep & Readiness:</p>
-          <div class="grid grid-cols-2 gap-2 mb-3">
-            <div>
-              <label class="text-[10px] font-bold text-[#8E8E93]">SLEEP SCORE (0-100)</label>
-              <input id="inpSleepScore" type="number" value="${state.health.sleepScore ?? 84}" class="num-input mt-1" />
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shortcutUrlExample = `${baseUrl}?health_sync=1&move=520&ex=42&stand=10&sleep=86&sleep_hrs=7.6&readiness=8`;
+        openModal('Apple Health Integration', `
+          <div class="space-y-3 text-xs">
+            <div class="bg-[#2C2C2E]/70 rounded-xl p-3 text-[#E5E5EA] leading-relaxed">
+              <strong class="text-white">Why Safari doesn't pop a HealthKit prompt:</strong> Apple only allows native iOS apps (installed via Xcode / TestFlight from <code class="text-[#92E82A]">hybrid-strength-app.zip</code>) to show the system Apple Health permission dialog.
             </div>
-            <div>
-              <label class="text-[10px] font-bold text-[#8E8E93]">READINESS (1-10)</label>
-              <input id="inpReadiness" type="number" max="10" min="1" value="${state.health.readiness ?? 8}" class="num-input mt-1" />
+            <div class="bg-[#2C2C2E]/70 rounded-xl p-3 space-y-1.5">
+              <div class="font-bold text-[#92E82A]">iPhone Web Workaround (Apple Shortcuts)</div>
+              <div class="text-[#8E8E93]">Create an Apple Shortcut on your iPhone that reads <strong>Move, Exercise, Stand & Sleep</strong> from Apple Health and opens this URL format:</div>
+              <div class="bg-[#0B0B0D] rounded-lg p-2 text-[10px] text-[#00F5EA] break-all font-mono select-all">${shortcutUrlExample}</div>
             </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div><label class="text-[10px] font-bold text-[#8E8E93]">MOVE (CAL)</label><input id="inpMoveCal" type="number" value="${state.health.moveCal || 480}" class="num-input mt-1" /></div>
+              <div><label class="text-[10px] font-bold text-[#8E8E93]">EXERCISE (M)</label><input id="inpExMin" type="number" value="${state.health.exMin || 35}" class="num-input mt-1" /></div>
+              <div><label class="text-[10px] font-bold text-[#8E8E93]">STAND (HR)</label><input id="inpStandHr" type="number" value="${state.health.standHr || 9}" class="num-input mt-1" /></div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div><label class="text-[10px] font-bold text-[#8E8E93]">SLEEP SCORE (0-100)</label><input id="inpSleepScore" type="number" value="${state.health.sleepScore ?? 84}" class="num-input mt-1" /></div>
+              <div><label class="text-[10px] font-bold text-[#8E8E93]">READINESS (1-10)</label><input id="inpReadiness" type="number" max="10" min="1" value="${state.health.readiness ?? 8}" class="num-input mt-1" /></div>
+            </div>
+            <button id="btnApplyHealth" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Apply Health Summary</button>
           </div>
-          <button id="btnApplyHealth" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Sync Apple Health Summary</button>
         `);
         document.getElementById('btnApplyHealth').addEventListener('click', () => {
           state.health.connected = true;
-          state.health.moveCal = Math.max(state.health.moveCal, 320);
-          state.health.exMin = Math.max(state.health.exMin, 18);
-          state.health.standHr = Math.max(state.health.standHr, 6);
+          state.health.moveCal = Number(document.getElementById('inpMoveCal').value) || 0;
+          state.health.exMin = Number(document.getElementById('inpExMin').value) || 0;
+          state.health.standHr = Number(document.getElementById('inpStandHr').value) || 0;
           state.health.sleepHrs = 7.4;
           state.health.sleepScore = Number(document.getElementById('inpSleepScore').value) || 84;
           state.health.readiness = Number(document.getElementById('inpReadiness').value) || 8;
           document.getElementById('modalOverlay').classList.add('hidden');
+          persistState();
           render();
         });
       });
@@ -1034,12 +1073,33 @@
       return rows.join('\n');
     }
 
+    function finishTrainingRound(weeksCountLabel) {
+      const snapshot = JSON.parse(JSON.stringify(state.peakWeights || {}));
+      state.savedRounds.unshift({
+        round: state.roundNumber || 1,
+        completedAt: new Date().toLocaleDateString(),
+        label: weeksCountLabel || `Week ${state.selectedWeek}`,
+        maxes: snapshot,
+      });
+      state.roundNumber = (state.roundNumber || 1) + 1;
+      state.selectedWeek = 1;
+      state.currentDayIdx = 0;
+      state.completedDays = [];
+      state.activeSession = null;
+      persistState();
+    }
+
+    function getLastRoundMax(exId) {
+      if (!state.savedRounds || !state.savedRounds.length) return null;
+      return state.savedRounds[0].maxes ? state.savedRounds[0].maxes[exId] || null : null;
+    }
+
     function renderLeftPane() {
       const left = document.getElementById('leftPane');
       left.innerHTML = `
         <div class="mb-4">
           <div class="text-[11px] font-bold tracking-widest text-[#92E82A]">PLAN OVERVIEW</div>
-          <div class="text-lg font-bold text-white mt-0.5">FitnessFAQs Hybrid — PPL</div>
+          <div class="text-lg font-bold text-white mt-0.5">APEX HYBRID — 9-Week Plan</div>
         </div>
         <div class="relative pl-5 space-y-3">
           <div class="absolute left-[7px] top-3 bottom-3 w-[1.5px] bg-[#2C2C2E]"></div>
@@ -1110,7 +1170,7 @@
           <div class="mb-4 pt-2 border-t border-[#1C1C1E]">
             <div class="flex items-center justify-between mb-2">
               <div class="text-sm font-bold text-white">Browse Split</div>
-              <span class="text-xs font-semibold text-[#92E82A]">Week ${state.selectedWeek}/9 • ${state.selectedWeek === 9 ? 'DELOAD' : `WEEK ${state.selectedWeek}`}</span>
+              <span class="text-xs font-semibold text-[#92E82A]">Round ${state.roundNumber} • ${state.selectedWeek === 9 ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
             </div>
             <div class="grid grid-cols-4 gap-2">
               <button class="split-jump rounded-2xl p-2.5 text-left bg-[#161F09] border border-[#2A3B12] hover:bg-[#1F2C0D]" data-day="0">
@@ -1220,84 +1280,51 @@
 
         const sess = state.activeSession;
         root.innerHTML = `
-          <div class="flex items-center justify-between bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3 mb-3">
+          <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-3.5 mb-3">
             <div>
               <div class="text-sm font-bold text-white">${sess.title}</div>
-              <div class="text-[11px] text-[#8E8E93]">Auto-saving locally • Tap ✓ or stopwatch to time rest</div>
+              <div class="text-[11px] text-[#8E8E93]">Round ${state.roundNumber} • Auto-saved locally</div>
             </div>
-            <button id="btnEndWorkout" class="px-4 py-2 rounded-full bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">End Workout</button>
+            <button id="btnEndWorkout" class="px-4 py-2 rounded-full bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Finish</button>
           </div>
 
           ${sess.exercises.map((item, exIdx) => {
             const ex = EXERCISES[item.exId];
             const isBw = ex.type === 'bodyweight_plus_weight';
-            const isBarbell = BARBELL_IDS.has(ex.id);
             const pr = state.peakWeights[ex.id];
-            const totalReps = item.sets.reduce((s, x) => x.done ? s + Number(x.reps || 0) : s, 0);
-            const totalVol = ex.type === 'external_weight' || isBw
-              ? item.sets.reduce((s, x) => (x.done && x.type !== 'warmup' ? s + Number(x.weight || 0) * Number(x.reps || 0) : s), 0)
-              : 0;
-            const loadLabel = isBw ? (item.loadMode === 'assist' ? `ASSIST (${state.unit.toUpperCase()})` : `+ADDED (${state.unit.toUpperCase()})`) : state.unit.toUpperCase();
+            const prevMax = getLastRoundMax(ex.id);
+            const refMax = pr || prevMax;
+            const loadLabel = isBw ? (item.loadMode === 'assist' ? `ASSIST (${state.unit.toUpperCase()})` : `+LB`) : state.unit.toUpperCase();
             return `
-              <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-2xl p-3.5 mb-3">
-                <div class="flex items-start justify-between mb-2 gap-2">
+              <div class="bg-[#1C1C1E] rounded-2xl p-3.5 mb-3">
+                <div class="flex items-start justify-between mb-2.5 gap-2">
                   <div class="min-w-0">
                     <div class="text-base font-bold text-[#92E82A] truncate">${ex.name}</div>
-                    <div class="text-[11px] text-[#8E8E93]">${item.rx.sets} × ${item.rx.reps} • Rest ${item.rx.restLabel}${pr ? ` • <span class="text-[#92E82A] font-semibold">PR: ${pr.weight}${state.unit}×${pr.reps}</span>` : ''}</div>
+                    <div class="text-[11px] text-[#8E8E93]">${item.rx.sets} × ${item.rx.reps} • Rest ${item.rx.restLabel}${refMax ? ` • <span class="text-white font-semibold">${prevMax ? 'Last Rnd' : 'Max'}: ${refMax.weight}${state.unit}×${refMax.reps}</span>` : ''}</div>
                   </div>
-                  <div class="flex gap-1 shrink-0">
-                    <button class="start-rec-timer inline-flex items-center gap-1 px-2 py-1 rounded bg-[#92E82A]/15 border border-[#92E82A]/35 text-[11px] text-[#92E82A] font-bold" data-ex="${exIdx}"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M9 2h6"/></svg><span>${Math.floor(item.rx.restSec / 60)}:00</span></button>
-                    ${isBarbell ? `<button class="plate-btn px-2 py-1 rounded bg-[#2C2C2E] text-[11px] text-white font-semibold" data-ex="${exIdx}">Plates</button>` : ''}
-                    <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded bg-[#2C2C2E] text-[11px] text-[#92E82A] font-semibold">Video ↗</a>
-                    <button class="sub-btn px-2 py-1 rounded bg-[#2C2C2E] text-[11px] text-[#8E8E93] font-semibold" data-ex="${exIdx}">Swap</button>
+                  <div class="flex gap-1.5 shrink-0">
+                    <button class="start-rec-timer inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#2C2C2E] text-[11px] text-[#92E82A] font-bold" data-ex="${exIdx}">⏱ ${Math.floor(item.rx.restSec / 60)}m</button>
+                    <button class="ex-more-btn px-2.5 py-1 rounded-full bg-[#2C2C2E] text-[11px] text-white font-bold" data-ex="${exIdx}">⋯</button>
                   </div>
                 </div>
 
-                ${isBw ? `
-                  <div class="flex items-center gap-1.5 mb-2">
-                    <button class="bw-mode-btn px-2.5 py-1 rounded-md text-[10px] font-bold ${item.loadMode === 'added' ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-mode="added">+ Added ${state.unit}</button>
-                    <button class="bw-mode-btn px-2.5 py-1 rounded-md text-[10px] font-bold ${item.loadMode === 'assist' ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-mode="assist">Band Assist</button>
-                  </div>
-                ` : ''}
-
-                ${pr && !item.sugDismissed ? `
-                  <div class="flex items-center justify-between bg-[#92E82A]/12 border border-[#92E82A]/30 rounded-lg px-2.5 py-1.5 mb-2 text-[11px]">
-                    <span class="text-[#92E82A] font-semibold">Suggest +${state.unit === 'lb' ? 5 : 2.5} ${state.unit} (${pr.weight + (state.unit === 'lb' ? 5 : 2.5)} ${state.unit})?</span>
-                    <div class="flex gap-1.5">
-                      <button class="apply-sug px-2 py-0.5 rounded bg-[#92E82A] text-[#0B0B0D] font-bold" data-ex="${exIdx}">Apply</button>
-                      <button class="dismiss-sug px-2 py-0.5 rounded bg-[#2C2C2E] text-[#8E8E93] font-semibold" data-ex="${exIdx}">Keep</button>
-                    </div>
-                  </div>
-                ` : ''}
-
-                <div class="grid grid-cols-[28px_1fr_1fr_52px_36px] gap-1.5 text-[10px] font-bold text-[#636366] text-center pb-1 border-b border-[#1F1F26] mb-1.5">
-                  <div>SET</div><div>${loadLabel}</div><div>REPS</div><div>RPE</div><div>✓</div>
+                <div class="grid grid-cols-[28px_1fr_1fr_40px] gap-2 text-[10px] font-bold text-[#636366] text-center pb-1 border-b border-[#2C2C2E] mb-1.5">
+                  <div>SET</div><div>${loadLabel}</div><div>REPS</div><div>✓</div>
                 </div>
 
                 ${item.sets.map((s, sIdx) => `
-                  <div class="grid grid-cols-[28px_1fr_1fr_52px_36px] gap-1.5 items-center py-1 rounded-lg ${s.done ? 'bg-[#22C55E]/10' : ''}">
+                  <div class="grid grid-cols-[28px_1fr_1fr_40px] gap-2 items-center py-1 rounded-lg ${s.done ? 'bg-[#22C55E]/10' : ''}">
                     <div class="text-center text-xs font-bold ${s.type === 'warmup' ? 'text-[#92E82A]' : 'text-white'}">${s.type === 'warmup' ? 'W' : s.num}</div>
-                    <input class="num-input set-w" data-ex="${exIdx}" data-s="${sIdx}" type="number" placeholder="${state.unit}" value="${s.weight ?? ''}" />
+                    <input class="num-input set-w" data-ex="${exIdx}" data-s="${sIdx}" type="number" placeholder="${refMax ? refMax.weight : state.unit}" value="${s.weight ?? ''}" />
                     <input class="num-input set-r" data-ex="${exIdx}" data-s="${sIdx}" type="number" value="${s.reps}" />
-                    <button class="rpe-pill-trigger num-input text-xs" data-ex="${exIdx}" data-s="${sIdx}">${s.rpe}</button>
                     <button class="set-done h-9 rounded-lg flex items-center justify-center font-bold text-sm ${s.done ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-s="${sIdx}">✓</button>
                   </div>
-                  ${item.activeRpeSetIdx === sIdx ? `
-                    <div class="flex items-center justify-between gap-1 bg-[#2C2C2E] rounded-lg p-1.5 my-1">
-                      ${[7, 7.5, 8, 8.5, 9, 9.5, 10].map((val) => `
-                        <button class="rpe-pick flex-1 py-1 rounded text-[11px] font-bold ${s.rpe === val ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-s="${sIdx}" data-val="${val}">${val}</button>
-                      `).join('')}
-                    </div>
-                  ` : ''}
                 `).join('')}
 
-                <div class="flex items-center justify-between mt-2.5 pt-2 border-t border-[#1F1F26]">
-                  <div class="flex gap-2.5">
-                    <button class="add-set text-xs font-bold text-[#92E82A]" data-ex="${exIdx}" data-type="working">+ Set</button>
-                    <button class="add-set text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}" data-type="warmup">+ Warm-up</button>
-                    <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
-                  </div>
-                  <div class="text-[11px] text-[#8E8E93] tabular-nums">Reps: ${totalReps} • Vol: ${Math.round(totalVol)} ${state.unit}</div>
+                <div class="flex items-center gap-4 mt-2.5 pt-2 border-t border-[#2C2C2E]">
+                  <button class="add-set text-xs font-bold text-[#92E82A]" data-ex="${exIdx}" data-type="working">+ Set</button>
+                  <button class="add-set text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}" data-type="warmup">+ Warm-up</button>
+                  <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
                 </div>
               </div>
             `;
@@ -1310,34 +1337,6 @@
         root.querySelectorAll('.set-r').forEach((inp) => inp.addEventListener('input', (e) => {
           state.activeSession.exercises[inp.dataset.ex].sets[inp.dataset.s].reps = Number(e.target.value || 0);
         }));
-        root.querySelectorAll('.rpe-pill-trigger').forEach((btn) => btn.addEventListener('click', () => {
-          const item = state.activeSession.exercises[btn.dataset.ex];
-          const sIdx = Number(btn.dataset.s);
-          item.activeRpeSetIdx = item.activeRpeSetIdx === sIdx ? null : sIdx;
-          render();
-        }));
-        root.querySelectorAll('.rpe-pick').forEach((btn) => btn.addEventListener('click', () => {
-          const item = state.activeSession.exercises[btn.dataset.ex];
-          item.sets[btn.dataset.s].rpe = Number(btn.dataset.val);
-          item.activeRpeSetIdx = null;
-          render();
-        }));
-        root.querySelectorAll('.bw-mode-btn').forEach((btn) => btn.addEventListener('click', () => {
-          state.activeSession.exercises[btn.dataset.ex].loadMode = btn.dataset.mode;
-          render();
-        }));
-        root.querySelectorAll('.apply-sug').forEach((btn) => btn.addEventListener('click', () => {
-          const item = state.activeSession.exercises[btn.dataset.ex];
-          const pr = state.peakWeights[item.exId];
-          const nextW = (pr ? pr.weight : 0) + (state.unit === 'lb' ? 5 : 2.5);
-          item.sets.forEach((s) => { if (s.type !== 'warmup') s.weight = nextW; });
-          item.sugDismissed = true;
-          render();
-        }));
-        root.querySelectorAll('.dismiss-sug').forEach((btn) => btn.addEventListener('click', () => {
-          state.activeSession.exercises[btn.dataset.ex].sugDismissed = true;
-          render();
-        }));
         root.querySelectorAll('.copy-down').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
           const firstWorking = item.sets.find((s) => s.type !== 'warmup');
@@ -1345,103 +1344,127 @@
           item.sets.forEach((s) => { if (s.type !== 'warmup') { s.weight = firstWorking.weight; s.reps = firstWorking.reps; } });
           render();
         }));
-        root.querySelectorAll('.start-rec-timer').forEach((btn) => btn.addEventListener('click', () => {
-          const item = state.activeSession.exercises[btn.dataset.ex];
-          startRestTimer(item.rx.restSec || 180, EXERCISES[item.exId].name);
-        }));
-        root.querySelectorAll('.plate-btn').forEach((btn) => btn.addEventListener('click', () => {
-          const item = state.activeSession.exercises[btn.dataset.ex];
-          const ex = EXERCISES[item.exId];
-          const firstWorking = item.sets.find((s) => s.type !== 'warmup');
-          const targetW = firstWorking && firstWorking.weight ? Number(firstWorking.weight) : 135;
-          openModal(`${ex.name} — Plates & Warm-Up`, `
-            <div class="p-3 rounded-xl bg-[#2C2C2E] border border-[#2D2D37] mb-3">
-              <div class="text-[10px] font-bold text-[#92E82A] mb-1">45 LB BARBELL LOADOUT (${targetW} lb)</div>
-              <div class="text-sm font-bold text-white">${calcPlatesLb(targetW)}</div>
-            </div>
-            <button id="btnGenWarmupRamp" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">
-              + Add 50% / 70% / 85% Warm-Up Ramp
-            </button>
-          `);
-          document.getElementById('btnGenWarmupRamp').addEventListener('click', () => {
-            const ramp = [0.5, 0.7, 0.85].map((pct) => ({
-              num: 1, type: 'warmup', weight: Math.max(45, Math.round((targetW * pct) / 5) * 5),
-              reps: pct === 0.5 ? 6 : pct === 0.7 ? 4 : 2, rpe: 5, done: false,
-            }));
-            item.sets = [...ramp, ...item.sets];
-            document.getElementById('modalOverlay').classList.add('hidden');
-            render();
-          });
-        }));
         root.querySelectorAll('.set-done').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
           const s = item.sets[btn.dataset.s];
           s.done = !s.done;
-          if (s.done) startRestTimer(item.rx.restSec || 180, EXERCISES[item.exId].name);
+          if (s.done) startRestTimer(item.rx.restSec, EXERCISES[item.exId].name);
           render();
+        }));
+        root.querySelectorAll('.start-rec-timer').forEach((btn) => btn.addEventListener('click', () => {
+          const item = state.activeSession.exercises[btn.dataset.ex];
+          startRestTimer(item.rx.restSec, EXERCISES[item.exId].name);
         }));
         root.querySelectorAll('.add-set').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
-          const last = item.sets[item.sets.length - 1] || { weight: '', reps: 8, rpe: 8 };
-          if (btn.dataset.type === 'warmup') item.sets.unshift({ num: 1, type: 'warmup', weight: last.weight ? Math.round(Number(last.weight) * 0.5) : '', reps: 6, rpe: 5, done: false });
-          else item.sets.push({ num: item.sets.length + 1, type: 'working', weight: last.weight, reps: last.reps, rpe: last.rpe, done: false });
+          const last = item.sets[item.sets.length - 1] || { weight: '', reps: 10, rpe: 8 };
+          const num = btn.dataset.type === 'warmup' ? 0 : item.sets.filter((x) => x.type !== 'warmup').length + 1;
+          item.sets.push({ num, type: btn.dataset.type, weight: last.weight, reps: last.reps, rpe: last.rpe, done: false });
           render();
         }));
-        root.querySelectorAll('.sub-btn').forEach((btn) => btn.addEventListener('click', () => {
+
+        // Clean "More ..." Sheet for Video, Swap, Plate Calc, and BW mode
+        root.querySelectorAll('.ex-more-btn').forEach((btn) => btn.addEventListener('click', () => {
           const exIdx = Number(btn.dataset.ex);
-          const cur = EXERCISES[state.activeSession.exercises[exIdx].exId];
-          const cands = cur.subs.length ? cur.subs : Object.keys(EXERCISES).filter((k) => k !== cur.id).slice(0, 4);
-          openModal(`Substitute ${cur.name}`, cands.map((id) => `
-            <button class="pick-sub w-full text-left p-3 rounded-xl bg-[#2C2C2E] mb-2 border border-[#2D2D37]" data-exidx="${exIdx}" data-newid="${id}">
-              <div class="font-bold text-[#92E82A]">${EXERCISES[id].name}</div>
-              <div class="text-xs text-[#8E8E93]">${EXERCISES[id].pattern}</div>
-            </button>
-          `).join(''));
-          document.querySelectorAll('.pick-sub').forEach((p) => p.addEventListener('click', () => {
-            state.activeSession.exercises[p.dataset.exidx].exId = p.dataset.newid;
+          const item = state.activeSession.exercises[exIdx];
+          const ex = EXERCISES[item.exId];
+          const isBw = ex.type === 'bodyweight_plus_weight';
+          const isBarbell = BARBELL_IDS.has(ex.id);
+          const w = Number(item.sets.find((x) => x.type !== 'warmup' && x.weight)?.weight || state.peakWeights[ex.id]?.weight || 135);
+          const perSide = Math.max(0, (w - 45) / 2);
+          const alts = (ex.subs || []).map((id) => EXERCISES[id]).filter(Boolean);
+
+          openModal(ex.name, `
+            <div class="space-y-3 text-xs">
+              <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="block w-full text-center py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Open FitnessFAQs Video ↗</a>
+              ${isBw ? `
+                <div class="grid grid-cols-2 gap-2">
+                  <button id="mBwAdd" class="py-2 rounded-xl font-bold ${item.loadMode === 'added' ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#2C2C2E] text-white'}">+ Added ${state.unit}</button>
+                  <button id="mBwAssist" class="py-2 rounded-xl font-bold ${item.loadMode === 'assist' ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#2C2C2E] text-white'}">Band Assist</button>
+                </div>
+              ` : ''}
+              ${isBarbell ? `
+                <div class="bg-[#2C2C2E]/70 rounded-xl p-2.5">
+                  <div class="font-bold text-white mb-1">45 lb Barbell Plates (${w} ${state.unit}):</div>
+                  <div class="text-[#92E82A] font-semibold">${perSide > 0 ? `${perSide} ${state.unit} per side` : 'Empty 45 lb bar'}</div>
+                </div>
+              ` : ''}
+              ${alts.length ? `
+                <div>
+                  <div class="text-[10px] font-bold text-[#8E8E93] mb-1.5">SWAP EXERCISE</div>
+                  <div class="space-y-1.5">
+                    ${alts.map((a) => `<button class="pick-sub w-full text-left p-2.5 rounded-xl bg-[#2C2C2E] text-white font-semibold" data-id="${a.id}">${a.name}</button>`).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `);
+          const bAdd = document.getElementById('mBwAdd');
+          const bAss = document.getElementById('mBwAssist');
+          if (bAdd) bAdd.addEventListener('click', () => { item.loadMode = 'added'; document.getElementById('modalOverlay').classList.add('hidden'); render(); });
+          if (bAss) bAss.addEventListener('click', () => { item.loadMode = 'assist'; document.getElementById('modalOverlay').classList.add('hidden'); render(); });
+          document.querySelectorAll('.pick-sub').forEach((sb) => sb.addEventListener('click', () => {
+            state.activeSession.exercises[exIdx].exId = sb.dataset.id;
             document.getElementById('modalOverlay').classList.add('hidden');
             render();
           }));
         }));
+
         document.getElementById('btnEndWorkout').addEventListener('click', () => {
-          const doneSets = sess.exercises.reduce((a, ex) => a + ex.sets.filter((s) => s.done && s.type !== 'warmup').length, 0);
-          const vol = sess.exercises.reduce((a, ex) => {
-            const e = EXERCISES[ex.exId];
-            if (e.type !== 'external_weight' && e.type !== 'bodyweight_plus_weight') return a;
-            return a + ex.sets.filter((s) => s.done && s.type !== 'warmup').reduce((x, y) => x + Number(y.weight || 0) * Number(y.reps || 0), 0);
-          }, 0);
-          const minsTrained = Math.max(20, Math.round((Date.now() - sess.startedAt) / 60000));
-          state.health.exMin += minsTrained;
-          state.health.moveCal += Math.max(180, doneSets * 14);
+          const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
+          const vol = sess.exercises.reduce((a, e) => a + e.sets.reduce((b, s) => b + (s.done && s.type !== 'warmup' ? Number(s.weight || 0) * Number(s.reps || 0) : 0), 0), 0);
+          sess.exercises.forEach((e) => {
+            e.sets.forEach((s) => {
+              const w = Number(s.weight || 0);
+              const r = Number(s.reps || 0);
+              if (s.done && s.type !== 'warmup' && w > 0) {
+                const prev = state.peakWeights[e.exId];
+                if (!prev || w > prev.weight || (w === prev.weight && r > prev.reps)) {
+                  state.peakWeights[e.exId] = { weight: w, reps: r, date: new Date().toLocaleDateString() };
+                }
+              }
+            });
+          });
+          savePrs(state.peakWeights);
           state.history.unshift({ title: sess.title, sets: doneSets, volume: Math.round(vol), date: new Date().toLocaleDateString() });
           if (!state.completedDays.includes(sess.dayIdx)) state.completedDays.push(sess.dayIdx);
-          state.currentDayIdx = (sess.dayIdx + 1) % PPL_DAYS.length;
+          state.health.moveCal += Math.max(120, Math.round(doneSets * 12));
+          state.health.exMin += Math.max(20, Math.round(doneSets * 2.5));
           state.activeSession = null;
-          state.restTimer.running = false;
-          clearInterval(state.timerInterval);
-          renderRestBar();
-          openModal('Workout Complete', `<div class="text-white font-bold">${doneSets} working sets • ${Math.round(vol)} ${state.unit} external volume</div>`);
-          switchTab('today');
+
+          // If finishing Week 8 or Week 9 (Deload) last day, offer 1-tap Round Completion
+          const finishedWeek8Or9 = state.selectedWeek >= 8 && state.completedDays.length >= 6;
+          if (finishedWeek8Or9) {
+            openModal(`Round ${state.roundNumber} Complete!`, `
+              <div class="space-y-3 text-xs">
+                <div class="text-white">You finished <strong>Week ${state.selectedWeek}</strong>! Save all your current maxes for <strong>Round ${state.roundNumber}</strong> and restart at Week 1 knowing where to start from?</div>
+                <button id="btnConfirmFinishRound" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Save Round ${state.roundNumber} Maxes & Start Round ${state.roundNumber + 1}</button>
+              </div>
+            `);
+            document.getElementById('btnConfirmFinishRound').addEventListener('click', () => {
+              finishTrainingRound(`Week ${state.selectedWeek}`);
+              document.getElementById('modalOverlay').classList.add('hidden');
+              switchTab('today');
+            });
+          } else {
+            switchTab('today');
+          }
         });
       }
 
       else if (state.tab === 'nutrition') {
         ensureNutriDefaults();
+        if (!['today', 'trends', 'nutrients'].includes(state.nutrition.subTab)) state.nutrition.subTab = 'today';
         const activeDate = getActiveNutritionDate();
         const logs = getActiveNutritionLogs();
         const tot = sumNutritionItems(logs);
         const g = state.nutrition.goals;
         const loggedDates = getAllLoggedNutritionDates();
         const latestLoggedDate = loggedDates.length ? loggedDates[loggedDates.length - 1] : activeDate;
-        const subTab = state.nutrition.subTab || 'today';
+        const subTab = state.nutrition.subTab;
 
         const calPct = Math.min(100, Math.round((tot.cal / Math.max(1, g.calories)) * 100));
         const rCal = 34, cCal = 2 * Math.PI * rCal;
-        const pCal = tot.p * 4, cCarb = tot.c * 4, fCal = tot.f * 9;
-        const macroCalSum = Math.max(1, pCal + cCarb + fCal);
-        const pShare = Math.round((pCal / macroCalSum) * 100);
-        const cShare = Math.round((cCarb / macroCalSum) * 100);
-        const fShare = Math.max(0, 100 - pShare - cShare);
 
         const MEAL_ORDER = ['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack', 'Snacks', 'Other'];
         const mealBuckets = {};
@@ -1455,7 +1478,6 @@
           ...Object.keys(mealBuckets).filter((m) => !MEAL_ORDER.includes(m))
         ];
 
-        // Trends data calculation
         const rangeDays = state.nutrition.trendRange === 'all'
           ? Math.max(7, loggedDates.length || 7)
           : Number(state.nutrition.trendRange) || 7;
@@ -1463,74 +1485,49 @@
         if (state.nutrition.trendRange === 'all' && loggedDates.length) {
           loggedDates.forEach((d) => trendDates.push(d));
         } else {
-          for (let i = rangeDays - 1; i >= 0; i--) {
-            trendDates.push(shiftDateStr(activeDate, -i));
-          }
+          for (let i = rangeDays - 1; i >= 0; i--) trendDates.push(shiftDateStr(activeDate, -i));
         }
-        const metricKey = state.nutrition.trendMetric || 'cal';
+
+        const metricKey = ['cal', 'p', 'c', 'f'].includes(state.nutrition.trendMetric) ? state.nutrition.trendMetric : 'cal';
         const metricMeta = {
           cal: { label: 'Calories', unit: 'Cal', color: '#FA114F', goal: g.calories },
           p: { label: 'Protein', unit: 'g', color: '#92E82A', goal: g.protein },
           c: { label: 'Carbs', unit: 'g', color: '#00F5EA', goal: g.carbs },
           f: { label: 'Fat', unit: 'g', color: '#BF5AF2', goal: g.fat },
-          fiber: { label: 'Fiber', unit: 'g', color: '#92E82A', goal: g.fiber || 28 },
-          sodium: { label: 'Sodium', unit: 'mg', color: '#FF9F0A', goal: g.sodium || 2300 },
-          water: { label: 'Water', unit: 'fl oz', color: '#00F5EA', goal: g.water || 64 },
-          caffeine: { label: 'Caffeine', unit: 'mg', color: '#FF9F0A', goal: g.caffeine || 400 },
-        }[metricKey] || { label: 'Calories', unit: 'Cal', color: '#FA114F', goal: g.calories };
-
-        const getMetricVal = (dayTot) => {
-          if (metricKey === 'cal' || metricKey === 'p' || metricKey === 'c' || metricKey === 'f') return dayTot[metricKey] || 0;
-          return (dayTot.micros && dayTot.micros[metricKey]) || 0;
-        };
+        }[metricKey];
 
         const trendSeries = trendDates.map((d) => {
           const dt = getNutritionTotals(d);
           const hasData = (state.nutrition.logsByDate[d] || []).length > 0;
-          return { date: d, tot: dt, val: getMetricVal(dt), hasData };
+          return { date: d, tot: dt, val: dt[metricKey] || 0, hasData };
         });
         const nonEmptySeries = trendSeries.filter((x) => x.hasData);
         const avgVal = nonEmptySeries.length ? nonEmptySeries.reduce((s, x) => s + x.val, 0) / nonEmptySeries.length : 0;
         const totalVal = nonEmptySeries.reduce((s, x) => s + x.val, 0);
         const maxVal = Math.max(metricMeta.goal || 1, ...trendSeries.map((x) => x.val), 1);
-        const onTargetCount = nonEmptySeries.filter((x) => {
-          if (!metricMeta.goal) return false;
-          return metricKey === 'sodium' || metricKey === 'caffeine'
-            ? x.val <= metricMeta.goal
-            : x.val >= metricMeta.goal * 0.85 && x.val <= metricMeta.goal * 1.15;
-        }).length;
 
-        // Nutrients scope (selected day vs 7-day average)
         const nutScope = state.nutrition.nutrientScope || 'day';
         let scopeTot = tot;
-        let scopeDaysCount = 1;
         if (nutScope === '7d') {
           const last7 = [];
           for (let i = 6; i >= 0; i--) last7.push(shiftDateStr(activeDate, -i));
           const active7 = last7.filter((d) => (state.nutrition.logsByDate[d] || []).length > 0);
-          scopeDaysCount = Math.max(1, active7.length);
-          const sum7 = { cal: 0, p: 0, c: 0, f: 0, micros: {} };
+          const denom = Math.max(1, active7.length);
+          const sum7 = { micros: {} };
           FOODNOMS_MICRO_SCHEMA.forEach((m) => { sum7.micros[m.key] = 0; });
           active7.forEach((d) => {
             const dt = getNutritionTotals(d);
-            sum7.cal += dt.cal; sum7.p += dt.p; sum7.c += dt.c; sum7.f += dt.f;
             FOODNOMS_MICRO_SCHEMA.forEach((m) => { sum7.micros[m.key] += dt.micros[m.key] || 0; });
           });
-          scopeTot = {
-            cal: sum7.cal / scopeDaysCount,
-            p: sum7.p / scopeDaysCount,
-            c: sum7.c / scopeDaysCount,
-            f: sum7.f / scopeDaysCount,
-            micros: Object.fromEntries(FOODNOMS_MICRO_SCHEMA.map((m) => [m.key, (sum7.micros[m.key] || 0) / scopeDaysCount]))
-          };
+          scopeTot = { micros: Object.fromEntries(FOODNOMS_MICRO_SCHEMA.map((m) => [m.key, (sum7.micros[m.key] || 0) / denom])) };
         }
 
         const renderTrendChartSvg = () => {
-          const W = 360, H = 155, padL = 8, padR = 8, padT = 18, padB = 22;
+          const W = 360, H = 150, padL = 8, padR = 8, padT = 18, padB = 22;
           const plotW = W - padL - padR, plotH = H - padT - padB;
           const n = Math.max(1, trendSeries.length);
           const step = plotW / n;
-          const barW = Math.max(4, Math.min(24, step * 0.64));
+          const barW = Math.max(5, Math.min(26, step * 0.62));
           const goalY = metricMeta.goal ? (padT + plotH - Math.min(1, metricMeta.goal / maxVal) * plotH) : null;
           const avgY = avgVal > 0 ? (padT + plotH - Math.min(1, avgVal / maxVal) * plotH) : null;
 
@@ -1541,13 +1538,12 @@
             const isSel = pt.date === activeDate;
             const labelEvery = n <= 8 ? 1 : n <= 16 ? 2 : Math.ceil(n / 6);
             const showLbl = (i % labelEvery === 0) || i === n - 1;
-            const shortD = pt.date.slice(5);
             return `
               <g class="trend-bar-hit cursor-pointer" data-date="${pt.date}">
                 <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3"
-                  fill="${pt.hasData ? metricMeta.color : '#2C2C2E'}" opacity="${isSel ? '1' : (pt.hasData ? '0.82' : '0.45')}"
+                  fill="${pt.hasData ? metricMeta.color : '#2C2C2E'}" opacity="${isSel ? '1' : (pt.hasData ? '0.82' : '0.4')}"
                   stroke="${isSel ? '#FFFFFF' : 'none'}" stroke-width="${isSel ? '1.5' : '0'}" />
-                ${showLbl ? `<text x="${(x + barW / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" fill="${isSel ? '#FFFFFF' : '#8E8E93'}" font-size="8.5" font-weight="${isSel ? '700' : '500'}">${shortD}</text>` : ''}
+                ${showLbl ? `<text x="${(x + barW / 2).toFixed(1)}" y="${H - 5}" text-anchor="middle" fill="${isSel ? '#FFFFFF' : '#8E8E93'}" font-size="8.5" font-weight="${isSel ? '700' : '500'}">${pt.date.slice(5)}</text>` : ''}
               </g>
             `;
           }).join('');
@@ -1568,162 +1564,117 @@
         };
 
         root.innerHTML = `
-          <!-- FoodNoms Header + Date Stepper -->
-          <div class="flex items-center justify-between mb-2.5 gap-2">
-            <div class="min-w-0">
-              <div class="text-xl font-bold text-white">Nutrition</div>
-              <div class="text-[11px] text-[#8E8E93]">${loggedDates.length ? `${loggedDates.length} logged days • FoodNoms + MacroLens` : 'MacroLens AI + FoodNoms CSV / USDA'}</div>
+          <!-- Clean Nutrition Header -->
+          <div class="flex items-center justify-between mb-3 gap-2">
+            <div class="flex items-center gap-1.5">
+              <button id="btnNutriPrevDay" class="w-8 h-8 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-sm font-bold flex items-center justify-center">‹</button>
+              <input id="nutriDatePick" type="date" value="${activeDate}" class="bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-semibold rounded-full px-3 py-1.5 outline-none" />
+              <button id="btnNutriNextDay" class="w-8 h-8 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-sm font-bold flex items-center justify-center">›</button>
             </div>
-            <div class="flex items-center gap-1 shrink-0">
-              <button id="btnNutriPrevDay" class="w-7 h-7 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-bold flex items-center justify-center">‹</button>
-              <input id="nutriDatePick" type="date" value="${activeDate}" class="bg-[#1C1C1E] border border-[#2C2C2E] text-white text-[11px] font-semibold rounded-full px-2.5 py-1 outline-none" />
-              <button id="btnNutriNextDay" class="w-7 h-7 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-white text-xs font-bold flex items-center justify-center">›</button>
-              <button id="btnMacroGoals" class="px-2.5 py-1 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-[11px] font-bold text-[#92E82A]">Targets</button>
+            <div class="flex items-center gap-1.5">
+              <button id="btnOpenLogModal" class="px-3 py-1.5 rounded-full bg-[#92E82A] text-[#000000] text-xs font-bold">+ Log / Import</button>
+              <button id="btnMacroGoals" class="px-3 py-1.5 rounded-full bg-[#1C1C1E] border border-[#2C2C2E] text-xs font-bold text-white">⚙</button>
             </div>
           </div>
 
-          <!-- Top FoodNoms Sub-Tab Bar -->
-          <div class="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#1C1C1E] mb-3">
+          <!-- Simple 3-View Switcher -->
+          <div class="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-[#1C1C1E] mb-3">
             ${[
               { id: 'today', label: 'Today' },
               { id: 'trends', label: 'Trends' },
               { id: 'nutrients', label: 'Nutrients' },
-              { id: 'log', label: 'Log / Sync' },
             ].map((t) => `
-              <button class="nutri-subtab-btn py-2 rounded-xl text-[11px] font-bold ${subTab === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-subtab="${t.id}">${t.label}</button>
+              <button class="nutri-subtab-btn py-2 rounded-xl text-xs font-bold ${subTab === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-subtab="${t.id}">${t.label}</button>
             `).join('')}
           </div>
 
           ${subTab === 'today' ? `
-            <!-- Apple Fitness Calorie & Macro Ring Card -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-2.5">
-              <div class="flex items-center gap-4">
-                <div class="relative w-20 h-20 shrink-0 flex items-center justify-center">
-                  <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#3A0D18" stroke-width="7" />
-                    <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#FA114F" stroke-width="7" stroke-linecap="round"
-                      stroke-dasharray="${cCal}" stroke-dashoffset="${cCal * (1 - calPct / 100)}" />
-                  </svg>
-                  <div class="absolute text-center">
-                    <div class="text-xs font-extrabold text-white leading-none">${Math.round(tot.cal)}</div>
-                    <div class="text-[9px] text-[#8E8E93]">/${g.calories}</div>
-                  </div>
-                </div>
-                <div class="flex-1 space-y-2">
-                  ${[
-                    { label: 'Protein', val: tot.p, goal: g.protein, color: '#92E82A', share: pShare },
-                    { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#00F5EA', share: cShare },
-                    { label: 'Fat', val: tot.f, goal: g.fat, color: '#BF5AF2', share: fShare },
-                  ].map((m) => {
-                    const pct = Math.min(100, Math.round((m.val / Math.max(1, m.goal)) * 100));
-                    return `
-                      <div>
-                        <div class="flex justify-between text-[11px] mb-0.5">
-                          <span class="text-[#8E8E93] font-medium">${m.label} <span class="text-[9px] text-[#636366]">(${m.share}%)</span></span>
-                          <span class="font-bold text-white tabular-nums">${Math.round(m.val)} / ${m.goal}g</span>
-                        </div>
-                        <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
-                          <div class="h-full rounded-full" style="width:${pct}%; background:${m.color}"></div>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
+            <!-- Calorie Ring + 3 Macro Bars -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-3 flex items-center gap-4">
+              <div class="relative w-20 h-20 shrink-0 flex items-center justify-center">
+                <svg class="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                  <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#3A0D18" stroke-width="7" />
+                  <circle cx="40" cy="40" r="${rCal}" fill="none" stroke="#FA114F" stroke-width="7" stroke-linecap="round"
+                    stroke-dasharray="${cCal}" stroke-dashoffset="${cCal * (1 - calPct / 100)}" />
+                </svg>
+                <div class="absolute text-center">
+                  <div class="text-xs font-extrabold text-white leading-none">${Math.round(tot.cal)}</div>
+                  <div class="text-[9px] text-[#8E8E93]">/${g.calories}</div>
                 </div>
               </div>
-              <!-- Macro Split Bar -->
-              <div class="mt-3 pt-2.5 border-t border-[#2C2C2E]">
-                <div class="flex justify-between text-[10px] text-[#8E8E93] mb-1">
-                  <span>Remaining: <strong class="text-white">${Math.round(g.calories - tot.cal)} Cal</strong></span>
-                  <span>Split: ${pShare}% P • ${cShare}% C • ${fShare}% F</span>
-                </div>
-                <div class="h-1.5 rounded-full overflow-hidden flex bg-[#2C2C2E]">
-                  <div style="width:${pShare}%; background:#92E82A"></div>
-                  <div style="width:${cShare}%; background:#00F5EA"></div>
-                  <div style="width:${fShare}%; background:#BF5AF2"></div>
-                </div>
+              <div class="flex-1 space-y-2">
+                ${[
+                  { label: 'Protein', val: tot.p, goal: g.protein, color: '#92E82A' },
+                  { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#00F5EA' },
+                  { label: 'Fat', val: tot.f, goal: g.fat, color: '#BF5AF2' },
+                ].map((m) => {
+                  const pct = Math.min(100, Math.round((m.val / Math.max(1, m.goal)) * 100));
+                  return `
+                    <div>
+                      <div class="flex justify-between text-[11px] mb-0.5">
+                        <span class="text-[#8E8E93] font-medium">${m.label}</span>
+                        <span class="font-bold text-white tabular-nums">${Math.round(m.val)} / ${m.goal}g</span>
+                      </div>
+                      <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
+                        <div class="h-full rounded-full" style="width:${pct}%; background:${m.color}"></div>
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
               </div>
             </div>
 
-            <!-- Key Daily Highlights Strip (Water, Caffeine, Fiber, Sodium, Added Sug, Sat Fat) -->
-            <div class="grid grid-cols-3 gap-2 mb-2.5">
+            <!-- Single Clean Row of 4 Key Stats -->
+            <div class="grid grid-cols-4 gap-2 mb-3 text-center">
               ${[
-                { label: 'Water', val: `${Math.round(tot.micros.water || 0)}`, unit: `/ ${g.water || 64} oz`, color: '#00F5EA' },
-                { label: 'Fiber', val: `${Math.round(tot.micros.fiber || 0)}`, unit: `/ ${g.fiber || 28}g`, color: '#92E82A' },
-                { label: 'Sodium', val: `${Math.round(tot.micros.sodium || 0)}`, unit: `/ ${g.sodium || 2300}mg`, color: '#FF9F0A' },
-                { label: 'Caffeine', val: `${Math.round(tot.micros.caffeine || 0)}`, unit: `/ ${g.caffeine || 400}mg`, color: '#FF9F0A' },
-                { label: 'Added Sug', val: `${Math.round(tot.micros.addedSug || 0)}`, unit: 'g', color: '#FA114F' },
-                { label: 'Sat. Fat', val: `${Math.round(tot.micros.satFat || 0)}`, unit: 'g', color: '#BF5AF2' },
+                { label: 'Water', val: `${Math.round(tot.micros.water || 0)} oz`, color: '#00F5EA' },
+                { label: 'Fiber', val: `${Math.round(tot.micros.fiber || 0)}g`, color: '#92E82A' },
+                { label: 'Sodium', val: `${Math.round(tot.micros.sodium || 0)}mg`, color: '#FF9F0A' },
+                { label: 'Caffeine', val: `${Math.round(tot.micros.caffeine || 0)}mg`, color: '#BF5AF2' },
               ].map((k) => `
-                <div class="bg-[#1C1C1E] rounded-2xl p-2.5">
-                  <div class="text-[10px] text-[#8E8E93] font-medium">${k.label}</div>
-                  <div class="text-sm font-bold tabular-nums mt-0.5" style="color:${k.color}">${k.val} <span class="text-[10px] text-[#636366] font-normal">${k.unit}</span></div>
+                <div class="bg-[#1C1C1E] rounded-2xl py-2.5 px-1">
+                  <div class="text-[10px] text-[#8E8E93]">${k.label}</div>
+                  <div class="text-xs font-bold tabular-nums mt-0.5" style="color:${k.color}">${k.val}</div>
                 </div>
               `).join('')}
             </div>
 
-            <!-- Daily Calorie Distribution by Meal Chart -->
-            ${orderedMeals.length ? `
-              <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="text-xs font-bold text-white">Daily Meal Distribution</div>
-                  <div class="text-[10px] text-[#8E8E93]">${logs.length} items</div>
-                </div>
-                <div class="space-y-2">
-                  ${orderedMeals.map((m) => {
-                    const mt = sumNutritionItems(mealBuckets[m]);
-                    const pct = Math.min(100, Math.round((mt.cal / Math.max(1, tot.cal)) * 100));
-                    return `
-                      <div>
-                        <div class="flex justify-between text-[11px] mb-0.5">
-                          <span class="text-white font-semibold">${m}</span>
-                          <span class="text-[#8E8E93] tabular-nums"><strong class="text-white">${Math.round(mt.cal)}</strong> Cal (${pct}%) • ${Math.round(mt.p)}P</span>
-                        </div>
-                        <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
-                          <div class="h-full rounded-full bg-[#FA114F]" style="width:${pct}%"></div>
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            ` : ''}
-
             <!-- Meal-Grouped Food Log -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
-              <div class="flex items-center justify-between mb-2">
-                <div class="text-sm font-bold text-white">Food Log • ${activeDate}</div>
+            <div class="bg-[#1C1C1E] rounded-[20px] p-4">
+              <div class="flex items-center justify-between mb-1">
+                <div class="text-sm font-bold text-white">Meals • ${activeDate}</div>
                 <div class="flex items-center gap-2">
                   ${activeDate !== latestLoggedDate && loggedDates.length ? `<button id="btnJumpLatestNutri" class="text-[11px] text-[#00F5EA] font-semibold">Latest (${latestLoggedDate.slice(5)})</button>` : ''}
-                  ${logs.length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear Day</button>` : ''}
+                  ${logs.length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear</button>` : ''}
                 </div>
               </div>
               ${orderedMeals.length ? orderedMeals.map((m) => {
                 const items = mealBuckets[m];
                 const mt = sumNutritionItems(items);
                 return `
-                  <div class="mt-2.5 pt-2 border-t border-[#2C2C2E]">
+                  <div class="mt-3 pt-2.5 border-t border-[#2C2C2E]">
                     <div class="flex items-center justify-between mb-1.5">
                       <span class="text-[11px] font-bold text-[#92E82A] uppercase tracking-wider">${m}</span>
-                      <span class="text-[10px] text-[#8E8E93] tabular-nums">${Math.round(mt.cal)} Cal • ${Math.round(mt.p)}P / ${Math.round(mt.c)}C / ${Math.round(mt.f)}F</span>
+                      <span class="text-[11px] text-[#8E8E93] tabular-nums">${Math.round(mt.cal)} Cal • ${Math.round(mt.p)}P / ${Math.round(mt.c)}C / ${Math.round(mt.f)}F</span>
                     </div>
                     ${items.map((item) => `
                       <div class="flex items-center justify-between py-1.5 text-xs">
                         <button class="food-detail-btn text-left flex-1 min-w-0 pr-2" data-idx="${item._idx}">
                           <div class="text-white font-semibold truncate">${item.name}${item.brand ? ` <span class="text-[#8E8E93] font-normal">(${item.brand})</span>` : ''}</div>
-                          <div class="text-[10px] text-[#8E8E93]">${[item.time, item.portion, `${Math.round(item.cal)} Cal`, `${Math.round(item.p)}P / ${Math.round(item.c)}C / ${Math.round(item.f)}F`].filter(Boolean).join(' • ')}</div>
+                          <div class="text-[10px] text-[#8E8E93]">${[item.portion, `${Math.round(item.cal)} Cal`, `${Math.round(item.p)}P / ${Math.round(item.c)}C / ${Math.round(item.f)}F`].filter(Boolean).join(' • ')}</div>
                         </button>
                         <button class="del-food-btn text-[#8E8E93] hover:text-[#FA114F] px-2 font-bold shrink-0" data-idx="${item._idx}">✕</button>
                       </div>
                     `).join('')}
                   </div>
                 `;
-              }).join('') : `<div class="text-xs text-[#636366] py-2">No meals logged on ${activeDate}. Tap <strong>Log / Sync</strong> to add food or import your Foodnoms CSV.</div>`}
+              }).join('') : `<div class="text-xs text-[#636366] py-3">No meals logged for ${activeDate}. Tap <strong>+ Log / Import</strong> above to add food or import your Foodnoms CSV.</div>`}
             </div>
 
           ` : subTab === 'trends' ? `
-            <!-- Weekly & Multi-Day Trends -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
-              <div class="flex items-center justify-between gap-2 mb-2.5">
+            <!-- Clean Weekly & Multi-Day Trends -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-3">
+              <div class="flex items-center justify-between gap-2 mb-3">
                 <div class="flex gap-1 bg-[#0B0B0D] p-1 rounded-xl">
                   ${[
                     { id: 7, label: '7D' },
@@ -1734,98 +1685,68 @@
                     <button class="nutri-range-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${String(state.nutrition.trendRange) === String(r.id) ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-range="${r.id}">${r.label}</button>
                   `).join('')}
                 </div>
-                <div class="text-[10px] text-[#8E8E93] tabular-nums">${trendDates[0]?.slice(5)} → ${trendDates[trendDates.length - 1]?.slice(5)}</div>
-              </div>
-
-              <!-- Metric Pills -->
-              <div class="flex gap-1.5 overflow-x-auto pb-2 mb-2">
-                ${[
-                  { id: 'cal', label: 'Calories' },
-                  { id: 'p', label: 'Protein' },
-                  { id: 'c', label: 'Carbs' },
-                  { id: 'f', label: 'Fat' },
-                  { id: 'fiber', label: 'Fiber' },
-                  { id: 'sodium', label: 'Sodium' },
-                  { id: 'water', label: 'Water' },
-                  { id: 'caffeine', label: 'Caffeine' },
-                ].map((m) => `
-                  <button class="nutri-metric-btn px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 ${metricKey === m.id ? 'bg-[#2C2C2E] text-white border border-[#92E82A]/60' : 'bg-[#0B0B0D] text-[#8E8E93]'}" data-metric="${m.id}">${m.label}</button>
-                `).join('')}
+                <div class="flex gap-1">
+                  ${[
+                    { id: 'cal', label: 'Cal' },
+                    { id: 'p', label: 'P' },
+                    { id: 'c', label: 'C' },
+                    { id: 'f', label: 'F' },
+                  ].map((m) => `
+                    <button class="nutri-metric-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${metricKey === m.id ? 'bg-[#2C2C2E] text-white' : 'text-[#8E8E93]'}" data-metric="${m.id}">${m.label}</button>
+                  `).join('')}
+                </div>
               </div>
 
               ${renderTrendChartSvg()}
 
-              <div class="grid grid-cols-3 gap-2 mt-2 pt-2.5 border-t border-[#2C2C2E] text-center">
+              <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-[#2C2C2E] text-center">
                 <div>
                   <div class="text-[10px] text-[#8E8E93]">Daily Avg</div>
-                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(avgVal)} <span class="text-[10px] text-[#8E8E93]">${metricMeta.unit}</span></div>
+                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(avgVal)} ${metricMeta.unit}</div>
                 </div>
                 <div>
                   <div class="text-[10px] text-[#8E8E93]">Period Total</div>
-                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(totalVal).toLocaleString()} <span class="text-[10px] text-[#8E8E93]">${metricMeta.unit}</span></div>
+                  <div class="text-sm font-bold text-white tabular-nums">${Math.round(totalVal).toLocaleString()}</div>
                 </div>
                 <div>
                   <div class="text-[10px] text-[#8E8E93]">Days Logged</div>
-                  <div class="text-sm font-bold text-[#92E82A] tabular-nums">${nonEmptySeries.length}/${trendDates.length} <span class="text-[10px] text-[#8E8E93]">(${onTargetCount} hit)</span></div>
+                  <div class="text-sm font-bold text-[#92E82A] tabular-nums">${nonEmptySeries.length}/${trendDates.length}</div>
                 </div>
               </div>
             </div>
 
-            <!-- Macro Split Stacked Bar Chart -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
-              <div class="text-xs font-bold text-white mb-2">Macro Ratio Trend (Protein / Carbs / Fat)</div>
-              <div class="space-y-1.5">
-                ${trendSeries.slice(-7).map((pt) => {
-                  const pc = pt.tot.p * 4, cc = pt.tot.c * 4, fc = pt.tot.f * 9;
-                  const s = Math.max(1, pc + cc + fc);
-                  const pp = pt.hasData ? Math.round((pc / s) * 100) : 0;
-                  const cp = pt.hasData ? Math.round((cc / s) * 100) : 0;
-                  const fp = pt.hasData ? Math.max(0, 100 - pp - cp) : 0;
-                  return `
-                    <button class="trend-bar-hit w-full flex items-center gap-2 text-left" data-date="${pt.date}">
-                      <span class="w-11 text-[10px] text-[#8E8E93] tabular-nums">${pt.date.slice(5)}</span>
-                      <div class="flex-1 h-2.5 rounded-full bg-[#2C2C2E] overflow-hidden flex">
-                        ${pt.hasData ? `<div style="width:${pp}%; background:#92E82A"></div><div style="width:${cp}%; background:#00F5EA"></div><div style="width:${fp}%; background:#BF5AF2"></div>` : ''}
-                      </div>
-                      <span class="w-20 text-right text-[10px] text-[#8E8E93] tabular-nums">${pt.hasData ? `${pp}/${cp}/${fp}%` : '—'}</span>
-                    </button>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-
-            <!-- Daily Breakdown Table -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
-              <div class="text-xs font-bold text-white mb-2">Daily Breakdown (Tap a Day to View)</div>
-              <div class="space-y-1 max-h-64 overflow-y-auto">
+            <!-- Daily Breakdown List -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-4">
+              <div class="text-xs font-bold text-white mb-2">Daily Breakdown</div>
+              <div class="space-y-1 max-h-72 overflow-y-auto">
                 ${trendSeries.slice().reverse().map((pt) => {
                   const delta = Math.round(pt.tot.cal - g.calories);
                   return `
-                    <button class="trend-bar-hit w-full flex items-center justify-between py-1.5 px-2 rounded-xl ${pt.date === activeDate ? 'bg-[#2C2C2E]' : 'hover:bg-[#2C2C2E]/50'} text-[11px]" data-date="${pt.date}">
+                    <button class="trend-bar-hit w-full flex items-center justify-between py-2 px-2.5 rounded-xl ${pt.date === activeDate ? 'bg-[#2C2C2E]' : ''} text-xs" data-date="${pt.date}">
                       <span class="font-semibold text-white tabular-nums">${pt.date}</span>
-                      <span class="text-[#8E8E93] tabular-nums">${pt.hasData ? `${Math.round(pt.tot.cal)} Cal • ${Math.round(pt.tot.p)}P / ${Math.round(pt.tot.c)}C / ${Math.round(pt.tot.f)}F` : 'No entries'}</span>
-                      <span class="font-bold tabular-nums ${!pt.hasData ? 'text-[#636366]' : (delta > 150 ? 'text-[#FA114F]' : 'text-[#92E82A]')}">${pt.hasData ? `${delta >= 0 ? '+' : ''}${delta}` : '—'}</span>
+                      <span class="text-[#8E8E93] tabular-nums">${pt.hasData ? `${Math.round(pt.tot.cal)} Cal • ${Math.round(pt.tot.p)}P / ${Math.round(pt.tot.c)}C / ${Math.round(pt.tot.f)}F` : '—'}</span>
+                      <span class="font-bold tabular-nums ${!pt.hasData ? 'text-[#636366]' : (delta > 150 ? 'text-[#FA114F]' : 'text-[#92E82A]')}">${pt.hasData ? `${delta >= 0 ? '+' : ''}${delta}` : ''}</span>
                     </button>
                   `;
                 }).join('')}
               </div>
             </div>
 
-          ` : subTab === 'nutrients' ? `
-            <!-- Full FoodNoms Micronutrient & Health Dashboard -->
-            <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-2.5 mb-2.5">
-              <div class="text-xs font-semibold text-white">All FoodNoms Nutrients (40+)</div>
+          ` : `
+            <!-- Clean Micronutrients View -->
+            <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-2.5 mb-3">
+              <div class="text-xs font-semibold text-white pl-1">Vitamins, Minerals & Fats</div>
               <div class="flex gap-1 bg-[#0B0B0D] p-1 rounded-xl">
-                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === 'day' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="day">Day (${activeDate.slice(5)})</button>
-                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === '7d' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="7d">7-Day Avg</button>
+                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === 'day' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="day">Day</button>
+                <button class="nutri-scope-btn px-2.5 py-1 rounded-lg text-[11px] font-bold ${nutScope === '7d' ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-scope="7d">7D Avg</button>
               </div>
             </div>
 
             ${['Carbs & Fats', 'Hydration & Stimulants', 'Minerals', 'Vitamins'].map((cat) => {
               const fields = FOODNOMS_MICRO_SCHEMA.filter((m) => m.cat === cat);
               return `
-                <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
-                  <div class="text-xs font-bold text-[#92E82A] uppercase tracking-wider mb-2.5">${cat}</div>
+                <div class="bg-[#1C1C1E] rounded-[20px] p-4 mb-2.5">
+                  <div class="text-[11px] font-bold text-[#92E82A] uppercase tracking-wider mb-2.5">${cat}</div>
                   <div class="space-y-2.5">
                     ${fields.map((m) => {
                       const val = scopeTot.micros[m.key] || 0;
@@ -1836,9 +1757,7 @@
                         <div>
                           <div class="flex justify-between text-[11px] mb-1">
                             <span class="text-white font-medium">${m.label}</span>
-                            <span class="tabular-nums font-bold ${overLimit ? 'text-[#FA114F]' : 'text-white'}">
-                              ${dispVal} <span class="text-[#8E8E93] font-normal">${m.unit}${m.goal ? ` / ${m.goal} ${m.unit}` : ''}</span>
-                            </span>
+                            <span class="tabular-nums font-bold ${overLimit ? 'text-[#FA114F]' : 'text-white'}">${dispVal} <span class="text-[#8E8E93] font-normal">${m.unit}${m.goal ? ` / ${m.goal}` : ''}</span></span>
                           </div>
                           <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden">
                             <div class="h-full rounded-full" style="width:${pct}%; background:${overLimit ? '#FA114F' : m.color}"></div>
@@ -1850,94 +1769,6 @@
                 </div>
               `;
             }).join('')}
-
-          ` : `
-            <!-- Log / Sync View -->
-            <div class="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#1C1C1E] mb-3">
-              ${[
-                { id: 'quick', label: 'Quick Add' },
-                { id: 'search', label: 'USDA DB' },
-                { id: 'ai', label: 'Ask AI' },
-                { id: 'saved', label: 'Saved' },
-              ].map((t) => `
-                <button class="nutri-mode-btn py-2 rounded-xl text-[11px] font-bold ${state.nutrition.mode === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-mode="${t.id}">${t.label}</button>
-              `).join('')}
-            </div>
-
-            <div class="grid grid-cols-3 gap-1.5 mb-3">
-              ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `
-                <button class="nutri-meal-btn py-1.5 rounded-full text-[11px] font-bold ${state.nutrition.mealTarget === m ? 'bg-[#2C2C2E] text-[#92E82A] border border-[#92E82A]/40' : 'bg-[#1C1C1E] text-[#8E8E93]'}" data-meal="${m}">${m}</button>
-              `).join('')}
-            </div>
-
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-3">
-              ${state.nutrition.mode === 'quick' ? `
-                <div class="space-y-2">
-                  <input id="qFoodName" type="text" placeholder="Food or meal name" class="num-input text-left px-3" />
-                  <div class="grid grid-cols-4 gap-1.5">
-                    <input id="qCal" type="number" placeholder="kcal" class="num-input" />
-                    <input id="qPro" type="number" placeholder="P (g)" class="num-input" />
-                    <input id="qCarb" type="number" placeholder="C (g)" class="num-input" />
-                    <input id="qFat" type="number" placeholder="F (g)" class="num-input" />
-                  </div>
-                  <div class="grid grid-cols-4 gap-1.5">
-                    <input id="qFiber" type="number" placeholder="Fiber g" class="num-input" />
-                    <input id="qSodium" type="number" placeholder="Sod mg" class="num-input" />
-                    <input id="qWater" type="number" placeholder="H2O oz" class="num-input" />
-                    <input id="qCaff" type="number" placeholder="Caff mg" class="num-input" />
-                  </div>
-                  <button id="btnLogQuickFood" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Log to ${state.nutrition.mealTarget}</button>
-                </div>
-              ` : state.nutrition.mode === 'search' ? `
-                <div class="space-y-2">
-                  <input id="usdaSearchInp" type="text" placeholder="Filter USDA grounded foods..." class="num-input text-left px-3" />
-                  <div id="usdaResultsList" class="space-y-1.5 max-h-48 overflow-y-auto">
-                    ${USDA_GROUNDED_FOODS.map((f, idx) => `
-                      <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
-                        <div>
-                          <div class="font-bold text-white">${f.name}</div>
-                          <div class="text-[10px] text-[#8E8E93]">Per 100g: ${f.per100.cal} kcal • ${f.per100.p}P / ${f.per100.c}C / ${f.per100.f}F</div>
-                        </div>
-                        <button class="add-usda-food px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">+ 100g</button>
-                      </div>
-                    `).join('')}
-                  </div>
-                </div>
-              ` : state.nutrition.mode === 'ai' ? `
-                <div class="space-y-2">
-                  <textarea id="aiMealPrompt" rows="2" placeholder="Describe your meal (e.g. 200g grilled chicken, 150g white rice, 1 tbsp olive oil)..." class="w-full bg-[#2C2C2E] text-white text-xs rounded-xl p-3 outline-none"></textarea>
-                  <button id="btnRunAiParse" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">
-                    ${state.nutrition.geminiKey ? 'Analyze with Gemini 2.5 Flash' : 'Smart Parse (Demo / Add Key in Targets)'}
-                  </button>
-                </div>
-              ` : `
-                <div class="space-y-1.5">
-                  ${SAVED_MEALS_PRESETS.map((sm, idx) => `
-                    <div class="flex items-center justify-between bg-[#2C2C2E]/70 rounded-xl p-2.5 text-xs">
-                      <div>
-                        <div class="font-bold text-white">${sm.name}</div>
-                        <div class="text-[10px] text-[#8E8E93]">${sm.cal} kcal • ${sm.p}P / ${sm.c}C / ${sm.f}F</div>
-                      </div>
-                      <button class="add-saved-meal px-2.5 py-1.5 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-[11px]" data-idx="${idx}">Log</button>
-                    </div>
-                  `).join('')}
-                </div>
-              `}
-            </div>
-
-            <!-- Nutrition-Only Backup & Restore -->
-            <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
-              <div class="text-[10px] font-bold text-[#92E82A] mb-1">NUTRITION BACKUP & RESTORE</div>
-              <div class="text-xs text-[#8E8E93] mb-2.5">Import your full <strong>Foodnoms Food Log.csv</strong> (all 51 columns & dates) or export Nutrition backups separately from training.</div>
-              <div class="grid grid-cols-3 gap-2">
-                <label class="py-2.5 px-2 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs text-center cursor-pointer">
-                  Import CSV/JSON
-                  <input id="inpImportNutrition" type="file" accept=".json,.csv,text/csv,application/json" class="hidden" />
-                </label>
-                <button id="btnExportNutritionCsv" class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs">Export CSV</button>
-                <button id="btnExportNutrition" class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs">Export JSON</button>
-              </div>
-            </div>
           `}
         `;
 
@@ -1959,7 +1790,174 @@
           state.nutrition.selectedDate = latestLoggedDate; render();
         });
 
-        // Wire Today handlers
+        // Clean Log / Gemini / Foodnoms Import Modal
+        document.getElementById('btnOpenLogModal').addEventListener('click', () => {
+          const openLogSheet = () => {
+            openModal('Log Food or Import Data', `
+              <div class="space-y-3 text-xs">
+                <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#0B0B0D]">
+                  ${[
+                    { id: 'ai', label: 'Gemini AI' },
+                    { id: 'quick', label: 'Quick Add' },
+                    { id: 'sync', label: 'Import / Export' },
+                  ].map((t) => `
+                    <button class="modal-log-mode py-2 rounded-lg font-bold ${state.nutrition.mode === t.id ? 'bg-[#92E82A] text-[#000000]' : 'text-[#8E8E93]'}" data-mode="${t.id}">${t.label}</button>
+                  `).join('')}
+                </div>
+
+                ${state.nutrition.mode === 'ai' ? `
+                  <div class="space-y-2.5">
+                    <div class="text-[#8E8E93]">Describe any meal and <strong>Gemini 2.5 Flash</strong> will estimate calories, macros, fiber, sodium & water.</div>
+                    <select id="mMealSel" class="num-input text-left px-3">
+                      ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `<option ${state.nutrition.mealTarget === m ? 'selected' : ''}>${m}</option>`).join('')}
+                    </select>
+                    <textarea id="aiMealPrompt" rows="3" placeholder="e.g. 2 scrambled eggs, 2 slices sourdough toast, 1 tbsp butter, 12oz black coffee" class="w-full bg-[#2C2C2E] text-white text-xs rounded-xl p-3 outline-none"></textarea>
+                    ${!state.nutrition.geminiKey ? `<input id="mGeminiInlineKey" type="password" placeholder="Paste Gemini API Key (saved locally)" class="num-input text-left px-3" />` : ''}
+                    <button id="btnRunAiParse" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Parse Meal with Gemini AI</button>
+                  </div>
+                ` : state.nutrition.mode === 'quick' ? `
+                  <div class="space-y-2">
+                    <select id="mMealSelQ" class="num-input text-left px-3">
+                      ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `<option ${state.nutrition.mealTarget === m ? 'selected' : ''}>${m}</option>`).join('')}
+                    </select>
+                    <input id="qFoodName" type="text" placeholder="Food name" class="num-input text-left px-3" />
+                    <div class="grid grid-cols-4 gap-1.5">
+                      <input id="qCal" type="number" placeholder="Cal" class="num-input" />
+                      <input id="qPro" type="number" placeholder="P (g)" class="num-input" />
+                      <input id="qCarb" type="number" placeholder="C (g)" class="num-input" />
+                      <input id="qFat" type="number" placeholder="F (g)" class="num-input" />
+                    </div>
+                    <button id="btnLogQuickFood" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Add to ${activeDate}</button>
+                  </div>
+                ` : `
+                  <div class="space-y-2.5">
+                    <div class="text-[#8E8E93]">Import your <strong>Foodnoms Food Log.csv</strong> (all 51 columns & dates) or export your Nutrition data separately from Training.</div>
+                    <label class="block w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-center cursor-pointer">
+                      Import Foodnoms CSV or JSON
+                      <input id="inpImportNutrition" type="file" accept=".json,.csv,text/csv,application/json" class="hidden" />
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                      <button id="btnExportNutritionCsv" class="py-2.5 rounded-xl bg-[#2C2C2E] text-white font-bold">Export CSV</button>
+                      <button id="btnExportNutrition" class="py-2.5 rounded-xl bg-[#2C2C2E] text-white font-bold">Export JSON</button>
+                    </div>
+                  </div>
+                `}
+              </div>
+            `);
+
+            document.querySelectorAll('.modal-log-mode').forEach((b) => b.addEventListener('click', () => {
+              state.nutrition.mode = b.dataset.mode;
+              openLogSheet();
+            }));
+
+            const aiBtn = document.getElementById('btnRunAiParse');
+            if (aiBtn) aiBtn.addEventListener('click', async () => {
+              const inlineKey = document.getElementById('mGeminiInlineKey');
+              if (inlineKey && inlineKey.value.trim()) state.nutrition.geminiKey = inlineKey.value.trim();
+              state.nutrition.mealTarget = document.getElementById('mMealSel').value;
+              const prompt = document.getElementById('aiMealPrompt').value.trim();
+              if (!prompt) return;
+              if (state.nutrition.geminiKey) {
+                aiBtn.textContent = 'Analyzing with Gemini...';
+                try {
+                  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      contents: [{ parts: [{ text: `Return JSON array of {name, portion, cal, p, c, f, fiber, sodium, water, caffeine} for: "${prompt}"` }] }],
+                      generationConfig: { temperature: 0.15, responseMimeType: 'application/json' }
+                    })
+                  });
+                  const data = await res.json();
+                  const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+                  const items = Array.isArray(parsed) ? parsed : [parsed];
+                  items.forEach((it) => getActiveNutritionLogs().unshift({
+                    name: it.name || 'Meal Item',
+                    portion: it.portion || '',
+                    meal: state.nutrition.mealTarget,
+                    cal: Number(it.cal) || 0, p: Number(it.p) || 0, c: Number(it.c) || 0, f: Number(it.f) || 0,
+                    micros: { fiber: Number(it.fiber) || 0, sodium: Number(it.sodium) || 0, water: Number(it.water) || 0, caffeine: Number(it.caffeine) || 0 }
+                  }));
+                  document.getElementById('modalOverlay').classList.add('hidden');
+                  persistState(); render();
+                  return;
+                } catch (err) {
+                  openModal('Gemini API Error', '<div class="text-[#FA114F] text-xs">Could not reach Gemini API. Check your API key in Settings (⚙).</div>');
+                  return;
+                }
+              }
+              const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
+              const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
+              list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} }));
+              document.getElementById('modalOverlay').classList.add('hidden');
+              persistState(); render();
+            });
+
+            const qBtn = document.getElementById('btnLogQuickFood');
+            if (qBtn) qBtn.addEventListener('click', () => {
+              state.nutrition.mealTarget = document.getElementById('mMealSelQ').value;
+              const name = document.getElementById('qFoodName').value.trim() || 'Quick Meal';
+              const cal = Number(document.getElementById('qCal').value) || 0;
+              const p = Number(document.getElementById('qPro').value) || 0;
+              const c = Number(document.getElementById('qCarb').value) || 0;
+              const f = Number(document.getElementById('qFat').value) || 0;
+              if (!cal && !p && !c && !f) return;
+              getActiveNutritionLogs().unshift({ name, meal: state.nutrition.mealTarget, cal, p, c, f, micros: {} });
+              document.getElementById('modalOverlay').classList.add('hidden');
+              persistState(); render();
+            });
+
+            const expJsonBtn = document.getElementById('btnExportNutrition');
+            if (expJsonBtn) expJsonBtn.addEventListener('click', () => {
+              const payload = { type: 'apex-hybrid-nutrition', version: 2, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
+              const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = `apex-hybrid-nutrition-${new Date().toISOString().slice(0, 10)}.json`;
+              document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            });
+            const expCsvBtn = document.getElementById('btnExportNutritionCsv');
+            if (expCsvBtn) expCsvBtn.addEventListener('click', () => {
+              const blob = new Blob([exportFoodnomsCsv()], { type: 'text/csv' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = `apex-hybrid-food-log-${new Date().toISOString().slice(0, 10)}.csv`;
+              document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+            });
+            const impInput = document.getElementById('inpImportNutrition');
+            if (impInput) impInput.addEventListener('change', (e) => {
+              const file = e.target.files && e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => {
+                const raw = String(reader.result || '');
+                if (file.name.toLowerCase().endsWith('.csv') || raw.trim().startsWith('"day",')) {
+                  const res = importFoodnomsCsv(raw);
+                  if (res.count === 0) { openModal('Import Error', '<div class="text-[#FA114F]">Could not parse Foodnoms CSV columns.</div>'); return; }
+                  state.nutrition.subTab = 'trends';
+                  persistState(); render();
+                  openModal('Foodnoms CSV Imported', `<div class="text-white font-semibold">Imported ${res.count} food entries across ${res.days} day(s). Showing ${res.latestDate}.</div>`);
+                  return;
+                }
+                try {
+                  const data = JSON.parse(raw);
+                  const nutri = data.nutrition || (data.goals ? data : null);
+                  if (!nutri) throw new Error('Missing nutrition data');
+                  state.nutrition = nutri;
+                  persistState(); render();
+                  openModal('Nutrition Restored', '<div class="text-white font-semibold">Restored nutrition logs and macro targets.</div>');
+                } catch (err) {
+                  openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition JSON or CSV file.</div>');
+                }
+              };
+              reader.readAsText(file);
+            });
+          };
+          if (!['ai', 'quick', 'sync'].includes(state.nutrition.mode)) state.nutrition.mode = 'sync';
+          openLogSheet();
+        });
+
+        // Wire Today / Trends / Nutrients interactions
         root.querySelectorAll('.food-detail-btn').forEach((b) => b.addEventListener('click', () => {
           const item = getActiveNutritionLogs()[Number(b.dataset.idx)];
           if (!item) return;
@@ -1988,12 +1986,11 @@
           `);
         }));
         root.querySelectorAll('.del-food-btn').forEach((b) => b.addEventListener('click', () => {
-          getActiveNutritionLogs().splice(Number(b.dataset.idx), 1); render();
+          getActiveNutritionLogs().splice(Number(b.dataset.idx), 1); persistState(); render();
         }));
         const clrBtn = document.getElementById('btnClearFoodLog');
-        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logsByDate[activeDate] = []; render(); });
+        if (clrBtn) clrBtn.addEventListener('click', () => { state.nutrition.logsByDate[activeDate] = []; persistState(); render(); });
 
-        // Wire Trends handlers
         root.querySelectorAll('.nutri-range-btn').forEach((b) => b.addEventListener('click', () => {
           state.nutrition.trendRange = b.dataset.range === 'all' ? 'all' : Number(b.dataset.range); render();
         }));
@@ -2005,147 +2002,21 @@
           state.nutrition.subTab = 'today';
           render();
         }));
-
-        // Wire Nutrients handlers
         root.querySelectorAll('.nutri-scope-btn').forEach((b) => b.addEventListener('click', () => {
           state.nutrition.nutrientScope = b.dataset.scope; render();
         }));
 
-        // Wire Log / Sync handlers
-        root.querySelectorAll('.nutri-mode-btn').forEach((b) => b.addEventListener('click', () => {
-          state.nutrition.mode = b.dataset.mode; render();
-        }));
-        root.querySelectorAll('.nutri-meal-btn').forEach((b) => b.addEventListener('click', () => {
-          state.nutrition.mealTarget = b.dataset.meal; render();
-        }));
-        const qBtn = document.getElementById('btnLogQuickFood');
-        if (qBtn) qBtn.addEventListener('click', () => {
-          const name = document.getElementById('qFoodName').value.trim() || 'Quick Meal';
-          const cal = Number(document.getElementById('qCal').value) || 0;
-          const p = Number(document.getElementById('qPro').value) || 0;
-          const c = Number(document.getElementById('qCarb').value) || 0;
-          const f = Number(document.getElementById('qFat').value) || 0;
-          const fiber = Number(document.getElementById('qFiber')?.value) || 0;
-          const sodium = Number(document.getElementById('qSodium')?.value) || 0;
-          const water = Number(document.getElementById('qWater')?.value) || 0;
-          const caffeine = Number(document.getElementById('qCaff')?.value) || 0;
-          if (!cal && !p && !c && !f && !water && !caffeine) return;
-          getActiveNutritionLogs().unshift({
-            name, meal: state.nutrition.mealTarget, cal, p, c, f,
-            micros: { fiber, sodium, water, caffeine }
-          });
-          state.nutrition.subTab = 'today';
-          render();
-        });
-        root.querySelectorAll('.add-usda-food').forEach((b) => b.addEventListener('click', () => {
-          const f = USDA_GROUNDED_FOODS[Number(b.dataset.idx)];
-          getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} });
-          state.nutrition.subTab = 'today';
-          render();
-        }));
-        root.querySelectorAll('.add-saved-meal').forEach((b) => b.addEventListener('click', () => {
-          const sm = SAVED_MEALS_PRESETS[Number(b.dataset.idx)];
-          getActiveNutritionLogs().unshift({ name: sm.name, meal: state.nutrition.mealTarget, cal: sm.cal, p: sm.p, c: sm.c, f: sm.f, micros: {} });
-          state.nutrition.subTab = 'today';
-          render();
-        }));
-        const aiBtn = document.getElementById('btnRunAiParse');
-        if (aiBtn) aiBtn.addEventListener('click', async () => {
-          const prompt = document.getElementById('aiMealPrompt').value.trim();
-          if (!prompt) return;
-          if (state.nutrition.geminiKey) {
-            try {
-              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ parts: [{ text: `Return JSON array of {name, cal, p, c, f} for meal: "${prompt}"` }] }],
-                  generationConfig: { temperature: 0.15, responseMimeType: 'application/json' }
-                })
-              });
-              const data = await res.json();
-              const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-              const items = Array.isArray(parsed) ? parsed : [parsed];
-              items.forEach((it) => getActiveNutritionLogs().unshift({ name: it.name, meal: state.nutrition.mealTarget, cal: Number(it.cal)||0, p: Number(it.p)||0, c: Number(it.c)||0, f: Number(it.f)||0, micros: {} }));
-              state.nutrition.subTab = 'today';
-              render();
-              return;
-            } catch (err) {
-              openModal('Gemini API Error', '<div class="text-[#FA114F] text-xs">Could not reach Gemini API. Check your key or use USDA DB / Quick Add.</div>');
-              return;
-            }
-          }
-          const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
-          const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
-          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} }));
-          state.nutrition.subTab = 'today';
-          render();
-        });
-
-        const expJsonBtn = document.getElementById('btnExportNutrition');
-        if (expJsonBtn) expJsonBtn.addEventListener('click', () => {
-          const payload = { type: 'apex-hybrid-nutrition', version: 2, exportedAt: new Date().toISOString(), nutrition: state.nutrition };
-          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = `apex-hybrid-nutrition-${new Date().toISOString().slice(0, 10)}.json`;
-          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        });
-        const expCsvBtn = document.getElementById('btnExportNutritionCsv');
-        if (expCsvBtn) expCsvBtn.addEventListener('click', () => {
-          const blob = new Blob([exportFoodnomsCsv()], { type: 'text/csv' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = `apex-hybrid-food-log-${new Date().toISOString().slice(0, 10)}.csv`;
-          document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-        });
-        const impInput = document.getElementById('inpImportNutrition');
-        if (impInput) impInput.addEventListener('change', (e) => {
-          const file = e.target.files && e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = () => {
-            const raw = String(reader.result || '');
-            if (file.name.toLowerCase().endsWith('.csv') || raw.trim().startsWith('"day",')) {
-              const res = importFoodnomsCsv(raw);
-              if (res.count === 0) {
-                openModal('Import Error', '<div class="text-[#FA114F]">Could not parse Foodnoms CSV columns.</div>');
-                return;
-              }
-              state.nutrition.subTab = 'trends';
-              persistState();
-              render();
-              openModal('Foodnoms CSV Imported', `<div class="text-white font-semibold">Imported ${res.count} food entries across ${res.days} day(s) with all 51 nutrient columns. Showing ${res.latestDate}.</div>`);
-              return;
-            }
-            try {
-              const data = JSON.parse(raw);
-              const nutri = data.nutrition || (data.goals ? data : null);
-              if (!nutri) throw new Error('Missing nutrition data');
-              state.nutrition = nutri;
-              persistState();
-              render();
-              openModal('Nutrition Restored', '<div class="text-white font-semibold">Restored nutrition logs and macro targets.</div>');
-            } catch (err) {
-              openModal('Import Error', '<div class="text-[#FA114F]">Invalid nutrition JSON or CSV file.</div>');
-            }
-          };
-          reader.readAsText(file);
-        });
-
         document.getElementById('btnMacroGoals').addEventListener('click', () => {
-          openModal('Nutrition Targets & AI Key', `
+          openModal('Nutrition Targets & Gemini Key', `
             <div class="space-y-2.5">
               <div class="grid grid-cols-2 gap-2">
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">CALORIES</label><input id="gCal" type="number" value="${g.calories}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">PROTEIN (G)</label><input id="gPro" type="number" value="${g.protein}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">CARBS (G)</label><input id="gCarb" type="number" value="${g.carbs}" class="num-input mt-1" /></div>
                 <div><label class="text-[10px] text-[#8E8E93] font-bold">FAT (G)</label><input id="gFat" type="number" value="${g.fat}" class="num-input mt-1" /></div>
-                <div><label class="text-[10px] text-[#8E8E93] font-bold">FIBER (G)</label><input id="gFib" type="number" value="${g.fiber || 28}" class="num-input mt-1" /></div>
-                <div><label class="text-[10px] text-[#8E8E93] font-bold">WATER (FL OZ)</label><input id="gWat" type="number" value="${g.water || 64}" class="num-input mt-1" /></div>
               </div>
-              <div><label class="text-[10px] text-[#8E8E93] font-bold">GEMINI API KEY (OPTIONAL)</label><input id="gGeminiKey" type="password" value="${state.nutrition.geminiKey}" placeholder="AIza..." class="num-input text-left px-3 mt-1" /></div>
-              <button id="btnSaveGoals" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Save Targets</button>
+              <div><label class="text-[10px] text-[#8E8E93] font-bold">GEMINI API KEY (SAVED LOCALLY)</label><input id="gGeminiKey" type="password" value="${state.nutrition.geminiKey}" placeholder="AIza..." class="num-input text-left px-3 mt-1" /></div>
+              <button id="btnSaveGoals" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Save Settings</button>
             </div>
           `);
           document.getElementById('btnSaveGoals').addEventListener('click', () => {
@@ -2154,14 +2025,11 @@
               protein: Number(document.getElementById('gPro').value) || 165,
               carbs: Number(document.getElementById('gCarb').value) || 230,
               fat: Number(document.getElementById('gFat').value) || 70,
-              fiber: Number(document.getElementById('gFib').value) || 28,
-              water: Number(document.getElementById('gWat').value) || 64,
-              sodium: g.sodium || 2300,
-              caffeine: g.caffeine || 400,
+              fiber: g.fiber || 28, water: g.water || 64, sodium: g.sodium || 2300, caffeine: g.caffeine || 400,
             };
             state.nutrition.geminiKey = document.getElementById('gGeminiKey').value.trim();
             document.getElementById('modalOverlay').classList.add('hidden');
-            render();
+            persistState(); render();
           });
         });
       }
@@ -2170,11 +2038,21 @@
         root.innerHTML = `
           <div class="flex items-center justify-between mb-3">
             <div>
-              <div class="text-xl font-bold text-white">Program & Import</div>
-              <div class="text-xs text-[#8E8E93]">6-Day Hybrid PPL • Weeks 1–8 + Deload</div>
+              <div class="text-xl font-bold text-white">Program • Round ${state.roundNumber}</div>
+              <div class="text-xs text-[#8E8E93]">6-Day Pull / Push / Legs • Weeks 1–8 + Deload</div>
             </div>
-            <button id="btnMockImport" class="px-3 py-2 rounded-lg bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Import CSV</button>
+            <button id="btnFinishRound" class="px-3 py-2 rounded-full bg-[#1C1C1E] border border-[#92E82A]/50 text-[#92E82A] font-bold text-xs">Finish Round</button>
           </div>
+
+          <!-- Week Selector Pills -->
+          <div class="flex gap-1.5 overflow-x-auto pb-2 mb-3">
+            ${WEEKS_META.map((w) => `
+              <button class="prog-week-btn px-3 py-1.5 rounded-full text-xs font-bold shrink-0 ${state.selectedWeek === w.num ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#1C1C1E] text-[#8E8E93]'}" data-w="${w.num}">
+                ${w.num === 9 ? 'Deload' : `Wk ${w.num}`}
+              </button>
+            `).join('')}
+          </div>
+
           <div class="grid grid-cols-2 gap-2.5">
           ${getDaysForWeek(state.selectedWeek).map((d, idx) => {
             const done = state.completedDays.includes(idx);
@@ -2196,9 +2074,23 @@
           }).join('')}
           </div>
         `;
+        root.querySelectorAll('.prog-week-btn').forEach((b) => b.addEventListener('click', () => {
+          state.selectedWeek = Number(b.dataset.w);
+          render();
+        }));
         root.querySelectorAll('.start-day-btn').forEach((b) => b.addEventListener('click', () => startWorkoutForDay(Number(b.dataset.idx))));
-        document.getElementById('btnMockImport').addEventListener('click', () => {
-          openModal('Spreadsheet Import Validation', `<div class="text-xs text-white">Detected columns: <span class="text-[#92E82A]">EXERCISE, SETS, REPS, REST (MINS), INTENSITY, SET 1–3</span>. Blank cells and unconfirmed SET 1–3 columns are flagged for review.</div>`);
+        document.getElementById('btnFinishRound').addEventListener('click', () => {
+          openModal(`Save Round ${state.roundNumber} Maxes?`, `
+            <div class="space-y-3 text-xs">
+              <div class="text-[#E5E5EA]">This will snapshot your current peak weights as <strong>Round ${state.roundNumber} Maxes</strong> and reset your schedule to <strong>Round ${state.roundNumber + 1} • Week 1</strong> so you know where to start from.</div>
+              <button id="btnConfirmRoundProg" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Save Maxes & Start Round ${state.roundNumber + 1}</button>
+            </div>
+          `);
+          document.getElementById('btnConfirmRoundProg').addEventListener('click', () => {
+            finishTrainingRound(`Week ${state.selectedWeek}`);
+            document.getElementById('modalOverlay').classList.add('hidden');
+            render();
+          });
         });
       }
 
@@ -2231,6 +2123,23 @@
               }).join('') : '<div class="text-xs text-[#636366]">No peak weights logged yet.</div>'}
             </div>
           </div>
+          <div class="bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3.5 mb-3">
+            <div class="text-sm font-bold text-white mb-2">Saved Round Maxes (Previous Runs)</div>
+            ${state.savedRounds && state.savedRounds.length ? state.savedRounds.map((sr) => `
+              <div class="py-2 border-t border-[#1F1F26] text-xs">
+                <div class="flex justify-between font-bold text-[#92E82A] mb-1">
+                  <span>Round ${sr.round} (${sr.label})</span>
+                  <span class="text-[#8E8E93] font-normal">${sr.completedAt}</span>
+                </div>
+                <div class="text-[11px] text-[#8E8E93]">
+                  ${Object.keys(sr.maxes || {}).length
+                    ? Object.entries(sr.maxes).slice(0, 6).map(([id, m]) => `${EXERCISES[id]?.name || id}: <strong class="text-white">${m.weight}${state.unit}×${m.reps}</strong>`).join(' • ')
+                    : 'No maxes recorded in this round.'}
+                </div>
+              </div>
+            `).join('') : '<div class="text-xs text-[#636366]">Finish an 8- or 9-week round in Program to archive your starting maxes for the next run.</div>'}
+          </div>
+
           <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-3.5">
             <div class="text-sm font-bold text-white mb-2">External Volume Trend (${state.unit})</div>
             <div class="relative h-40"><canvas id="volChart"></canvas></div>
@@ -2284,10 +2193,11 @@
           <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-4">
             <div class="text-[10px] font-bold text-[#92E82A] mb-1">TRAINING BACKUP & RESTORE</div>
             <div class="text-xs text-[#8E8E93] mb-3">Export or import your workouts, Peak Weights / PRs, and Apple Health entries separately from nutrition.</div>
-            <div class="grid grid-cols-2 gap-2">
-              <button id="btnExportBackup" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export Training (.json)</button>
-              <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
-                Import Training
+            <div class="grid grid-cols-3 gap-2">
+              <button id="btnExportTrainingCsv" class="py-2.5 px-2 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Export CSV</button>
+              <button id="btnExportBackup" class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs">Export JSON</button>
+              <label class="py-2.5 px-2 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
+                Import JSON
                 <input id="inpImportBackup" type="file" accept=".json,application/json" class="hidden" />
               </label>
             </div>
@@ -2295,9 +2205,35 @@
         `;
         document.getElementById('unitLb').addEventListener('click', () => { state.unit = 'lb'; render(); });
         document.getElementById('unitKg').addEventListener('click', () => { state.unit = 'kg'; render(); });
+        document.getElementById('btnExportTrainingCsv').addEventListener('click', () => {
+          const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+          const rows = [['record_type', 'round', 'date', 'name', 'sets', 'reps', 'weight', 'unit', 'volume_or_est_1rm'].map(esc).join(',')];
+          (state.history || []).forEach((h) => {
+            rows.push(['Workout', state.roundNumber, h.date, h.title, h.sets, '', '', state.unit, h.volume].map(esc).join(','));
+          });
+          Object.entries(state.peakWeights || {}).forEach(([exId, pr]) => {
+            const e1rm = pr.reps > 1 ? Math.round(pr.weight * (1 + pr.reps / 30) * 10) / 10 : pr.weight;
+            rows.push(['Peak PR', state.roundNumber, pr.date, EXERCISES[exId]?.name || exId, '', pr.reps, pr.weight, state.unit, e1rm].map(esc).join(','));
+          });
+          (state.savedRounds || []).forEach((sr) => {
+            Object.entries(sr.maxes || {}).forEach(([exId, m]) => {
+              const e1rm = m.reps > 1 ? Math.round(m.weight * (1 + m.reps / 30) * 10) / 10 : m.weight;
+              rows.push(['Saved Round Max', sr.round, sr.completedAt, EXERCISES[exId]?.name || exId, '', m.reps, m.weight, state.unit, e1rm].map(esc).join(','));
+            });
+          });
+          const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `apex-hybrid-training-${new Date().toISOString().slice(0, 10)}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        });
         document.getElementById('btnExportBackup').addEventListener('click', () => {
           const payload = {
-            version: 1,
+            version: 2,
             exportedAt: new Date().toISOString(),
             unit: state.unit,
             selectedWeek: state.selectedWeek,
@@ -2305,6 +2241,8 @@
             completedDays: state.completedDays,
             history: state.history,
             peakWeights: state.peakWeights,
+            roundNumber: state.roundNumber,
+            savedRounds: state.savedRounds,
             health: state.health,
           };
           const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -2330,6 +2268,8 @@
               if (Array.isArray(data.completedDays)) state.completedDays = data.completedDays;
               if (Array.isArray(data.history)) state.history = data.history;
               if (data.peakWeights) state.peakWeights = data.peakWeights;
+              if (data.roundNumber) state.roundNumber = data.roundNumber;
+              if (Array.isArray(data.savedRounds)) state.savedRounds = data.savedRounds;
               if (data.health) state.health = data.health;
               persistState();
               render();
