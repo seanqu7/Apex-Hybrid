@@ -710,8 +710,8 @@
       if (raw === null || raw === undefined || raw === '') return null;
       let v = parseFloat(String(raw).replace(/[^0-9.\-]/g, ''));
       if (!Number.isFinite(v) || v <= 0) return null;
-      if (v > 120) v = v / 3600; // Shortcuts Duration returns seconds
-      else if (v > 24) v = v / 60; // minutes
+      if (v > 120) v = v / 3600;
+      else if (v > 24) v = v / 60;
       return Number(v.toFixed(1));
     }
 
@@ -720,19 +720,13 @@
       const moveDisp = Math.round(Number(h.moveCal) || 0);
       const exDisp = Math.round(Number(h.exMin) || 0);
       const standDisp = Math.round(Number(h.standHr) || 0);
-      const sleepHrsDisp = cleanSleepHrs(h.sleepHrs);
-      const sleepScoreDisp = h.sleepScore !== null ? Math.round(Number(h.sleepScore)) : null;
       const movePct = Math.min(1, moveDisp / h.moveGoal);
       const exPct = Math.min(1, exDisp / h.exGoal);
       const standPct = Math.min(1, standDisp / h.standGoal);
 
-      const r1 = 36, c1 = 2 * Math.PI * r1;
-      const r2 = 27, c2 = 2 * Math.PI * r2;
+      const r1 = 38, c1 = 2 * Math.PI * r1;
+      const r2 = 28, c2 = 2 * Math.PI * r2;
       const r3 = 18, c3 = 2 * Math.PI * r3;
-
-      const readyVal = h.readiness !== null ? Math.round(Number(h.readiness)) : '—';
-      const readyLabel = h.readiness === null ? 'Tap to Connect' : (h.readiness >= 7 ? 'Ready' : h.readiness >= 5 ? 'Moderate' : 'Recover');
-      const readyPct = h.readiness !== null ? Math.min(1, Math.max(0.05, h.readiness / 10)) : 0;
 
       return `
         <div class="mb-4">
@@ -743,42 +737,52 @@
             </button>
           </div>
 
-          <!-- Activity Rings Card -->
-          <a href="fitnessapp://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-4 mb-2.5 flex items-center justify-between no-underline">
-            <div class="flex items-center gap-4">
-              <svg class="w-24 h-24 -rotate-90 shrink-0" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="${r1}" fill="none" stroke="#3A0D18" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r1}" fill="none" stroke="#FA114F" stroke-width="7.5" stroke-linecap="round"
+          <!-- Extended Activity Rings Card -->
+          <a href="fitnessapp://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-4 mb-2.5 no-underline">
+            <div class="flex items-center justify-between mb-3">
+              <div class="text-xs font-semibold text-white">Activity</div>
+              <span class="text-[10px] font-bold text-[#8E8E93]">Fitness ↗</span>
+            </div>
+            <div class="flex items-center gap-5">
+              <svg class="w-28 h-28 -rotate-90 shrink-0" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="${r1}" fill="none" stroke="#3A0D18" stroke-width="8" />
+                <circle cx="48" cy="48" r="${r1}" fill="none" stroke="#FA114F" stroke-width="8" stroke-linecap="round"
                   stroke-dasharray="${c1}" stroke-dashoffset="${c1 * (1 - movePct)}" />
-                <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#1E3508" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#92E82A" stroke-width="7.5" stroke-linecap="round"
+                <circle cx="48" cy="48" r="${r2}" fill="none" stroke="#1E3508" stroke-width="8" />
+                <circle cx="48" cy="48" r="${r2}" fill="none" stroke="#92E82A" stroke-width="8" stroke-linecap="round"
                   stroke-dasharray="${c2}" stroke-dashoffset="${c2 * (1 - exPct)}" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#2C2C2E" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#D1D1D6" stroke-width="7.5" stroke-linecap="round"
+                <circle cx="48" cy="48" r="${r3}" fill="none" stroke="#2C2C2E" stroke-width="8" />
+                <circle cx="48" cy="48" r="${r3}" fill="none" stroke="#D1D1D6" stroke-width="8" stroke-linecap="round"
                   stroke-dasharray="${c3}" stroke-dashoffset="${c3 * (1 - standPct)}" />
               </svg>
-              <div class="space-y-1.5">
+              <div class="flex-1 space-y-2.5">
                 <div>
-                  <div class="text-[11px] text-[#8E8E93] font-medium">Move</div>
-                  <div class="text-sm font-bold text-[#FA114F] tabular-nums">${moveDisp}/${h.moveGoal} <span class="text-[11px]">CAL</span></div>
+                  <div class="flex justify-between text-[11px] mb-0.5">
+                    <span class="text-[#8E8E93] font-medium">Move</span>
+                    <span class="font-bold text-[#FA114F] tabular-nums">${moveDisp}/${h.moveGoal} <span class="text-[10px]">CAL</span></span>
+                  </div>
+                  <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden"><div class="h-full rounded-full bg-[#FA114F]" style="width:${Math.round(movePct * 100)}%"></div></div>
                 </div>
-                <div class="flex gap-4">
-                  <div>
-                    <div class="text-[11px] text-[#8E8E93] font-medium">Exercise</div>
-                    <div class="text-sm font-bold text-[#92E82A] tabular-nums">${exDisp}/${h.exGoal} <span class="text-[11px]">MIN</span></div>
+                <div>
+                  <div class="flex justify-between text-[11px] mb-0.5">
+                    <span class="text-[#8E8E93] font-medium">Exercise</span>
+                    <span class="font-bold text-[#92E82A] tabular-nums">${exDisp}/${h.exGoal} <span class="text-[10px]">MIN</span></span>
                   </div>
-                  <div>
-                    <div class="text-[11px] text-[#8E8E93] font-medium">Stand</div>
-                    <div class="text-sm font-bold text-[#D1D1D6] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
+                  <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden"><div class="h-full rounded-full bg-[#92E82A]" style="width:${Math.round(exPct * 100)}%"></div></div>
+                </div>
+                <div>
+                  <div class="flex justify-between text-[11px] mb-0.5">
+                    <span class="text-[#8E8E93] font-medium">Stand</span>
+                    <span class="font-bold text-[#D1D1D6] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[10px]">HRS</span></span>
                   </div>
+                  <div class="h-1.5 rounded-full bg-[#2C2C2E] overflow-hidden"><div class="h-full rounded-full bg-[#D1D1D6]" style="width:${Math.round(standPct * 100)}%"></div></div>
                 </div>
               </div>
             </div>
-            <span class="text-[10px] font-bold text-[#8E8E93] self-start">Fitness ↗</span>
           </a>
 
-          <!-- Nutrition Macro Strip (MacroLens Integration) -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
+          <!-- Nutrition Macro Strip -->
+          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
             <div class="flex items-center justify-between mb-2">
               <div class="text-xs font-semibold text-white">Nutrition</div>
               <button id="btnGoNutri" class="text-[11px] font-bold text-[#92E82A]">Log Meal →</button>
@@ -801,137 +805,6 @@
                 <div class="text-xs font-bold text-[#A1A1AA] tabular-nums">${Math.round(getNutritionTotals().f)}/${state.nutrition.goals.fat}g</div>
               </div>
             </div>
-          </div>
-
-        </div>
-      `;
-    }
-
-    function cleanSleepHrs(raw) {
-      if (raw === null || raw === undefined || raw === '') return null;
-      let v = parseFloat(String(raw).replace(/[^0-9.\-]/g, ''));
-      if (!Number.isFinite(v) || v <= 0) return null;
-      if (v > 120) v = v / 3600; // Shortcuts Duration returns seconds
-      else if (v > 24) v = v / 60; // minutes
-      return Number(v.toFixed(1));
-    }
-
-    function renderAppleFitnessBento() {
-      const h = state.health;
-      const moveDisp = Math.round(Number(h.moveCal) || 0);
-      const exDisp = Math.round(Number(h.exMin) || 0);
-      const standDisp = Math.round(Number(h.standHr) || 0);
-      const sleepHrsDisp = cleanSleepHrs(h.sleepHrs);
-      const sleepScoreDisp = h.sleepScore !== null ? Math.round(Number(h.sleepScore)) : null;
-      const movePct = Math.min(1, moveDisp / h.moveGoal);
-      const exPct = Math.min(1, exDisp / h.exGoal);
-      const standPct = Math.min(1, standDisp / h.standGoal);
-
-      const r1 = 36, c1 = 2 * Math.PI * r1;
-      const r2 = 27, c2 = 2 * Math.PI * r2;
-      const r3 = 18, c3 = 2 * Math.PI * r3;
-
-      const readyVal = h.readiness !== null ? Math.round(Number(h.readiness)) : '—';
-      const readyLabel = h.readiness === null ? 'Tap to Connect' : (h.readiness >= 7 ? 'Ready' : h.readiness >= 5 ? 'Moderate' : 'Recover');
-      const readyPct = h.readiness !== null ? Math.min(1, Math.max(0.05, h.readiness / 10)) : 0;
-
-      return `
-        <div class="mb-4">
-          <div class="flex items-center justify-between mb-2.5">
-            <div class="text-lg font-bold tracking-tight text-white">Summary</div>
-            <button id="btnHealthConnect" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-[#92E82A] border border-[#2C2C2E]">
-              Health
-            </button>
-          </div>
-
-          <!-- Activity Rings Card -->
-          <a href="fitnessapp://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-4 mb-2.5 flex items-center justify-between no-underline">
-            <div class="flex items-center gap-4">
-              <svg class="w-24 h-24 -rotate-90 shrink-0" viewBox="0 0 90 90">
-                <circle cx="45" cy="45" r="${r1}" fill="none" stroke="#3A0D18" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r1}" fill="none" stroke="#FA114F" stroke-width="7.5" stroke-linecap="round"
-                  stroke-dasharray="${c1}" stroke-dashoffset="${c1 * (1 - movePct)}" />
-                <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#1E3508" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#92E82A" stroke-width="7.5" stroke-linecap="round"
-                  stroke-dasharray="${c2}" stroke-dashoffset="${c2 * (1 - exPct)}" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#2C2C2E" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#D1D1D6" stroke-width="7.5" stroke-linecap="round"
-                  stroke-dasharray="${c3}" stroke-dashoffset="${c3 * (1 - standPct)}" />
-              </svg>
-              <div class="space-y-1.5">
-                <div>
-                  <div class="text-[11px] text-[#8E8E93] font-medium">Move</div>
-                  <div class="text-sm font-bold text-[#FA114F] tabular-nums">${moveDisp}/${h.moveGoal} <span class="text-[11px]">CAL</span></div>
-                </div>
-                <div class="flex gap-4">
-                  <div>
-                    <div class="text-[11px] text-[#8E8E93] font-medium">Exercise</div>
-                    <div class="text-sm font-bold text-[#92E82A] tabular-nums">${exDisp}/${h.exGoal} <span class="text-[11px]">MIN</span></div>
-                  </div>
-                  <div>
-                    <div class="text-[11px] text-[#8E8E93] font-medium">Stand</div>
-                    <div class="text-sm font-bold text-[#D1D1D6] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <span class="text-[10px] font-bold text-[#8E8E93] self-start">Fitness ↗</span>
-          </a>
-
-          <!-- Nutrition Macro Strip (MacroLens Integration) -->
-          <div class="bg-[#1C1C1E] rounded-[20px] p-3.5 mb-2.5">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-xs font-semibold text-white">Nutrition</div>
-              <button id="btnGoNutri" class="text-[11px] font-bold text-[#92E82A]">Log Meal →</button>
-            </div>
-            <div class="grid grid-cols-4 gap-2 text-center">
-              <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
-                <div class="text-[10px] text-[#8E8E93]">Calories</div>
-                <div class="text-xs font-bold text-[#FA114F] tabular-nums">${Math.round(getNutritionTotals().cal)}/${state.nutrition.goals.calories}</div>
-              </div>
-              <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
-                <div class="text-[10px] text-[#8E8E93]">Protein</div>
-                <div class="text-xs font-bold text-[#92E82A] tabular-nums">${Math.round(getNutritionTotals().p)}/${state.nutrition.goals.protein}g</div>
-              </div>
-              <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
-                <div class="text-[10px] text-[#8E8E93]">Carbs</div>
-                <div class="text-xs font-bold text-[#D1D1D6] tabular-nums">${Math.round(getNutritionTotals().c)}/${state.nutrition.goals.carbs}g</div>
-              </div>
-              <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
-                <div class="text-[10px] text-[#8E8E93]">Fat</div>
-                <div class="text-xs font-bold text-[#A1A1AA] tabular-nums">${Math.round(getNutritionTotals().f)}/${state.nutrition.goals.fat}g</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 2-Column Sleep & Readiness Bento -->
-          <div class="grid grid-cols-2 gap-2.5">
-            <a href="x-apple-health://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-3.5 no-underline">
-              <div class="flex items-center justify-between mb-0.5">
-                <div class="text-xs font-semibold text-white">Sleep Score</div>
-                <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
-              </div>
-              <div class="text-xl font-bold text-[#38BDF8] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
-              <div class="flex items-end gap-1.5 h-8 mt-2">
-                ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#38BDF8]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
-              </div>
-            </a>
-
-            <a href="x-apple-health://" class="block bg-[#1C1C1E] active:opacity-80 rounded-[20px] p-3.5 flex flex-col items-center justify-between no-underline">
-              <div class="w-full flex items-center justify-between">
-                <div class="text-xs font-semibold text-white">Readiness</div>
-                <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
-              </div>
-              <svg class="w-28 h-14 mt-1" viewBox="0 0 100 54">
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2C2C2E" stroke-width="8" stroke-linecap="round" />
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#38BDF8" stroke-width="8" stroke-linecap="round"
-                  stroke-dasharray="125.6" stroke-dashoffset="${125.6 * (1 - readyPct)}" />
-              </svg>
-              <div class="-mt-6 text-center">
-                <div class="text-lg font-bold text-[#38BDF8] leading-none">${readyVal}</div>
-                <div class="text-[10px] text-[#8E8E93] mt-0.5">${readyLabel}</div>
-              </div>
-            </a>
           </div>
         </div>
       `;
