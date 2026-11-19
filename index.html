@@ -141,11 +141,60 @@
       transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
     }
     .tab-btn.active {
-      color: var(--accent);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(146, 232, 42, 0.14) 100%);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 2px 8px rgba(0, 0, 0, 0.45);
+      color: #92E82A;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, rgba(146, 232, 42, 0.18) 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 2px 10px rgba(0, 0, 0, 0.45);
     }
-    .pill-active { background: var(--accent) !important; color: #0B0B0D !important; }
+    .pill-active { background: #92E82A !important; color: #0B0B0D !important; }
+
+    /* Clear Liquid Glass Design (Green, Red & Neutral Grays) */
+    body, .duo-shell {
+      background:
+        radial-gradient(90% 55% at 15% 0%, rgba(146, 232, 42, 0.08) 0%, transparent 60%),
+        radial-gradient(80% 50% at 90% 10%, rgba(250, 17, 79, 0.06) 0%, transparent 55%),
+        #050507 !important;
+    }
+    .left-pane {
+      background: rgba(14, 14, 18, 0.52) !important;
+      backdrop-filter: blur(34px) saturate(170%);
+      -webkit-backdrop-filter: blur(34px) saturate(170%);
+      border-right: 1px solid rgba(255, 255, 255, 0.11) !important;
+    }
+    .right-pane {
+      background: transparent !important;
+    }
+    .rail-nav, .bottom-nav {
+      background: rgba(20, 20, 24, 0.55) !important;
+      backdrop-filter: blur(38px) saturate(190%) !important;
+      -webkit-backdrop-filter: blur(38px) saturate(190%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.18) !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 14px 36px rgba(0, 0, 0, 0.65) !important;
+    }
+    .bg-\[\#1C1C1E\], .bg-\[\#1C1C1E\]\/60, .bg-\[\#1C1C1E\]\/95 {
+      background: rgba(255, 255, 255, 0.048) !important;
+      backdrop-filter: blur(28px) saturate(165%);
+      -webkit-backdrop-filter: blur(28px) saturate(165%);
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 24px rgba(0, 0, 0, 0.38);
+    }
+    .bg-\[\#2C2C2E\], .bg-\[\#2C2C2E\]\/70, .num-input {
+      background: rgba(255, 255, 255, 0.075) !important;
+      border: 1px solid rgba(255, 255, 255, 0.11) !important;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    #todayFooter {
+      background: rgba(8, 8, 10, 0.45) !important;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-top-color: rgba(255, 255, 255, 0.10) !important;
+    }
+    #btnStartToday {
+      background: rgba(146, 232, 42, 0.92) !important;
+      color: #000000 !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 24px rgba(146, 232, 42, 0.25) !important;
+    }
   </style>
 </head>
 <body>
@@ -166,7 +215,7 @@
 
         <!-- Docked Start Workout Footer (Today tab) -->
         <div id="todayFooter" class="hidden px-4 pt-2.5 bg-[#000000]/95 border-t border-[#1C1C1E]" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
-          <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#92E82A] text-[#000000] font-extrabold text-sm tracking-wide shadow-lg">
+          <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#E5E5EA] text-[#0B0B0D] font-bold text-sm tracking-wide shadow-lg">
             START WORKOUT
           </button>
         </div>
@@ -704,8 +753,8 @@
                 <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#1E3508" stroke-width="7.5" />
                 <circle cx="45" cy="45" r="${r2}" fill="none" stroke="#92E82A" stroke-width="7.5" stroke-linecap="round"
                   stroke-dasharray="${c2}" stroke-dashoffset="${c2 * (1 - exPct)}" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#003538" stroke-width="7.5" />
-                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#00F5EA" stroke-width="7.5" stroke-linecap="round"
+                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#2C2C2E" stroke-width="7.5" />
+                <circle cx="45" cy="45" r="${r3}" fill="none" stroke="#D1D1D6" stroke-width="7.5" stroke-linecap="round"
                   stroke-dasharray="${c3}" stroke-dashoffset="${c3 * (1 - standPct)}" />
               </svg>
               <div class="space-y-1.5">
@@ -720,7 +769,7 @@
                   </div>
                   <div>
                     <div class="text-[11px] text-[#8E8E93] font-medium">Stand</div>
-                    <div class="text-sm font-bold text-[#00F5EA] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
+                    <div class="text-sm font-bold text-[#D1D1D6] tabular-nums">${standDisp}/${h.standGoal} <span class="text-[11px]">HRS</span></div>
                   </div>
                 </div>
               </div>
@@ -745,11 +794,11 @@
               </div>
               <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
                 <div class="text-[10px] text-[#8E8E93]">Carbs</div>
-                <div class="text-xs font-bold text-[#00F5EA] tabular-nums">${Math.round(getNutritionTotals().c)}/${state.nutrition.goals.carbs}g</div>
+                <div class="text-xs font-bold text-[#D1D1D6] tabular-nums">${Math.round(getNutritionTotals().c)}/${state.nutrition.goals.carbs}g</div>
               </div>
               <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
                 <div class="text-[10px] text-[#8E8E93]">Fat</div>
-                <div class="text-xs font-bold text-[#BF5AF2] tabular-nums">${Math.round(getNutritionTotals().f)}/${state.nutrition.goals.fat}g</div>
+                <div class="text-xs font-bold text-[#A1A1AA] tabular-nums">${Math.round(getNutritionTotals().f)}/${state.nutrition.goals.fat}g</div>
               </div>
             </div>
           </div>
@@ -761,9 +810,9 @@
                 <div class="text-xs font-semibold text-white">Sleep Score</div>
                 <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
               </div>
-              <div class="text-xl font-bold text-[#A78BFA] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
+              <div class="text-xl font-bold text-[#A1A1AA] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
               <div class="flex items-end gap-1.5 h-8 mt-2">
-                ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#8B5CF6]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
+                ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#8E8E93]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
               </div>
             </a>
 
@@ -774,11 +823,11 @@
               </div>
               <svg class="w-28 h-14 mt-1" viewBox="0 0 100 54">
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2C2C2E" stroke-width="8" stroke-linecap="round" />
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#38BDF8" stroke-width="8" stroke-linecap="round"
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#D1D1D6" stroke-width="8" stroke-linecap="round"
                   stroke-dasharray="125.6" stroke-dashoffset="${125.6 * (1 - readyPct)}" />
               </svg>
               <div class="-mt-6 text-center">
-                <div class="text-lg font-bold text-[#38BDF8] leading-none">${readyVal}</div>
+                <div class="text-lg font-bold text-[#D1D1D6] leading-none">${readyVal}</div>
                 <div class="text-[10px] text-[#8E8E93] mt-0.5">${readyLabel}</div>
               </div>
             </a>
@@ -787,9 +836,10 @@
       `;
     }
 
-    (function applyHealthUrlParams() {
+    function applyHealthQueryString(rawStr) {
       try {
-        const p = new URLSearchParams(window.location.search);
+        const q = rawStr.includes('?') ? rawStr.slice(rawStr.indexOf('?')) : rawStr;
+        const p = new URLSearchParams(q);
         const numParam = (k) => {
           const v = parseFloat(String(p.get(k) || '').replace(/[^0-9.\-]/g, ''));
           return Number.isFinite(v) ? v : 0;
@@ -802,10 +852,17 @@
           if (p.has('sleep')) state.health.sleepScore = Math.min(100, Math.max(0, Math.round(numParam('sleep')) || 84));
           if (p.has('sleep_hrs')) state.health.sleepHrs = cleanSleepHrs(p.get('sleep_hrs')) ?? 7.5;
           if (p.has('readiness')) state.health.readiness = Math.min(10, Math.max(1, Number(numParam('readiness').toFixed(1)) || 8));
-          window.history.replaceState({}, '', window.location.pathname);
           persistState();
+          return true;
         }
       } catch (e) {}
+      return false;
+    }
+
+    (function applyHealthUrlParams() {
+      if (window.location.search && applyHealthQueryString(window.location.search)) {
+        try { window.history.replaceState({}, '', window.location.pathname); } catch (e) {}
+      }
     })();
 
     function wireHealthButton() {
@@ -816,13 +873,40 @@
       btn.addEventListener('click', () => {
         const baseUrl = window.location.origin + window.location.pathname;
         const shortcutUrl = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&sleep=86&readiness=8`;
-        openModal('Apple Shortcuts Sync URL', `
+        openModal('Apple Health Sync', `
           <div class="space-y-3 text-xs">
-            <div class="text-[#8E8E93]">Use this URL in your iPhone <strong>Shortcuts</strong> app to sync Apple Health data automatically:</div>
-            <div class="bg-[#0B0B0D] border border-[#2C2C2E] rounded-xl p-3 text-[11px] text-[#00F5EA] break-all font-mono select-all">${shortcutUrl}</div>
-            <button id="btnCopyShortcutUrl" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Copy Shortcut URL</button>
+            <div class="text-[#E5E5EA] leading-relaxed">Because iOS keeps Safari and Home Screen bookmarks separate, end your Shortcut with <strong>Copy to Clipboard</strong> instead of Open URLs, then tap below:</div>
+            <button id="btnPasteSyncHealth" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Paste Sync from Clipboard</button>
+            <div class="text-[11px] text-[#8E8E93] pt-1">Shortcut URL format:</div>
+            <div class="bg-[#0B0B0D] border border-[#2C2C2E] rounded-xl p-3 text-[11px] text-[#D1D1D6] break-all font-mono select-all">${shortcutUrl}</div>
+            <button id="btnCopyShortcutUrl" class="w-full py-2.5 rounded-xl bg-[#2C2C2E] text-white font-bold">Copy Shortcut URL</button>
           </div>
         `);
+        document.getElementById('btnPasteSyncHealth').addEventListener('click', async () => {
+          try {
+            const clip = await navigator.clipboard.readText();
+            if (applyHealthQueryString(clip)) {
+              document.getElementById('modalOverlay').classList.add('hidden');
+              render();
+              return;
+            }
+            openModal('Clipboard Empty or Invalid', '<div class="text-xs text-[#FA114F]">Run your Sync APEX HYBRID shortcut (with Copy to Clipboard) first, then tap Paste Sync.</div>');
+          } catch (e) {
+            openModal('Paste URL', `
+              <div class="space-y-2.5 text-xs">
+                <input id="inpManualPasteSync" type="text" placeholder="Paste your synced Shortcut URL here" class="num-input text-left px-3" />
+                <button id="btnApplyManualPaste" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Apply Sync</button>
+              </div>
+            `);
+            document.getElementById('btnApplyManualPaste').addEventListener('click', () => {
+              const val = document.getElementById('inpManualPasteSync').value.trim();
+              if (applyHealthQueryString(val)) {
+                document.getElementById('modalOverlay').classList.add('hidden');
+                render();
+              }
+            });
+          }
+        });
         document.getElementById('btnCopyShortcutUrl').addEventListener('click', async () => {
           try { await navigator.clipboard.writeText(shortcutUrl); } catch (e) {}
           document.getElementById('btnCopyShortcutUrl').textContent = 'Copied ✓';
@@ -852,47 +936,47 @@
     const FOODNOMS_MICRO_SCHEMA = [
       // Carbs & Fats Breakdown
       { key: 'fiber', csv: 'fiber (g)', label: 'Fiber', unit: 'g', cat: 'Carbs & Fats', goal: 28, color: '#92E82A' },
-      { key: 'sugars', csv: 'sugars (g)', label: 'Total Sugars', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#00F5EA' },
+      { key: 'sugars', csv: 'sugars (g)', label: 'Total Sugars', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#D1D1D6' },
       { key: 'addedSug', csv: 'added sug. (g)', label: 'Added Sugars', unit: 'g', cat: 'Carbs & Fats', goal: 50, limit: true, color: '#FA114F' },
       { key: 'sugarAlc', csv: 'sugar alc. (g)', label: 'Sugar Alcohols', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#8E8E93' },
       { key: 'satFat', csv: 'sat. fat (g)', label: 'Saturated Fat', unit: 'g', cat: 'Carbs & Fats', goal: 20, limit: true, color: '#FA114F' },
-      { key: 'monoFat', csv: 'mono. fat (g)', label: 'Monounsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#BF5AF2' },
-      { key: 'polyFat', csv: 'poly. fat (g)', label: 'Polyunsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#BF5AF2' },
+      { key: 'monoFat', csv: 'mono. fat (g)', label: 'Monounsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#A1A1AA' },
+      { key: 'polyFat', csv: 'poly. fat (g)', label: 'Polyunsat. Fat', unit: 'g', cat: 'Carbs & Fats', goal: null, color: '#A1A1AA' },
       { key: 'transFat', csv: 'trans fat (g)', label: 'Trans Fat', unit: 'g', cat: 'Carbs & Fats', goal: 2, limit: true, color: '#FA114F' },
-      { key: 'cholesterol', csv: 'cholesterol (mg)', label: 'Cholesterol', unit: 'mg', cat: 'Carbs & Fats', goal: 300, limit: true, color: '#FF9F0A' },
+      { key: 'cholesterol', csv: 'cholesterol (mg)', label: 'Cholesterol', unit: 'mg', cat: 'Carbs & Fats', goal: 300, limit: true, color: '#A1A1AA' },
       // Hydration & Stimulants
-      { key: 'water', csv: 'water (fl oz)', label: 'Water', unit: 'fl oz', cat: 'Hydration & Stimulants', goal: 64, color: '#00F5EA' },
-      { key: 'caffeine', csv: 'caffeine (mg)', label: 'Caffeine', unit: 'mg', cat: 'Hydration & Stimulants', goal: 400, limit: true, color: '#FF9F0A' },
+      { key: 'water', csv: 'water (fl oz)', label: 'Water', unit: 'fl oz', cat: 'Hydration & Stimulants', goal: 64, color: '#D1D1D6' },
+      { key: 'caffeine', csv: 'caffeine (mg)', label: 'Caffeine', unit: 'mg', cat: 'Hydration & Stimulants', goal: 400, limit: true, color: '#A1A1AA' },
       { key: 'alcohol', csv: 'alcohol (std. drink)', label: 'Alcohol', unit: 'std', cat: 'Hydration & Stimulants', goal: 2, limit: true, color: '#FA114F' },
       // Minerals (14)
-      { key: 'calcium', csv: 'calcium (mg)', label: 'Calcium', unit: 'mg', cat: 'Minerals', goal: 1000, color: '#38BDF8' },
-      { key: 'chloride', csv: 'chloride (mg)', label: 'Chloride', unit: 'mg', cat: 'Minerals', goal: 2300, color: '#38BDF8' },
+      { key: 'calcium', csv: 'calcium (mg)', label: 'Calcium', unit: 'mg', cat: 'Minerals', goal: 1000, color: '#D1D1D6' },
+      { key: 'chloride', csv: 'chloride (mg)', label: 'Chloride', unit: 'mg', cat: 'Minerals', goal: 2300, color: '#D1D1D6' },
       { key: 'iron', csv: 'iron (mg)', label: 'Iron', unit: 'mg', cat: 'Minerals', goal: 18, color: '#FA114F' },
       { key: 'magnesium', csv: 'magnesium (mg)', label: 'Magnesium', unit: 'mg', cat: 'Minerals', goal: 420, color: '#92E82A' },
-      { key: 'phosphorus', csv: 'phosphorus (mg)', label: 'Phosphorus', unit: 'mg', cat: 'Minerals', goal: 1250, color: '#38BDF8' },
+      { key: 'phosphorus', csv: 'phosphorus (mg)', label: 'Phosphorus', unit: 'mg', cat: 'Minerals', goal: 1250, color: '#D1D1D6' },
       { key: 'potassium', csv: 'potassium (mg)', label: 'Potassium', unit: 'mg', cat: 'Minerals', goal: 4700, color: '#92E82A' },
-      { key: 'sodium', csv: 'sodium (mg)', label: 'Sodium', unit: 'mg', cat: 'Minerals', goal: 2300, limit: true, color: '#FF9F0A' },
-      { key: 'zinc', csv: 'zinc (mg)', label: 'Zinc', unit: 'mg', cat: 'Minerals', goal: 11, color: '#38BDF8' },
-      { key: 'chromium', csv: 'chromium (mcg)', label: 'Chromium', unit: 'mcg', cat: 'Minerals', goal: 35, color: '#38BDF8' },
-      { key: 'copper', csv: 'copper (mg)', label: 'Copper', unit: 'mg', cat: 'Minerals', goal: 0.9, color: '#38BDF8' },
-      { key: 'iodine', csv: 'iodine (mcg)', label: 'Iodine', unit: 'mcg', cat: 'Minerals', goal: 150, color: '#38BDF8' },
-      { key: 'manganese', csv: 'manganese (mg)', label: 'Manganese', unit: 'mg', cat: 'Minerals', goal: 2.3, color: '#38BDF8' },
-      { key: 'molybdenum', csv: 'molybdenum (mcg)', label: 'Molybdenum', unit: 'mcg', cat: 'Minerals', goal: 45, color: '#38BDF8' },
-      { key: 'selenium', csv: 'selenium (mcg)', label: 'Selenium', unit: 'mcg', cat: 'Minerals', goal: 55, color: '#38BDF8' },
+      { key: 'sodium', csv: 'sodium (mg)', label: 'Sodium', unit: 'mg', cat: 'Minerals', goal: 2300, limit: true, color: '#A1A1AA' },
+      { key: 'zinc', csv: 'zinc (mg)', label: 'Zinc', unit: 'mg', cat: 'Minerals', goal: 11, color: '#D1D1D6' },
+      { key: 'chromium', csv: 'chromium (mcg)', label: 'Chromium', unit: 'mcg', cat: 'Minerals', goal: 35, color: '#D1D1D6' },
+      { key: 'copper', csv: 'copper (mg)', label: 'Copper', unit: 'mg', cat: 'Minerals', goal: 0.9, color: '#D1D1D6' },
+      { key: 'iodine', csv: 'iodine (mcg)', label: 'Iodine', unit: 'mcg', cat: 'Minerals', goal: 150, color: '#D1D1D6' },
+      { key: 'manganese', csv: 'manganese (mg)', label: 'Manganese', unit: 'mg', cat: 'Minerals', goal: 2.3, color: '#D1D1D6' },
+      { key: 'molybdenum', csv: 'molybdenum (mcg)', label: 'Molybdenum', unit: 'mcg', cat: 'Minerals', goal: 45, color: '#D1D1D6' },
+      { key: 'selenium', csv: 'selenium (mcg)', label: 'Selenium', unit: 'mcg', cat: 'Minerals', goal: 55, color: '#D1D1D6' },
       // Vitamins (13)
-      { key: 'vitA', csv: 'vit. a (mcg)', label: 'Vitamin A', unit: 'mcg', cat: 'Vitamins', goal: 900, color: '#FF9F0A' },
-      { key: 'vitC', csv: 'vit. c (mg)', label: 'Vitamin C', unit: 'mg', cat: 'Vitamins', goal: 90, color: '#FF9F0A' },
-      { key: 'vitD', csv: 'vit. d (mcg)', label: 'Vitamin D', unit: 'mcg', cat: 'Vitamins', goal: 20, color: '#FF9F0A' },
-      { key: 'vitE', csv: 'vit. e (mg)', label: 'Vitamin E', unit: 'mg', cat: 'Vitamins', goal: 15, color: '#FF9F0A' },
+      { key: 'vitA', csv: 'vit. a (mcg)', label: 'Vitamin A', unit: 'mcg', cat: 'Vitamins', goal: 900, color: '#A1A1AA' },
+      { key: 'vitC', csv: 'vit. c (mg)', label: 'Vitamin C', unit: 'mg', cat: 'Vitamins', goal: 90, color: '#A1A1AA' },
+      { key: 'vitD', csv: 'vit. d (mcg)', label: 'Vitamin D', unit: 'mcg', cat: 'Vitamins', goal: 20, color: '#A1A1AA' },
+      { key: 'vitE', csv: 'vit. e (mg)', label: 'Vitamin E', unit: 'mg', cat: 'Vitamins', goal: 15, color: '#A1A1AA' },
       { key: 'vitK', csv: 'vit. k (mcg)', label: 'Vitamin K', unit: 'mcg', cat: 'Vitamins', goal: 120, color: '#92E82A' },
-      { key: 'thiamin', csv: 'thiamin (mg)', label: 'Thiamin (B1)', unit: 'mg', cat: 'Vitamins', goal: 1.2, color: '#BF5AF2' },
-      { key: 'riboflavin', csv: 'riboflavin (mg)', label: 'Riboflavin (B2)', unit: 'mg', cat: 'Vitamins', goal: 1.3, color: '#BF5AF2' },
-      { key: 'niacin', csv: 'niacin (mg)', label: 'Niacin (B3)', unit: 'mg', cat: 'Vitamins', goal: 16, color: '#BF5AF2' },
-      { key: 'pantoAcid', csv: 'panto. acid (mg)', label: 'Pantothenic Acid (B5)', unit: 'mg', cat: 'Vitamins', goal: 5, color: '#BF5AF2' },
-      { key: 'vitB6', csv: 'vit. b6 (mg)', label: 'Vitamin B6', unit: 'mg', cat: 'Vitamins', goal: 1.7, color: '#BF5AF2' },
-      { key: 'biotin', csv: 'biotin (mcg)', label: 'Biotin (B7)', unit: 'mcg', cat: 'Vitamins', goal: 30, color: '#BF5AF2' },
-      { key: 'folate', csv: 'folate (mcg)', label: 'Folate (B9)', unit: 'mcg', cat: 'Vitamins', goal: 400, color: '#BF5AF2' },
-      { key: 'vitB12', csv: 'vit. b12 (mcg)', label: 'Vitamin B12', unit: 'mcg', cat: 'Vitamins', goal: 2.4, color: '#BF5AF2' },
+      { key: 'thiamin', csv: 'thiamin (mg)', label: 'Thiamin (B1)', unit: 'mg', cat: 'Vitamins', goal: 1.2, color: '#A1A1AA' },
+      { key: 'riboflavin', csv: 'riboflavin (mg)', label: 'Riboflavin (B2)', unit: 'mg', cat: 'Vitamins', goal: 1.3, color: '#A1A1AA' },
+      { key: 'niacin', csv: 'niacin (mg)', label: 'Niacin (B3)', unit: 'mg', cat: 'Vitamins', goal: 16, color: '#A1A1AA' },
+      { key: 'pantoAcid', csv: 'panto. acid (mg)', label: 'Pantothenic Acid (B5)', unit: 'mg', cat: 'Vitamins', goal: 5, color: '#A1A1AA' },
+      { key: 'vitB6', csv: 'vit. b6 (mg)', label: 'Vitamin B6', unit: 'mg', cat: 'Vitamins', goal: 1.7, color: '#A1A1AA' },
+      { key: 'biotin', csv: 'biotin (mcg)', label: 'Biotin (B7)', unit: 'mcg', cat: 'Vitamins', goal: 30, color: '#A1A1AA' },
+      { key: 'folate', csv: 'folate (mcg)', label: 'Folate (B9)', unit: 'mcg', cat: 'Vitamins', goal: 400, color: '#A1A1AA' },
+      { key: 'vitB12', csv: 'vit. b12 (mcg)', label: 'Vitamin B12', unit: 'mcg', cat: 'Vitamins', goal: 2.4, color: '#A1A1AA' },
     ];
 
     function ensureNutriDefaults() {
@@ -1113,7 +1197,7 @@
                     ${getDaysForWeek(w.num).map((d, dIdx) => {
                       const isSelDay = active && state.currentDayIdx === dIdx;
                       const split = getSplitType(d.day);
-                      return `<button class="duo-day-pick flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl text-[11px] font-bold ${isSelDay ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#161F09] border border-[#2A3B12]/70 text-[#92E82A] hover:bg-[#1F2C0D]'}" data-w="${w.num}" data-d="${dIdx}">${getSplitIcon(split, 'w-3.5 h-3.5')}<span>${split}</span></button>`;
+                      return `<button class="duo-day-pick flex items-center justify-center gap-1 py-1.5 px-2 rounded-xl text-[11px] font-bold ${isSelDay ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#1C1C1E] border border-[#2C2C2E]/70 text-[#92E82A] hover:bg-[#2C2C2E]'}" data-w="${w.num}" data-d="${dIdx}">${getSplitIcon(split, 'w-3.5 h-3.5')}<span>${split}</span></button>`;
                     }).join('')}
                   </div>
                 </div>
@@ -1168,20 +1252,20 @@
               <span class="text-xs font-semibold text-[#92E82A]">Round ${state.roundNumber} • ${state.selectedWeek === 9 ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
             </div>
             <div class="grid grid-cols-4 gap-2">
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#161F09] border border-[#2A3B12] hover:bg-[#1F2C0D]" data-day="0">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="0">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Pull', 'w-5 h-5')}</div>
                 <div class="text-xs font-bold text-white">Pull</div>
               </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#161F09] border border-[#2A3B12] hover:bg-[#1F2C0D]" data-day="1">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="1">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Push', 'w-5 h-5')}</div>
                 <div class="text-xs font-bold text-white">Push</div>
               </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#161F09] border border-[#2A3B12] hover:bg-[#1F2C0D]" data-day="2">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="2">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Legs', 'w-5 h-5')}</div>
                 <div class="text-xs font-bold text-white">Legs</div>
               </button>
               <button class="split-jump-deload rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]">
-                <div class="text-[#A78BFA] mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
+                <div class="text-[#A1A1AA] mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
                 <div class="text-xs font-bold text-white">Deload</div>
               </button>
             </div>
@@ -1190,7 +1274,7 @@
           <!-- Day Header & Summary -->
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-2xl bg-[#161F09] border border-[#2A3B12] flex items-center justify-center text-[#92E82A]">
+              <div class="w-10 h-10 rounded-2xl bg-[#1C1C1E] border border-[#2C2C2E] flex items-center justify-center text-[#92E82A]">
                 ${getSplitIcon(day.name, 'w-6 h-6')}
               </div>
               <div>
@@ -1487,8 +1571,8 @@
         const metricMeta = {
           cal: { label: 'Calories', unit: 'Cal', color: '#FA114F', goal: g.calories },
           p: { label: 'Protein', unit: 'g', color: '#92E82A', goal: g.protein },
-          c: { label: 'Carbs', unit: 'g', color: '#00F5EA', goal: g.carbs },
-          f: { label: 'Fat', unit: 'g', color: '#BF5AF2', goal: g.fat },
+          c: { label: 'Carbs', unit: 'g', color: '#D1D1D6', goal: g.carbs },
+          f: { label: 'Fat', unit: 'g', color: '#A1A1AA', goal: g.fat },
         }[metricKey];
 
         const trendSeries = trendDates.map((d) => {
@@ -1600,8 +1684,8 @@
               <div class="flex-1 space-y-2">
                 ${[
                   { label: 'Protein', val: tot.p, goal: g.protein, color: '#92E82A' },
-                  { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#00F5EA' },
-                  { label: 'Fat', val: tot.f, goal: g.fat, color: '#BF5AF2' },
+                  { label: 'Carbs', val: tot.c, goal: g.carbs, color: '#D1D1D6' },
+                  { label: 'Fat', val: tot.f, goal: g.fat, color: '#A1A1AA' },
                 ].map((m) => {
                   const pct = Math.min(100, Math.round((m.val / Math.max(1, m.goal)) * 100));
                   return `
@@ -1619,13 +1703,34 @@
               </div>
             </div>
 
+            <!-- FoodNoms-Style Voice / AI Meal Bar -->
+            <div class="bg-[#1C1C1E] rounded-[20px] p-3 mb-3">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-bold text-white">Quick AI Log</span>
+                  <span class="text-[10px] text-[#8E8E93]">→ ${state.nutrition.mealTarget}</span>
+                </div>
+                <select id="inlineMealTarget" class="bg-[#2C2C2E] text-[#92E82A] text-[11px] font-bold rounded-full px-2.5 py-1 outline-none">
+                  ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `<option value="${m}" ${state.nutrition.mealTarget === m ? 'selected' : ''}>${m}</option>`).join('')}
+                </select>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <button id="btnNutriMic" title="Speak your meal" class="w-10 h-10 rounded-xl bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                </button>
+                <input id="inlineAiMealInp" type="text" placeholder="Speak or type meal (e.g. 3 eggs, toast, coffee)..." class="num-input text-left px-3 h-10 text-xs flex-1" />
+                <button id="btnInlineAiLog" class="h-10 px-3.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs shrink-0">Log AI</button>
+              </div>
+              <div id="micStatusTxt" class="hidden text-[10px] text-[#92E82A] mt-1.5 pl-1">Listening... speak your meal now.</div>
+            </div>
+
             <!-- Single Clean Row of 4 Key Stats -->
             <div class="grid grid-cols-4 gap-2 mb-3 text-center">
               ${[
-                { label: 'Water', val: `${Math.round(tot.micros.water || 0)} oz`, color: '#00F5EA' },
+                { label: 'Water', val: `${Math.round(tot.micros.water || 0)} oz`, color: '#D1D1D6' },
                 { label: 'Fiber', val: `${Math.round(tot.micros.fiber || 0)}g`, color: '#92E82A' },
-                { label: 'Sodium', val: `${Math.round(tot.micros.sodium || 0)}mg`, color: '#FF9F0A' },
-                { label: 'Caffeine', val: `${Math.round(tot.micros.caffeine || 0)}mg`, color: '#BF5AF2' },
+                { label: 'Sodium', val: `${Math.round(tot.micros.sodium || 0)}mg`, color: '#A1A1AA' },
+                { label: 'Caffeine', val: `${Math.round(tot.micros.caffeine || 0)}mg`, color: '#A1A1AA' },
               ].map((k) => `
                 <div class="bg-[#1C1C1E] rounded-2xl py-2.5 px-1">
                   <div class="text-[10px] text-[#8E8E93]">${k.label}</div>
@@ -1639,7 +1744,7 @@
               <div class="flex items-center justify-between mb-1">
                 <div class="text-sm font-bold text-white">Meals • ${activeDate}</div>
                 <div class="flex items-center gap-2">
-                  ${activeDate !== latestLoggedDate && loggedDates.length ? `<button id="btnJumpLatestNutri" class="text-[11px] text-[#00F5EA] font-semibold">Latest (${latestLoggedDate.slice(5)})</button>` : ''}
+                  ${activeDate !== latestLoggedDate && loggedDates.length ? `<button id="btnJumpLatestNutri" class="text-[11px] text-[#D1D1D6] font-semibold">Latest (${latestLoggedDate.slice(5)})</button>` : ''}
                   ${logs.length ? `<button id="btnClearFoodLog" class="text-[11px] text-[#FA114F] font-semibold">Clear</button>` : ''}
                 </div>
               </div>
@@ -1649,7 +1754,10 @@
                 return `
                   <div class="mt-3 pt-2.5 border-t border-[#2C2C2E]">
                     <div class="flex items-center justify-between mb-1.5">
-                      <span class="text-[11px] font-bold text-[#92E82A] uppercase tracking-wider">${m}</span>
+                      <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-bold text-[#92E82A] uppercase tracking-wider">${m}</span>
+                        <button class="meal-quick-focus w-5 h-5 rounded-full bg-[#2C2C2E] text-white text-xs font-bold flex items-center justify-center" data-meal="${m}" title="Add to ${m}">+</button>
+                      </div>
                       <span class="text-[11px] text-[#8E8E93] tabular-nums">${Math.round(mt.cal)} Cal • ${Math.round(mt.p)}P / ${Math.round(mt.c)}C / ${Math.round(mt.f)}F</span>
                     </div>
                     ${items.map((item) => `
@@ -1952,6 +2060,96 @@
           openLogSheet();
         });
 
+        // Wire FoodNoms-style Inline Mic + AI Meal Logger
+        const inlineMealSel = document.getElementById('inlineMealTarget');
+        if (inlineMealSel) inlineMealSel.addEventListener('change', (e) => {
+          state.nutrition.mealTarget = e.target.value;
+          persistState();
+          render();
+        });
+        root.querySelectorAll('.meal-quick-focus').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.mealTarget = b.dataset.meal;
+          render();
+          const inp = document.getElementById('inlineAiMealInp');
+          if (inp) inp.focus();
+        }));
+        const runAiMealText = async (prompt, btnEl) => {
+          if (!prompt) return;
+          if (state.nutrition.geminiKey) {
+            const orig = btnEl.textContent;
+            btnEl.textContent = '...';
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: `Return JSON array of {name, portion, cal, p, c, f, fiber, sodium, water, caffeine} for: "${prompt}"` }] }],
+                  generationConfig: { temperature: 0.15, responseMimeType: 'application/json' }
+                })
+              });
+              const data = await res.json();
+              const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+              const items = Array.isArray(parsed) ? parsed : [parsed];
+              items.forEach((it) => getActiveNutritionLogs().unshift({
+                name: it.name || 'Meal Item',
+                portion: it.portion || '',
+                meal: state.nutrition.mealTarget,
+                cal: Number(it.cal) || 0, p: Number(it.p) || 0, c: Number(it.c) || 0, f: Number(it.f) || 0,
+                micros: { fiber: Number(it.fiber) || 0, sodium: Number(it.sodium) || 0, water: Number(it.water) || 0, caffeine: Number(it.caffeine) || 0 }
+              }));
+              persistState(); render();
+              return;
+            } catch (err) {
+              btnEl.textContent = orig;
+              openModal('Gemini API Error', '<div class="text-[#FA114F] text-xs">Check your Gemini API key in Settings (⚙).</div>');
+              return;
+            }
+          }
+          const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
+          const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
+          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} }));
+          persistState(); render();
+        };
+        const inlineAiBtn = document.getElementById('btnInlineAiLog');
+        const inlineAiInp = document.getElementById('inlineAiMealInp');
+        if (inlineAiBtn && inlineAiInp) {
+          inlineAiBtn.addEventListener('click', () => runAiMealText(inlineAiInp.value.trim(), inlineAiBtn));
+          inlineAiInp.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') runAiMealText(inlineAiInp.value.trim(), inlineAiBtn);
+          });
+        }
+        const micBtn = document.getElementById('btnNutriMic');
+        if (micBtn) micBtn.addEventListener('click', () => {
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SR) {
+            const inp = document.getElementById('inlineAiMealInp');
+            if (inp) { inp.focus(); inp.placeholder = 'Tip: tap your iPhone keyboard mic to dictate!'; }
+            return;
+          }
+          const rec = new SR();
+          rec.lang = 'en-US';
+          rec.interimResults = false;
+          const st = document.getElementById('micStatusTxt');
+          if (st) st.classList.remove('hidden');
+          micBtn.classList.add('bg-[#FA114F]', 'text-white');
+          rec.onresult = (ev) => {
+            const transcript = ev.results[0][0].transcript;
+            if (inlineAiInp) inlineAiInp.value = transcript;
+            if (st) st.classList.add('hidden');
+            micBtn.classList.remove('bg-[#FA114F]', 'text-white');
+            runAiMealText(transcript, inlineAiBtn);
+          };
+          rec.onerror = () => {
+            if (st) st.classList.add('hidden');
+            micBtn.classList.remove('bg-[#FA114F]', 'text-white');
+          };
+          rec.onend = () => {
+            if (st) st.classList.add('hidden');
+            micBtn.classList.remove('bg-[#FA114F]', 'text-white');
+          };
+          rec.start();
+        });
+
         // Wire Today / Trends / Nutrients interactions
         root.querySelectorAll('.food-detail-btn').forEach((b) => b.addEventListener('click', () => {
           const item = getActiveNutritionLogs()[Number(b.dataset.idx)];
@@ -1964,8 +2162,8 @@
               <div class="grid grid-cols-4 gap-2 text-center bg-[#2C2C2E] rounded-xl p-2.5">
                 <div><div class="text-[10px] text-[#8E8E93]">Calories</div><div class="font-bold text-[#FA114F]">${Math.round(item.cal)}</div></div>
                 <div><div class="text-[10px] text-[#8E8E93]">Protein</div><div class="font-bold text-[#92E82A]">${Math.round(item.p)}g</div></div>
-                <div><div class="text-[10px] text-[#8E8E93]">Carbs</div><div class="font-bold text-[#00F5EA]">${Math.round(item.c)}g</div></div>
-                <div><div class="text-[10px] text-[#8E8E93]">Fat</div><div class="font-bold text-[#BF5AF2]">${Math.round(item.f)}g</div></div>
+                <div><div class="text-[10px] text-[#8E8E93]">Carbs</div><div class="font-bold text-[#D1D1D6]">${Math.round(item.c)}g</div></div>
+                <div><div class="text-[10px] text-[#8E8E93]">Fat</div><div class="font-bold text-[#A1A1AA]">${Math.round(item.f)}g</div></div>
               </div>
               ${nonZero.length ? `
                 <div class="max-h-60 overflow-y-auto space-y-1 border-t border-[#2C2C2E] pt-2">
@@ -2053,7 +2251,7 @@
             const done = state.completedDays.includes(idx);
             const split = getSplitType(d.day);
             return `
-              <div class="bg-[#161F09] border border-[#2A3B12] rounded-2xl p-3.5 flex flex-col justify-between">
+              <div class="bg-[#1C1C1E] border border-[#2C2C2E] rounded-2xl p-3.5 flex flex-col justify-between">
                 <div class="flex items-start justify-between mb-3">
                   <div class="text-[#92E82A]">${getSplitIcon(split, 'w-7 h-7')}</div>
                   <button class="start-day-btn w-8 h-8 rounded-full bg-[#92E82A] text-[#000000] flex items-center justify-center shadow" data-idx="${idx}" title="Start ${split}">
