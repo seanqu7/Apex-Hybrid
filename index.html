@@ -872,16 +872,33 @@
       if (!btn) return;
       btn.addEventListener('click', () => {
         const baseUrl = window.location.origin + window.location.pathname;
-        const shortcutUrl = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&sleep=86&readiness=8`;
+        const h = state.health;
+        const liveSyncedUrl = `${baseUrl}?health_sync=1&move=${Math.round(h.moveCal || 0)}&ex=${Math.round(h.exMin || 0)}&stand=${Math.round(h.standHr || 0)}&sleep_hrs=${cleanSleepHrs(h.sleepHrs) ?? 0}&sleep=${h.sleepScore ?? 86}&readiness=${h.readiness ?? 8}`;
+        const shortcutTemplate = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&sleep=86&readiness=8`;
         openModal('Apple Health Sync', `
           <div class="space-y-3 text-xs">
-            <div class="text-[#E5E5EA] leading-relaxed">Because iOS keeps Safari and Home Screen bookmarks separate, end your Shortcut with <strong>Copy to Clipboard</strong> instead of Open URLs, then tap below:</div>
-            <button id="btnPasteSyncHealth" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Paste Sync from Clipboard</button>
-            <div class="text-[11px] text-[#8E8E93] pt-1">Shortcut URL format:</div>
-            <div class="bg-[#0B0B0D] border border-[#2C2C2E] rounded-xl p-3 text-[11px] text-[#D1D1D6] break-all font-mono select-all">${shortcutUrl}</div>
-            <button id="btnCopyShortcutUrl" class="w-full py-2.5 rounded-xl bg-[#2C2C2E] text-white font-bold">Copy Shortcut URL</button>
+            <div class="text-[#E5E5EA] leading-relaxed">In your Shortcut, use <strong>Copy to Clipboard</strong> (instead of Open URLs), then paste below:</div>
+            <div class="flex gap-1.5">
+              <input id="inpManualPasteSync" type="text" placeholder="Tap & Paste synced URL here..." class="num-input text-left px-3 flex-1 text-xs" />
+              <button id="btnApplyManualPaste" class="px-3.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold shrink-0">Apply</button>
+            </div>
+            <button id="btnPasteSyncHealth" class="w-full py-2.5 rounded-xl bg-[#2C2C2E] text-white font-bold">Auto-Paste from Clipboard</button>
+            ${h.connected ? `
+              <button id="btnCopyLiveSync" class="w-full py-2.5 rounded-xl bg-[#2C2C2E] text-[#92E82A] font-bold">Copy Current Synced Data</button>
+            ` : ''}
+            <div class="text-[11px] text-[#8E8E93] pt-1">Shortcut URL template:</div>
+            <div class="bg-[#0B0B0D] border border-[#2C2C2E] rounded-xl p-2.5 text-[10px] text-[#D1D1D6] break-all font-mono select-all">${shortcutTemplate}</div>
           </div>
         `);
+        document.getElementById('btnApplyManualPaste').addEventListener('click', () => {
+          const val = document.getElementById('inpManualPasteSync').value.trim();
+          if (applyHealthQueryString(val)) {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            render();
+          } else {
+            openModal('Invalid Sync URL', '<div class="text-xs text-[#FA114F]">Make sure the pasted text contains ?health_sync=1&move=...</div>');
+          }
+        });
         document.getElementById('btnPasteSyncHealth').addEventListener('click', async () => {
           try {
             const clip = await navigator.clipboard.readText();
@@ -890,26 +907,15 @@
               render();
               return;
             }
-            openModal('Clipboard Empty or Invalid', '<div class="text-xs text-[#FA114F]">Run your Sync APEX HYBRID shortcut (with Copy to Clipboard) first, then tap Paste Sync.</div>');
+            document.getElementById('inpManualPasteSync').focus();
           } catch (e) {
-            openModal('Paste URL', `
-              <div class="space-y-2.5 text-xs">
-                <input id="inpManualPasteSync" type="text" placeholder="Paste your synced Shortcut URL here" class="num-input text-left px-3" />
-                <button id="btnApplyManualPaste" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Apply Sync</button>
-              </div>
-            `);
-            document.getElementById('btnApplyManualPaste').addEventListener('click', () => {
-              const val = document.getElementById('inpManualPasteSync').value.trim();
-              if (applyHealthQueryString(val)) {
-                document.getElementById('modalOverlay').classList.add('hidden');
-                render();
-              }
-            });
+            document.getElementById('inpManualPasteSync').focus();
           }
         });
-        document.getElementById('btnCopyShortcutUrl').addEventListener('click', async () => {
-          try { await navigator.clipboard.writeText(shortcutUrl); } catch (e) {}
-          document.getElementById('btnCopyShortcutUrl').textContent = 'Copied ✓';
+        const copyLiveBtn = document.getElementById('btnCopyLiveSync');
+        if (copyLiveBtn) copyLiveBtn.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(liveSyncedUrl); } catch (e) {}
+          copyLiveBtn.textContent = 'Copied Live Sync URL ✓';
         });
       });
     }
