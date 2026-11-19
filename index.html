@@ -730,7 +730,7 @@
       const r2 = 27, c2 = 2 * Math.PI * r2;
       const r3 = 18, c3 = 2 * Math.PI * r3;
 
-      const readyVal = h.readiness !== null ? h.readiness : '—';
+      const readyVal = h.readiness !== null ? Math.round(Number(h.readiness)) : '—';
       const readyLabel = h.readiness === null ? 'Tap to Connect' : (h.readiness >= 7 ? 'Ready' : h.readiness >= 5 ? 'Moderate' : 'Recover');
       const readyPct = h.readiness !== null ? Math.min(1, Math.max(0.05, h.readiness / 10)) : 0;
 
@@ -810,9 +810,9 @@
                 <div class="text-xs font-semibold text-white">Sleep Score</div>
                 <span class="text-[10px] font-bold text-[#8E8E93]">Health ↗</span>
               </div>
-              <div class="text-xl font-bold text-[#A1A1AA] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
+              <div class="text-xl font-bold text-[#38BDF8] tabular-nums">${sleepScoreDisp !== null ? `${sleepScoreDisp}` : '—'} <span class="text-xs font-medium text-[#8E8E93]">${sleepHrsDisp !== null ? `${sleepHrsDisp}h` : 'No data'}</span></div>
               <div class="flex items-end gap-1.5 h-8 mt-2">
-                ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#8E8E93]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
+                ${[45, 70, 55, 85, 65, 90, 75].map((pct) => `<div class="flex-1 rounded-sm ${h.sleepScore !== null ? 'bg-[#38BDF8]' : 'bg-[#2C2C2E]'}" style="height:${h.sleepScore !== null ? pct : 30}%"></div>`).join('')}
               </div>
             </a>
 
@@ -823,11 +823,11 @@
               </div>
               <svg class="w-28 h-14 mt-1" viewBox="0 0 100 54">
                 <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#2C2C2E" stroke-width="8" stroke-linecap="round" />
-                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#D1D1D6" stroke-width="8" stroke-linecap="round"
+                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#38BDF8" stroke-width="8" stroke-linecap="round"
                   stroke-dasharray="125.6" stroke-dashoffset="${125.6 * (1 - readyPct)}" />
               </svg>
               <div class="-mt-6 text-center">
-                <div class="text-lg font-bold text-[#D1D1D6] leading-none">${readyVal}</div>
+                <div class="text-lg font-bold text-[#38BDF8] leading-none">${readyVal}</div>
                 <div class="text-[10px] text-[#8E8E93] mt-0.5">${readyLabel}</div>
               </div>
             </a>
@@ -849,7 +849,7 @@
       if (hrs) score += Math.min(2.5, Math.max(-2.0, (hrs - 6.5) * 1.1));
       if (hrv && hrv > 0) score += Math.min(2.0, Math.max(-1.5, (hrv - 45) / 25));
       if (rhr && rhr > 0) score += Math.min(1.0, Math.max(-1.5, (62 - rhr) / 12));
-      return Math.min(10, Math.max(1, Number(score.toFixed(1))));
+      return Math.min(10, Math.max(1, Math.round(score)));
     }
 
     function applyHealthQueryString(rawStr) {
@@ -879,7 +879,7 @@
 
           const readyParam = p.get('readiness');
           if (readyParam && readyParam !== 'auto' && numParam('readiness') > 0) {
-            state.health.readiness = Math.min(10, Math.max(1, Number(numParam('readiness').toFixed(1))));
+            state.health.readiness = Math.min(10, Math.max(1, Math.round(numParam('readiness'))));
           } else {
             state.health.readiness = computeReadiness(hrs, hrv, rhr);
           }
