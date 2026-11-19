@@ -926,17 +926,119 @@
     }
 
     const USDA_GROUNDED_FOODS = [
-      { name: 'Chicken Breast (Cooked)', per100: { cal: 165, p: 31, c: 0, f: 3.6 } },
-      { name: 'White Rice (Cooked)', per100: { cal: 130, p: 2.7, c: 28, f: 0.3 } },
-      { name: 'Whole Eggs', per100: { cal: 143, p: 12.6, c: 0.7, f: 9.5 } },
-      { name: 'Whey Protein Isolate', per100: { cal: 370, p: 85, c: 3, f: 1 } },
-      { name: 'Rolled Oats (Dry)', per100: { cal: 389, p: 16.9, c: 66.3, f: 6.9 } },
-      { name: 'Greek Yogurt (0% Fat)', per100: { cal: 59, p: 10.2, c: 3.6, f: 0.4 } },
-      { name: 'Atlantic Salmon', per100: { cal: 208, p: 20, c: 0, f: 13 } },
-      { name: 'Avocado', per100: { cal: 160, p: 2, c: 8.5, f: 14.7 } },
-      { name: 'Banana', per100: { cal: 89, p: 1.1, c: 22.8, f: 0.3 } },
-      { name: 'Extra Virgin Olive Oil', per100: { cal: 884, p: 0, c: 0, f: 100 } },
+      { name: 'Chicken Breast (Cooked)', keys: ['chicken breast', 'chicken', 'grilled chicken'], servingG: 140, servingLbl: '5 oz', per100: { cal: 165, p: 31, c: 0, f: 3.6, sodium: 74 } },
+      { name: 'Chicken Thigh (Cooked)', keys: ['chicken thigh', 'thighs'], servingG: 115, servingLbl: '4 oz', per100: { cal: 209, p: 26, c: 0, f: 10.9, sodium: 84 } },
+      { name: 'Ground Beef (93% Lean)', keys: ['ground beef', 'beef', '93/7'], servingG: 113, servingLbl: '4 oz', per100: { cal: 196, p: 26, c: 0, f: 9.5, sodium: 75 } },
+      { name: 'Steak / Sirloin (Cooked)', keys: ['steak', 'sirloin', 'ribeye', 'filet'], servingG: 170, servingLbl: '6 oz', per100: { cal: 212, p: 27, c: 0, f: 11, sodium: 60 } },
+      { name: 'Ground Turkey (93% Lean)', keys: ['turkey', 'ground turkey'], servingG: 113, servingLbl: '4 oz', per100: { cal: 170, p: 24, c: 0, f: 8, sodium: 85 } },
+      { name: 'Atlantic Salmon (Cooked)', keys: ['salmon'], servingG: 140, servingLbl: '5 oz', per100: { cal: 208, p: 20, c: 0, f: 13, sodium: 59 } },
+      { name: 'Tuna (Canned in Water)', keys: ['tuna'], servingG: 113, servingLbl: '1 can', per100: { cal: 116, p: 25.5, c: 0, f: 0.8, sodium: 247 } },
+      { name: 'Shrimp (Cooked)', keys: ['shrimp'], servingG: 113, servingLbl: '4 oz', per100: { cal: 99, p: 24, c: 0.2, f: 0.3, sodium: 111 } },
+      { name: 'Whole Egg', keys: ['egg', 'eggs', 'scrambled egg', 'fried egg'], servingG: 50, servingLbl: '1 egg', per100: { cal: 143, p: 12.6, c: 0.7, f: 9.5, sodium: 142 } },
+      { name: 'Egg Whites', keys: ['egg white', 'egg whites'], servingG: 46, servingLbl: '1 large white', per100: { cal: 52, p: 10.9, c: 0.7, f: 0.2, sodium: 166 } },
+      { name: 'Canadian Bacon', keys: ['canadian bacon'], servingG: 17, servingLbl: '1 slice', per100: { cal: 100, p: 18, c: 0, f: 2, sodium: 745 } },
+      { name: 'Bacon (Cooked)', keys: ['bacon'], servingG: 8, servingLbl: '1 slice', per100: { cal: 541, p: 37, c: 1.4, f: 42, sodium: 1717 } },
+      { name: 'Whey Protein Isolate', keys: ['whey', 'protein powder', 'protein shake', 'scoop'], servingG: 32, servingLbl: '1 scoop', per100: { cal: 370, p: 85, c: 3, f: 1, sodium: 160 } },
+      { name: 'Greek Yogurt (0% Fat)', keys: ['greek yogurt', 'yogurt'], servingG: 170, servingLbl: '1 cup', per100: { cal: 59, p: 10.2, c: 3.6, f: 0.4, sodium: 36 } },
+      { name: 'Cottage Cheese (Low Fat)', keys: ['cottage cheese'], servingG: 113, servingLbl: '1/2 cup', per100: { cal: 81, p: 11, c: 4.3, f: 2.3, sodium: 330 } },
+      { name: 'Cheddar Cheese', keys: ['cheddar', 'cheese'], servingG: 28, servingLbl: '1 oz', per100: { cal: 403, p: 25, c: 1.3, f: 33, sodium: 621 } },
+      { name: 'Whole Milk', keys: ['whole milk', 'milk'], servingG: 244, servingLbl: '1 cup', per100: { cal: 61, p: 3.2, c: 4.8, f: 3.3, water: 3.0, sodium: 43 } },
+      { name: 'Almond Milk (Unsweetened)', keys: ['almond milk'], servingG: 240, servingLbl: '1 cup', per100: { cal: 15, p: 0.6, c: 0.6, f: 1.1, water: 3.2, sodium: 63 } },
+      { name: 'White Rice (Cooked)', keys: ['white rice', 'rice', 'jasmine rice'], servingG: 158, servingLbl: '1 cup', per100: { cal: 130, p: 2.7, c: 28, f: 0.3, fiber: 0.4 } },
+      { name: 'Brown Rice (Cooked)', keys: ['brown rice'], servingG: 195, servingLbl: '1 cup', per100: { cal: 111, p: 2.6, c: 23, f: 0.9, fiber: 1.8 } },
+      { name: 'Rolled Oats (Dry)', keys: ['oats', 'oatmeal', 'rolled oats'], servingG: 40, servingLbl: '1/2 cup dry', per100: { cal: 389, p: 16.9, c: 66.3, f: 6.9, fiber: 10.6 } },
+      { name: 'Sourdough / Bread Slice', keys: ['sourdough', 'toast', 'bread', 'slice of bread'], servingG: 36, servingLbl: '1 slice', per100: { cal: 265, p: 9, c: 51, f: 1.5, fiber: 2.4, sodium: 520 } },
+      { name: 'Bagel', keys: ['bagel'], servingG: 95, servingLbl: '1 bagel', per100: { cal: 257, p: 10, c: 50, f: 1.6, fiber: 2.3, sodium: 430 } },
+      { name: 'Flour Tortilla', keys: ['tortilla', 'wrap'], servingG: 45, servingLbl: '1 tortilla', per100: { cal: 306, p: 8.2, c: 50, f: 8, fiber: 2.5, sodium: 610 } },
+      { name: 'Pasta (Cooked)', keys: ['pasta', 'spaghetti', 'noodles'], servingG: 140, servingLbl: '1 cup', per100: { cal: 131, p: 5, c: 25, f: 1.1, fiber: 1.8 } },
+      { name: 'Potato (Baked)', keys: ['potato', 'potatoes'], servingG: 173, servingLbl: '1 medium', per100: { cal: 93, p: 2.5, c: 21, f: 0.1, fiber: 2.2 } },
+      { name: 'Sweet Potato (Baked)', keys: ['sweet potato', 'yam'], servingG: 130, servingLbl: '1 medium', per100: { cal: 90, p: 2, c: 21, f: 0.1, fiber: 3.3 } },
+      { name: 'Banana', keys: ['banana'], servingG: 118, servingLbl: '1 medium', per100: { cal: 89, p: 1.1, c: 22.8, f: 0.3, fiber: 2.6 } },
+      { name: 'Apple', keys: ['apple'], servingG: 182, servingLbl: '1 medium', per100: { cal: 52, p: 0.3, c: 13.8, f: 0.2, fiber: 2.4 } },
+      { name: 'Blueberries / Berries', keys: ['berries', 'blueberries', 'strawberries'], servingG: 148, servingLbl: '1 cup', per100: { cal: 57, p: 0.7, c: 14.5, f: 0.3, fiber: 2.4 } },
+      { name: 'Avocado', keys: ['avocado'], servingG: 75, servingLbl: '1/2 avocado', per100: { cal: 160, p: 2, c: 8.5, f: 14.7, fiber: 6.7 } },
+      { name: 'Broccoli (Cooked)', keys: ['broccoli'], servingG: 91, servingLbl: '1 cup', per100: { cal: 35, p: 2.4, c: 7.2, f: 0.4, fiber: 3.3 } },
+      { name: 'Spinach / Mixed Greens', keys: ['spinach', 'salad', 'greens'], servingG: 60, servingLbl: '2 cups', per100: { cal: 23, p: 2.9, c: 3.6, f: 0.4, fiber: 2.2 } },
+      { name: 'Extra Virgin Olive Oil', keys: ['olive oil', 'oil'], servingG: 14, servingLbl: '1 tbsp', per100: { cal: 884, p: 0, c: 0, f: 100 } },
+      { name: 'Butter', keys: ['butter'], servingG: 14, servingLbl: '1 tbsp', per100: { cal: 717, p: 0.9, c: 0.1, f: 81, sodium: 643 } },
+      { name: 'Peanut Butter', keys: ['peanut butter', 'almond butter'], servingG: 32, servingLbl: '2 tbsp', per100: { cal: 588, p: 25, c: 20, f: 50, fiber: 6, sodium: 429 } },
+      { name: 'Almonds', keys: ['almonds', 'nuts'], servingG: 28, servingLbl: '1 oz', per100: { cal: 579, p: 21, c: 22, f: 50, fiber: 12.5 } },
+      { name: 'Honey / Maple Syrup', keys: ['honey', 'maple syrup', 'syrup'], servingG: 21, servingLbl: '1 tbsp', per100: { cal: 304, p: 0.3, c: 82, f: 0 } },
+      { name: 'Black Coffee', keys: ['black coffee', 'coffee', 'espresso', 'americano'], servingG: 240, servingLbl: '8 oz', per100: { cal: 1, p: 0.1, c: 0, f: 0, water: 3.3, caffeine: 40 } },
+      { name: 'Protein Bar', keys: ['protein bar'], servingG: 60, servingLbl: '1 bar', per100: { cal: 350, p: 33, c: 36, f: 11, fiber: 8, sodium: 250 } },
     ];
+
+    function parseLocalMealDescription(prompt) {
+      const chunks = String(prompt || '')
+        .split(/,|\band\b|\+|&|\n/i)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      const parsed = [];
+      const unmatched = [];
+
+      chunks.forEach((rawChunk) => {
+        const lower = rawChunk.toLowerCase();
+        // Match longest keyword first
+        let bestFood = null, bestLen = 0;
+        USDA_GROUNDED_FOODS.forEach((f) => {
+          (f.keys || [f.name.toLowerCase()]).forEach((k) => {
+            if (lower.includes(k) && k.length > bestLen) {
+              bestFood = f; bestLen = k.length;
+            }
+          });
+        });
+        if (!bestFood) { unmatched.push(rawChunk); return; }
+
+        // Parse quantity + unit
+        let grams = bestFood.servingG || 100;
+        let portionLbl = bestFood.servingLbl || '1 serving';
+        const gMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:g|grams?)\b/);
+        const ozMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:oz|ounces?)\b/);
+        const tbspMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:tbsp|tablespoons?)\b/);
+        const tspMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:tsp|teaspoons?)\b/);
+        const qtyMatch = lower.match(/^(\d+(?:\.\d+)?)\b/);
+
+        if (gMatch) {
+          grams = Number(gMatch[1]);
+          portionLbl = `${grams}g`;
+        } else if (ozMatch) {
+          const oz = Number(ozMatch[1]);
+          grams = oz * 28.35;
+          portionLbl = `${oz} oz`;
+        } else if (tbspMatch) {
+          const tb = Number(tbspMatch[1]);
+          grams = tb * 14;
+          portionLbl = `${tb} tbsp`;
+        } else if (tspMatch) {
+          const ts = Number(tspMatch[1]);
+          grams = ts * 4.7;
+          portionLbl = `${ts} tsp`;
+        } else if (qtyMatch) {
+          const q = Number(qtyMatch[1]);
+          grams = (bestFood.servingG || 100) * q;
+          portionLbl = `${q} × ${bestFood.servingLbl || '100g'}`;
+        }
+
+        const mult = grams / 100;
+        const p100 = bestFood.per100;
+        parsed.push({
+          name: bestFood.name,
+          portion: portionLbl,
+          cal: Math.round((p100.cal || 0) * mult),
+          p: Math.round((p100.p || 0) * mult * 10) / 10,
+          c: Math.round((p100.c || 0) * mult * 10) / 10,
+          f: Math.round((p100.f || 0) * mult * 10) / 10,
+          micros: {
+            fiber: Math.round((p100.fiber || 0) * mult * 10) / 10,
+            sodium: Math.round((p100.sodium || 0) * mult),
+            water: Math.round((p100.water || 0) * mult * 10) / 10,
+            caffeine: Math.round((p100.caffeine || 0) * mult),
+          }
+        });
+      });
+
+      return { parsed, unmatched };
+    }
 
     const SAVED_MEALS_PRESETS = [
       { name: 'Post-Workout Whey & Banana', meal: 'Snacks', cal: 225, p: 29, c: 25, f: 1 },
@@ -1716,10 +1818,12 @@
 
             <!-- FoodNoms-Style Voice / AI Meal Bar -->
             <div class="bg-[#1C1C1E] rounded-[20px] p-3 mb-3">
-              <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-1.5">
-                  <span class="text-xs font-bold text-white">Quick AI Log</span>
-                  <span class="text-[10px] text-[#8E8E93]">→ ${state.nutrition.mealTarget}</span>
+              <div class="flex items-center justify-between mb-2 gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-white">AI Meal Log</span>
+                  <button id="btnInlineGeminiKey" class="px-2 py-0.5 rounded-full text-[10px] font-bold ${state.nutrition.geminiKey ? 'bg-[#92E82A]/15 text-[#92E82A]' : 'bg-[#2C2C2E] text-[#8E8E93]'}">
+                    ${state.nutrition.geminiKey ? '● Gemini AI' : '+ Add Gemini Key'}
+                  </button>
                 </div>
                 <select id="inlineMealTarget" class="bg-[#2C2C2E] text-[#92E82A] text-[11px] font-bold rounded-full px-2.5 py-1 outline-none">
                   ${['Breakfast', 'Lunch', 'Dinner', 'Pre-Workout', 'Post-Workout', 'Snack'].map((m) => `<option value="${m}" ${state.nutrition.mealTarget === m ? 'selected' : ''}>${m}</option>`).join('')}
@@ -2084,42 +2188,124 @@
           const inp = document.getElementById('inlineAiMealInp');
           if (inp) inp.focus();
         }));
+        const showAiMealReviewModal = (items, unmatched) => {
+          if (!items.length) {
+            openModal('Could Not Match Meal', `
+              <div class="space-y-3 text-xs">
+                <div class="text-[#E5E5EA]">No local match found for: <strong class="text-white">${unmatched.join(', ')}</strong></div>
+                <div class="text-[#8E8E93]">Add a free <strong>Gemini API Key</strong> so AI can look up exact calories & macros for any meal or restaurant food.</div>
+                <input id="revGeminiKey" type="password" placeholder="Paste Gemini API Key (AIza...)" class="num-input text-left px-3" />
+                <button id="btnSaveRevKey" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Save Key & Re-Analyze</button>
+              </div>
+            `);
+            document.getElementById('btnSaveRevKey').addEventListener('click', () => {
+              const k = document.getElementById('revGeminiKey').value.trim();
+              if (!k) return;
+              state.nutrition.geminiKey = k;
+              persistState();
+              document.getElementById('modalOverlay').classList.add('hidden');
+              render();
+            });
+            return;
+          }
+
+          const totalCal = Math.round(items.reduce((s, x) => s + (Number(x.cal) || 0), 0));
+          const totalP = Math.round(items.reduce((s, x) => s + (Number(x.p) || 0), 0));
+          const totalC = Math.round(items.reduce((s, x) => s + (Number(x.c) || 0), 0));
+          const totalF = Math.round(items.reduce((s, x) => s + (Number(x.f) || 0), 0));
+
+          openModal(`Review ${state.nutrition.mealTarget} (${totalCal} Cal)`, `
+            <div class="space-y-2.5 text-xs">
+              <div class="text-[#8E8E93]">${totalCal} Cal • ${totalP}P / ${totalC}C / ${totalF}F${unmatched && unmatched.length ? ` • Unmatched: ${unmatched.join(', ')}` : ''}</div>
+              <div class="space-y-2 max-h-60 overflow-y-auto">
+                ${items.map((it, idx) => `
+                  <div class="bg-[#2C2C2E] rounded-xl p-2.5 space-y-1.5">
+                    <div class="flex justify-between font-bold text-white">
+                      <span>${it.name}</span>
+                      <span class="text-[#8E8E93] font-normal">${it.portion || ''}</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1.5">
+                      <div><label class="text-[9px] text-[#8E8E93]">CAL</label><input class="ai-rev-cal num-input h-8 text-xs" data-idx="${idx}" type="number" value="${Math.round(it.cal || 0)}" /></div>
+                      <div><label class="text-[9px] text-[#8E8E93]">P (g)</label><input class="ai-rev-p num-input h-8 text-xs" data-idx="${idx}" type="number" value="${Math.round(it.p || 0)}" /></div>
+                      <div><label class="text-[9px] text-[#8E8E93]">C (g)</label><input class="ai-rev-c num-input h-8 text-xs" data-idx="${idx}" type="number" value="${Math.round(it.c || 0)}" /></div>
+                      <div><label class="text-[9px] text-[#8E8E93]">F (g)</label><input class="ai-rev-f num-input h-8 text-xs" data-idx="${idx}" type="number" value="${Math.round(it.f || 0)}" /></div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+              <button id="btnConfirmAiItems" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Add to ${state.nutrition.mealTarget}</button>
+            </div>
+          `);
+          document.getElementById('btnConfirmAiItems').addEventListener('click', () => {
+            items.forEach((it, idx) => {
+              const cal = Number(document.querySelector(`.ai-rev-cal[data-idx="${idx}"]`)?.value ?? it.cal) || 0;
+              const p = Number(document.querySelector(`.ai-rev-p[data-idx="${idx}"]`)?.value ?? it.p) || 0;
+              const c = Number(document.querySelector(`.ai-rev-c[data-idx="${idx}"]`)?.value ?? it.c) || 0;
+              const f = Number(document.querySelector(`.ai-rev-f[data-idx="${idx}"]`)?.value ?? it.f) || 0;
+              getActiveNutritionLogs().unshift({
+                name: it.name,
+                portion: it.portion || '',
+                meal: state.nutrition.mealTarget,
+                cal, p, c, f,
+                micros: it.micros || {}
+              });
+            });
+            document.getElementById('modalOverlay').classList.add('hidden');
+            persistState(); render();
+          });
+        };
+
+        const gKeyBtn = document.getElementById('btnInlineGeminiKey');
+        if (gKeyBtn) gKeyBtn.addEventListener('click', () => {
+          openModal('Gemini AI Nutrition Key', `
+            <div class="space-y-3 text-xs">
+              <div class="text-[#8E8E93]">Paste your Google Gemini API key (stored locally on your device) to enable full AI meal, portion, and restaurant calorie analysis.</div>
+              <input id="inlineGKeyInp" type="password" value="${state.nutrition.geminiKey || ''}" placeholder="AIza..." class="num-input text-left px-3" />
+              <button id="btnSaveInlineGKey" class="w-full py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Save Gemini Key</button>
+            </div>
+          `);
+          document.getElementById('btnSaveInlineGKey').addEventListener('click', () => {
+            state.nutrition.geminiKey = document.getElementById('inlineGKeyInp').value.trim();
+            persistState();
+            document.getElementById('modalOverlay').classList.add('hidden');
+            render();
+          });
+        });
+
         const runAiMealText = async (prompt, btnEl) => {
           if (!prompt) return;
           if (state.nutrition.geminiKey) {
             const orig = btnEl.textContent;
-            btnEl.textContent = '...';
+            btnEl.textContent = 'Analyzing...';
             try {
               const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  contents: [{ parts: [{ text: `Return JSON array of {name, portion, cal, p, c, f, fiber, sodium, water, caffeine} for: "${prompt}"` }] }],
-                  generationConfig: { temperature: 0.15, responseMimeType: 'application/json' }
+                  contents: [{ parts: [{ text: `You are a USDA nutritionist. Break down this meal into individual foods with accurate USDA calories and macros. Return ONLY a JSON array of objects with keys: name (string), portion (string), cal (number), p (number), c (number), f (number), fiber (number), sodium (number in mg), water (number in fl oz), caffeine (number in mg). Meal: "${prompt}"` }] }],
+                  generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
                 })
               });
               const data = await res.json();
+              if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error(data.error?.message || 'API error');
               const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-              const items = Array.isArray(parsed) ? parsed : [parsed];
-              items.forEach((it) => getActiveNutritionLogs().unshift({
+              const items = (Array.isArray(parsed) ? parsed : [parsed]).map((it) => ({
                 name: it.name || 'Meal Item',
                 portion: it.portion || '',
-                meal: state.nutrition.mealTarget,
                 cal: Number(it.cal) || 0, p: Number(it.p) || 0, c: Number(it.c) || 0, f: Number(it.f) || 0,
                 micros: { fiber: Number(it.fiber) || 0, sodium: Number(it.sodium) || 0, water: Number(it.water) || 0, caffeine: Number(it.caffeine) || 0 }
               }));
-              persistState(); render();
+              btnEl.textContent = orig;
+              showAiMealReviewModal(items, []);
               return;
             } catch (err) {
               btnEl.textContent = orig;
-              openModal('Gemini API Error', '<div class="text-[#FA114F] text-xs">Check your Gemini API key in Settings (⚙).</div>');
+              openModal('Gemini AI Error', `<div class="text-[#FA114F] text-xs">${err.message || 'Could not reach Gemini API. Check your Gemini key.'}</div>`);
               return;
             }
           }
-          const matched = USDA_GROUNDED_FOODS.filter((f) => prompt.toLowerCase().includes(f.name.split(' ')[0].toLowerCase()));
-          const list = matched.length ? matched : [USDA_GROUNDED_FOODS[0], USDA_GROUNDED_FOODS[1]];
-          list.forEach((f) => getActiveNutritionLogs().unshift({ name: `${f.name} (100g)`, meal: state.nutrition.mealTarget, cal: f.per100.cal, p: f.per100.p, c: f.per100.c, f: f.per100.f, micros: {} }));
-          persistState(); render();
+          const localRes = parseLocalMealDescription(prompt);
+          showAiMealReviewModal(localRes.parsed, localRes.unmatched);
         };
         const inlineAiBtn = document.getElementById('btnInlineAiLog');
         const inlineAiInp = document.getElementById('inlineAiMealInp');
