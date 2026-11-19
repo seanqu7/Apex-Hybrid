@@ -836,6 +836,22 @@
       `;
     }
 
+    function computeSleepScore(hrs) {
+      if (!hrs || hrs <= 0) return null;
+      // Optimal 7.5–8.5h -> 88–98; scale smoothly below 7.5h
+      if (hrs >= 8) return Math.min(99, Math.round(92 + Math.min(7, (hrs - 8) * 4)));
+      if (hrs >= 7) return Math.round(80 + (hrs - 7) * 12);
+      return Math.max(35, Math.round((hrs / 7) * 80));
+    }
+
+    function computeReadiness(hrs, hrv, rhr) {
+      let score = 5.0;
+      if (hrs) score += Math.min(2.5, Math.max(-2.0, (hrs - 6.5) * 1.1));
+      if (hrv && hrv > 0) score += Math.min(2.0, Math.max(-1.5, (hrv - 45) / 25));
+      if (rhr && rhr > 0) score += Math.min(1.0, Math.max(-1.5, (62 - rhr) / 12));
+      return Math.min(10, Math.max(1, Number(score.toFixed(1))));
+    }
+
     function applyHealthQueryString(rawStr) {
       try {
         const q = rawStr.includes('?') ? rawStr.slice(rawStr.indexOf('?')) : rawStr;
@@ -844,14 +860,29 @@
           const v = parseFloat(String(p.get(k) || '').replace(/[^0-9.\-]/g, ''));
           return Number.isFinite(v) ? v : 0;
         };
-        if (p.has('move') || p.has('ex') || p.has('stand') || p.has('sleep') || p.has('health_sync')) {
+        if (p.has('move') || p.has('ex') || p.has('stand') || p.has('sleep') || p.has('sleep_hrs') || p.has('hrv') || p.has('health_sync')) {
           state.health.connected = true;
           if (p.has('move')) state.health.moveCal = Math.round(numParam('move'));
           if (p.has('ex')) state.health.exMin = Math.round(numParam('ex'));
           if (p.has('stand')) state.health.standHr = Math.round(numParam('stand'));
-          if (p.has('sleep')) state.health.sleepScore = Math.min(100, Math.max(0, Math.round(numParam('sleep')) || 84));
-          if (p.has('sleep_hrs')) state.health.sleepHrs = cleanSleepHrs(p.get('sleep_hrs')) ?? 7.5;
-          if (p.has('readiness')) state.health.readiness = Math.min(10, Math.max(1, Number(numParam('readiness').toFixed(1)) || 8));
+          const hrs = p.has('sleep_hrs') ? cleanSleepHrs(p.get('sleep_hrs')) : state.health.sleepHrs;
+          if (hrs !== null) state.health.sleepHrs = hrs;
+          const hrv = p.has('hrv') ? numParam('hrv') : null;
+          const rhr = p.has('rhr') ? numParam('rhr') : null;
+
+          const sleepParam = p.get('sleep');
+          if (sleepParam && sleepParam !== 'auto' && numParam('sleep') > 0) {
+            state.health.sleepScore = Math.min(100, Math.max(0, Math.round(numParam('sleep'))));
+          } else if (hrs !== null) {
+            state.health.sleepScore = computeSleepScore(hrs);
+          }
+
+          const readyParam = p.get('readiness');
+          if (readyParam && readyParam !== 'auto' && numParam('readiness') > 0) {
+            state.health.readiness = Math.min(10, Math.max(1, Number(numParam('readiness').toFixed(1))));
+          } else {
+            state.health.readiness = computeReadiness(hrs, hrv, rhr);
+          }
           persistState();
           return true;
         }
@@ -874,7 +905,7 @@
         const baseUrl = window.location.origin + window.location.pathname;
         const h = state.health;
         const liveSyncedUrl = `${baseUrl}?health_sync=1&move=${Math.round(h.moveCal || 0)}&ex=${Math.round(h.exMin || 0)}&stand=${Math.round(h.standHr || 0)}&sleep_hrs=${cleanSleepHrs(h.sleepHrs) ?? 0}&sleep=${h.sleepScore ?? 86}&readiness=${h.readiness ?? 8}`;
-        const shortcutTemplate = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&sleep=86&readiness=8`;
+        const shortcutTemplate = `${baseUrl}?health_sync=1&move=[Move]&ex=[Exercise]&stand=[Stand]&sleep_hrs=[Sleep]&hrv=[HRV]&rhr=[RHR]`;
         openModal('Apple Health Sync', `
           <div class="space-y-3 text-xs">
             <div class="text-[#E5E5EA] leading-relaxed">In your Shortcut, use <strong>Copy to Clipboard</strong> (instead of Open URLs), then paste below:</div>
