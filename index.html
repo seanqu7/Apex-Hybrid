@@ -229,17 +229,8 @@
 
       <!-- CENTER/RIGHT WORKSPACE PANE -->
       <main class="right-pane">
-        <div id="mainContent" class="scroll-area"></div>
-
-        <!-- Docked Start Workout Footer (Today tab) -->
-        <div id="todayFooter" class="hidden px-4 pt-2.5 bg-[#000000]/95 border-t border-[#1C1C1E]" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
-          <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#E5E5EA] text-[#0B0B0D] font-bold text-sm tracking-wide shadow-lg">
-            START WORKOUT
-          </button>
-        </div>
-
         <!-- Floating Rest Timer Bar -->
-        <div id="restTimerBar" class="hidden bg-[#2C2C2E] border-t border-[#2D2D37] px-4 py-2.5 relative">
+        <div id="restTimerBar" class="hidden bg-[#2C2C2E] border-b border-[#2D2D37] shrink-0 px-4 py-2.5 relative">
           <div id="restProgress" class="absolute top-0 left-0 h-[3px] bg-[#92E82A] transition-all" style="width: 100%"></div>
           <div class="flex items-center justify-between gap-2">
             <div class="min-w-0">
@@ -257,6 +248,17 @@
             </div>
           </div>
         </div>
+
+        <div id="mainContent" class="scroll-area"></div>
+
+        <!-- Docked Start Workout Footer (Today tab) -->
+        <div id="todayFooter" class="hidden px-4 pt-2.5 bg-[#000000]/95 border-t border-[#1C1C1E]" style="padding-bottom: max(10px, env(safe-area-inset-bottom));">
+          <button id="btnStartToday" class="w-full py-3.5 rounded-full bg-[#E5E5EA] text-[#0B0B0D] font-bold text-sm tracking-wide shadow-lg">
+            START WORKOUT
+          </button>
+        </div>
+
+
       </main>
 
       <!-- FAR-RIGHT VERTICAL ICON RAIL (Duo Mode) -->
@@ -669,6 +671,8 @@
       peakWeights: saved.peakWeights || {},
       lastExerciseSets: saved.lastExerciseSets || {},
       timerExpanded: false,
+      todayWeekOffset: 0,
+      woElapsedInterval: null,
       roundNumber: saved.roundNumber || 1,
       savedRounds: Array.isArray(saved.savedRounds) ? saved.savedRounds : [],
       nutrition: saved.nutrition || {
@@ -748,6 +752,7 @@
         sets: doneSets,
         volume: Math.round(vol),
         date: new Date().toLocaleDateString(),
+        durationMin: Math.max(1, Math.round((sess.elapsedSec || 0) / 60)),
         isoDate: getLocalTodayStr(),
         exercises: exercisesSnapshot
       };
@@ -768,7 +773,7 @@
         }));
         return { exId: item.exId, rx: item, sets, loadMode: 'added', sugDismissed: false, activeRpeSetIdx: null };
       });
-      state.activeSession = { sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, dayIdx, title: `WEEK ${state.selectedWeek} • ${day.name}`, startedAt: Date.now(), exercises };
+      state.activeSession = { sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, dayIdx, title: `WEEK ${state.selectedWeek} • ${day.name}`, startedAt: Date.now(), elapsedSec: 0, lastTickMs: Date.now(), paused: false, exercises };
       switchTab('train');
     }
 
@@ -805,6 +810,32 @@
         lpRing.setAttribute('stroke-dashoffset', String(c * (1 - Math.min(1, left / Math.max(1, rt.total)))));
       }
     }
+
+    function formatWoClock(sec) {
+      const s = Math.max(0, Math.floor(sec || 0));
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const r = s % 60;
+      return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(r).padStart(2, '0')}` : `${m}:${String(r).padStart(2, '0')}`;
+    }
+
+    function tickWorkoutClock() {
+      const sess = state.activeSession;
+      if (!sess) return;
+      const now = Date.now();
+      if (!sess.paused) {
+        const dt = Math.max(0, Math.floor((now - (sess.lastTickMs || now)) / 1000));
+        if (dt > 0) {
+          sess.elapsedSec = (sess.elapsedSec || 0) + dt;
+          sess.lastTickMs = now;
+        }
+      } else {
+        sess.lastTickMs = now;
+      }
+      const el = document.getElementById('woElapsedClock');
+      if (el) el.textContent = formatWoClock(sess.elapsedSec || 0);
+    }
+    if (typeof setInterval === 'function') setInterval(tickWorkoutClock, 1000);
 
     document.getElementById('btnRestMinus').addEventListener('click', () => {
       if (!state.restTimer.running) return;
@@ -878,7 +909,7 @@
         <div class="mb-4">
           <div class="flex items-center justify-between mb-2.5">
             <div class="text-lg font-bold tracking-tight text-white">Summary</div>
-            <button id="btnHealthConnect" class="px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-[#92E82A] border border-[#2C2C2E]">
+            <button class="health-connect-btn px-3 py-1 rounded-full text-[11px] font-bold bg-[#1C1C1E] text-[#92E82A] border border-[#2C2C2E]">
               Health
             </button>
           </div>
@@ -930,8 +961,8 @@
           <!-- Nutrition Macro Strip -->
           <div class="bg-[#1C1C1E] rounded-[20px] p-3.5">
             <div class="flex items-center justify-between mb-2">
-              <div class="text-xs font-semibold text-white">Nutrition</div>
-              <button id="btnGoNutri" class="text-[11px] font-bold text-[#92E82A]">Log Meal →</button>
+              <div class="text-xs font-semibold text-white">Nutrition <span class="text-[10px] font-normal text-[#8E8E93]">• ${getActiveNutritionDate()}</span></div>
+              <button class="go-nutri-btn text-[11px] font-bold text-[#92E82A]">Log Meal →</button>
             </div>
             <div class="grid grid-cols-4 gap-2 text-center">
               <div class="bg-[#2C2C2E]/70 rounded-xl py-1.5 px-1">
@@ -1017,11 +1048,13 @@
     })();
 
     function wireHealthButton() {
-      const goN = document.getElementById('btnGoNutri');
-      if (goN) goN.addEventListener('click', () => switchTab('nutrition'));
-      const btn = document.getElementById('btnHealthConnect');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
+      document.querySelectorAll('.go-nutri-btn').forEach((goN) => {
+        if (!goN.dataset.wired) { goN.dataset.wired = '1'; goN.addEventListener('click', () => switchTab('nutrition')); }
+      });
+      document.querySelectorAll('.health-connect-btn').forEach((btn) => {
+        if (btn.dataset.wired) return;
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', () => {
         const baseUrl = window.location.origin + window.location.pathname;
         const h = state.health;
         const liveSyncedUrl = `${baseUrl}?health_sync=1&move=${Math.round(h.moveCal || 0)}&ex=${Math.round(h.exMin || 0)}&stand=${Math.round(h.standHr || 0)}`;
@@ -1067,6 +1100,7 @@
         if (copyLiveBtn) copyLiveBtn.addEventListener('click', async () => {
           try { await navigator.clipboard.writeText(liveSyncedUrl); } catch (e) {}
           copyLiveBtn.textContent = 'Copied Live Sync URL ✓';
+        });
         });
       });
     }
@@ -1841,29 +1875,36 @@
           const d = new Date(h.date);
           return !isNaN(d.getTime()) ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         }).filter(Boolean));
+        const selDate = getActiveNutritionDate();
+        const weekShift = (state.todayWeekOffset || 0) * 7;
         const monSunDays = [];
         for (let i = 0; i < 7; i++) {
-          const dStr = shiftDateStr(todayStr, i - dow);
+          const dStr = shiftDateStr(todayStr, i - dow + weekShift);
           monSunDays.push({
             date: dStr,
             lbl: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i],
             num: Number(dStr.slice(8)),
             isToday: dStr === todayStr,
+            isSel: dStr === selDate,
             didWork: workoutDays.has(dStr)
           });
         }
+        const selDayWorkouts = (state.history || []).filter((h) => h.isoDate === selDate);
 
         root.innerHTML = `
-          <!-- Clean Mon-Sun Strip + Calendar Trigger -->
-          <div class="flex items-center justify-between mb-3">
-            <div class="grid grid-cols-7 gap-1 flex-1 mr-2">
+          <!-- Interactive Scrollable Mon-Sun Strip + Red Dots + Calendar -->
+          <div class="flex items-center justify-between mb-3 gap-1">
+            <button id="btnWeekPrev" class="w-7 h-9 rounded-xl bg-[#1C1C1E] text-[#8E8E93] hover:text-white font-bold text-sm flex items-center justify-center shrink-0">‹</button>
+            <div class="grid grid-cols-7 gap-1 flex-1">
               ${monSunDays.map((d) => `
-                <div class="text-center py-1 rounded-xl ${d.isToday ? 'bg-[#92E82A] text-[#000000]' : (d.didWork ? 'bg-[#92E82A]/20 text-[#92E82A]' : 'text-[#8E8E93]')}">
-                  <div class="text-[9px] font-bold tracking-wider">${d.lbl}</div>
-                  <div class="text-xs font-extrabold tabular-nums mt-0.5">${d.num}</div>
-                </div>
+                <button class="today-cal-day flex flex-col items-center justify-center py-1 rounded-xl ${d.isSel ? 'bg-[#FA114F] text-white shadow' : (d.didWork ? 'bg-[#FA114F]/15 text-white' : 'text-[#8E8E93]')}" data-date="${d.date}">
+                  <span class="w-1.5 h-1.5 rounded-full mb-0.5 ${d.didWork ? 'bg-[#92E82A]' : 'bg-transparent'}"></span>
+                  <div class="text-[9px] font-bold tracking-wider ${d.isSel ? 'text-white/90' : ''}">${d.lbl}</div>
+                  <div class="text-xs font-extrabold tabular-nums mt-0.5 ${d.didWork && !d.isSel ? 'text-white' : ''}">${d.num}</div>
+                </button>
               `).join('')}
             </div>
+            <button id="btnWeekNext" class="w-7 h-9 rounded-xl bg-[#1C1C1E] text-[#8E8E93] hover:text-white font-bold text-sm flex items-center justify-center shrink-0">›</button>
             <button id="btnOpenMonthCal" title="Calendar & Streak" class="w-9 h-9 rounded-xl bg-[#1C1C1E] border border-[#2C2C2E] text-white flex items-center justify-center shrink-0">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </button>
@@ -1952,6 +1993,15 @@
         });
 
         // Month Calendar + Consistency Streak Modal
+        const wkPrev = document.getElementById('btnWeekPrev');
+        const wkNext = document.getElementById('btnWeekNext');
+        if (wkPrev) wkPrev.addEventListener('click', () => { state.todayWeekOffset = (state.todayWeekOffset || 0) - 1; render(); });
+        if (wkNext) wkNext.addEventListener('click', () => { state.todayWeekOffset = (state.todayWeekOffset || 0) + 1; render(); });
+        root.querySelectorAll('.today-cal-day').forEach((b) => b.addEventListener('click', () => {
+          state.nutrition.selectedDate = b.dataset.date;
+          persistState();
+          render();
+        }));
         const calBtn = document.getElementById('btnOpenMonthCal');
         if (calBtn) calBtn.addEventListener('click', () => {
           const now = new Date();
@@ -2070,12 +2120,17 @@
 
         const sess = state.activeSession;
         root.innerHTML = `
-          <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-3.5 mb-2.5">
+          <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-3.5 mb-3">
             <div>
               <div class="text-sm font-bold text-white">${sess.title}</div>
-              <div class="text-[11px] text-[#8E8E93]">Round ${state.roundNumber} • Auto-saved locally</div>
+              <div class="text-[11px] text-[#8E8E93]">Round ${state.roundNumber} • Auto-saved</div>
             </div>
-            <button id="btnEndWorkout" class="px-4 py-2 rounded-full bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Finish</button>
+            <div class="flex items-center gap-2">
+              <div id="woElapsedClock" class="text-sm font-extrabold text-white tabular-nums">${formatWoClock(sess.elapsedSec || 0)}</div>
+              <button id="btnPauseWorkout" class="px-3 py-1.5 rounded-full text-xs font-bold ${sess.paused ? 'bg-[#92E82A] text-[#000000]' : 'bg-[#2C2C2E] text-white'}">
+                ${sess.paused ? 'Resume' : 'Pause'}
+              </button>
+            </div>
           </div>
 
 
@@ -2143,7 +2198,21 @@
               </div>
             `;
           }).join('')}
+          <div class="pt-2 pb-6">
+            <button id="btnEndWorkout" class="w-full py-4 rounded-full bg-[#92E82A] text-[#000000] font-extrabold text-sm tracking-wide shadow-lg">
+              FINISH WORKOUT
+            </button>
+          </div>
         `;
+
+        const pauseWoBtn = document.getElementById('btnPauseWorkout');
+        if (pauseWoBtn) pauseWoBtn.addEventListener('click', () => {
+          tickWorkoutClock();
+          sess.paused = !sess.paused;
+          sess.lastTickMs = Date.now();
+          persistState();
+          render();
+        });
 
         root.querySelectorAll('.set-w').forEach((inp) => inp.addEventListener('input', (e) => {
           state.activeSession.exercises[inp.dataset.ex].sets[inp.dataset.s].weight = e.target.value === '' ? '' : Number(e.target.value);
