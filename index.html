@@ -582,6 +582,43 @@
       return `${y}-${m}-${day}`;
     }
 
+    const IDB_NAME = 'apex_hybrid_personal_db';
+    const IDB_STORE = 'state_store';
+    function openPersonalIdb() {
+      return new Promise((resolve, reject) => {
+        if (typeof indexedDB === 'undefined') return reject(new Error('No IDB'));
+        const req = indexedDB.open(IDB_NAME, 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    }
+    async function idbPut(key, val) {
+      try {
+        const db = await openPersonalIdb();
+        await new Promise((res, rej) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).put(val, key);
+          tx.oncomplete = res;
+          tx.onerror = rej;
+        });
+      } catch (e) {}
+    }
+    async function idbGet(key) {
+      try {
+        const db = await openPersonalIdb();
+        return await new Promise((res, rej) => {
+          const tx = db.transaction(IDB_STORE, 'readonly');
+          const req = tx.objectStore(IDB_STORE).get(key);
+          req.onsuccess = () => res(req.result);
+          req.onerror = () => rej(req.error);
+        });
+      } catch (e) { return null; }
+    }
+
     function loadSavedState() {
       try {
         const raw = localStorage.getItem('hs_app_backup_v1');
@@ -606,8 +643,15 @@
           health: state.health,
           nutrition: state.nutrition,
         };
+        idbPut('main_backup', payload);
         localStorage.setItem('hs_app_backup_v1', JSON.stringify(payload));
-      } catch (e) {}
+      } catch (e) {
+        try {
+          // If localStorage is full, trim old nutrition logs from localStorage while keeping FULL archive in IndexedDB
+          const slim = { ...state, nutrition: { ...state.nutrition, logsByDate: {} } };
+          localStorage.setItem('hs_app_backup_v1', JSON.stringify(slim));
+        } catch (e2) {}
+      }
     }
     function savePrs(map) {
       persistState();
@@ -687,13 +731,25 @@
         };
       });
 
+      const exercisesSnapshot = sess.exercises.map((e) => ({
+        exId: e.exId,
+        name: EXERCISES[e.exId]?.name || e.exId,
+        note: e.note || '',
+        sets: e.sets
+          .filter((s) => s.done || (s.type !== 'warmup' && Number(s.weight || 0) > 0))
+          .map((s) => ({ weight: Number(s.weight || 0), reps: Number(s.reps || 0), type: s.type }))
+      })).filter((e) => e.sets.length > 0 || e.note);
+
       const entry = {
         sessionId: sess.sessionId || String(sess.startedAt),
         title: sess.title,
+        round: state.roundNumber || 1,
+        week: state.selectedWeek,
         sets: doneSets,
         volume: Math.round(vol),
         date: new Date().toLocaleDateString(),
-        isoDate: getLocalTodayStr()
+        isoDate: getLocalTodayStr(),
+        exercises: exercisesSnapshot
       };
       const existingIdx = state.history.findIndex((h) => h.sessionId && h.sessionId === entry.sessionId);
       if (existingIdx >= 0) state.history[existingIdx] = entry;
@@ -1775,81 +1831,217 @@
         const estMin = Math.max(30, totalSets * 3);
         const curSplit = getSplitType(day.day);
         const isDeload = state.selectedWeek === 9;
-        const activeSplitStyle = 'style="background: rgba(146, 232, 42, 0.20) !important; border-color: #92E82A !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(146,232,42,0.18) !important;"';
+        const heroImg = EX_IMAGES[day.items[0]?.exId] || EX_IMAGES.pull_up || '';
+
+        const todayStr = getLocalTodayStr();
+        const [ty, tm, td] = todayStr.split('-').map(Number);
+        const dow = (new Date(Date.UTC(ty, tm - 1, td)).getUTCDay() + 6) % 7; // Mon=0..Sun=6
+        const workoutDays = new Set((state.history || []).map((h) => {
+          if (h.isoDate) return h.isoDate;
+          const d = new Date(h.date);
+          return !isNaN(d.getTime()) ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
+        }).filter(Boolean));
+        const monSunDays = [];
+        for (let i = 0; i < 7; i++) {
+          const dStr = shiftDateStr(todayStr, i - dow);
+          monSunDays.push({
+            date: dStr,
+            lbl: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'][i],
+            num: Number(dStr.slice(8)),
+            isToday: dStr === todayStr,
+            didWork: workoutDays.has(dStr)
+          });
+        }
 
         root.innerHTML = `
-          <div class="md:hidden">${renderAppleFitnessBento()}</div>
-          <!-- Browse Split Gradient Cards (Apple Fitness+ style) -->
-          <div class="mb-4 pt-2 border-t border-[#1C1C1E]">
-            <div class="flex items-center justify-between mb-2">
-              <div class="text-sm font-bold text-white">Browse Split</div>
-              <span class="text-xs font-semibold text-[#92E82A]">Round ${state.roundNumber} • ${isDeload ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
-            </div>
-            <div class="grid grid-cols-4 gap-2">
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Pull' ? activeSplitStyle : ''} data-day="0">
-                <div class="text-[#92E82A] mb-1">${getSplitIcon('Pull', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold ${!isDeload && curSplit === 'Pull' ? 'text-[#92E82A]' : 'text-white'}">Pull</div>
-              </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Push' ? activeSplitStyle : ''} data-day="1">
-                <div class="text-[#92E82A] mb-1">${getSplitIcon('Push', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold ${!isDeload && curSplit === 'Push' ? 'text-[#92E82A]' : 'text-white'}">Push</div>
-              </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Legs' ? activeSplitStyle : ''} data-day="2">
-                <div class="text-[#92E82A] mb-1">${getSplitIcon('Legs', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold ${!isDeload && curSplit === 'Legs' ? 'text-[#92E82A]' : 'text-white'}">Legs</div>
-              </button>
-              <button class="split-jump-deload rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${isDeload ? activeSplitStyle : ''}>
-                <div class="${isDeload ? 'text-[#92E82A]' : 'text-[#D1D1D6]'} mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
-                <div class="text-xs font-bold ${isDeload ? 'text-[#92E82A]' : 'text-white'}">Deload</div>
-              </button>
-            </div>
-          </div>
-
-          <!-- Day Header & Summary -->
+          <!-- Clean Mon-Sun Strip + Calendar Trigger -->
           <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-2xl bg-[#1C1C1E] border border-[#2C2C2E] flex items-center justify-center text-[#92E82A]">
-                ${getSplitIcon(day.name, 'w-6 h-6')}
-              </div>
+            <div class="grid grid-cols-7 gap-1 flex-1 mr-2">
+              ${monSunDays.map((d) => `
+                <div class="text-center py-1 rounded-xl ${d.isToday ? 'bg-[#92E82A] text-[#000000]' : (d.didWork ? 'bg-[#92E82A]/20 text-[#92E82A]' : 'text-[#8E8E93]')}">
+                  <div class="text-[9px] font-bold tracking-wider">${d.lbl}</div>
+                  <div class="text-xs font-extrabold tabular-nums mt-0.5">${d.num}</div>
+                </div>
+              `).join('')}
+            </div>
+            <button id="btnOpenMonthCal" title="Calendar & Streak" class="w-9 h-9 rounded-xl bg-[#1C1C1E] border border-[#2C2C2E] text-white flex items-center justify-center shrink-0">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </button>
+          </div>
+
+          <!-- Mobile Summary (Hidden on Duo Landscape since it sits on Left Pane) -->
+          <div class="md:hidden mb-3">${renderAppleFitnessBento()}</div>
+
+          <!-- Clean Hero Workout Photo Card -->
+          <div class="relative h-36 rounded-[22px] overflow-hidden bg-[#1C1C1E] border border-white/10 mb-3">
+            ${heroImg ? `<img src="${heroImg}" alt="${day.name}" class="w-full h-full object-cover opacity-75" />` : ''}
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+            <div class="absolute top-3 left-3.5 right-3.5 flex items-center justify-between">
+              <span class="text-[10px] font-bold tracking-widest text-[#92E82A] uppercase">Round ${state.roundNumber} • ${isDeload ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
+              <span class="text-[11px] font-semibold text-white/80">~${estMin} Min</span>
+            </div>
+            <div class="absolute bottom-3 left-3.5 right-3.5 flex items-end justify-between">
               <div>
-                <div class="text-xl font-bold text-white leading-tight">${day.name}</div>
-              <div class="flex items-center gap-3 text-xs text-[#8E8E93] mt-0.5">
-                <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#92E82A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${day.items.length} Exercises</span>
-                <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#92E82A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>~${estMin} Min</span>
-                <span class="inline-flex items-center gap-1"><svg class="w-3.5 h-3.5 text-[#92E82A]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>${totalSets} Sets</span>
+                <div class="text-2xl font-extrabold text-white leading-none">${day.name}</div>
+                <div class="text-xs text-white/75 mt-1">${day.items.length} Exercises • ${totalSets} Sets</div>
               </div>
-              </div>
+              <button id="btnHeroStart" class="w-11 h-11 rounded-full bg-[#92E82A] text-[#000000] flex items-center justify-center shadow-lg">
+                <svg class="w-5 h-5 ml-0.5" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+              </button>
             </div>
           </div>
 
-          <!-- Compact Apple Fitness+ Horizontal Thumbnail Rows -->
-          <div class="space-y-3 pb-4">
-            ${day.items.map((it, i) => {
+          <!-- Simple Pill Split Switcher -->
+          <div class="flex gap-2 mb-3.5 overflow-x-auto pb-0.5">
+            ${[
+              { label: 'Pull', day: 0, active: !isDeload && curSplit === 'Pull' },
+              { label: 'Push', day: 1, active: !isDeload && curSplit === 'Push' },
+              { label: 'Legs', day: 2, active: !isDeload && curSplit === 'Legs' },
+            ].map((p) => `
+              <button class="split-jump px-4 py-1.5 rounded-full text-xs font-bold shrink-0 border ${p.active ? 'bg-[#92E82A] text-[#000000] border-[#92E82A]' : 'bg-transparent text-white border-white/25'}" data-day="${p.day}">${p.label}</button>
+            `).join('')}
+            <button class="split-jump-deload px-4 py-1.5 rounded-full text-xs font-bold shrink-0 border ${isDeload ? 'bg-[#92E82A] text-[#000000] border-[#92E82A]' : 'bg-transparent text-white border-white/25'}">Deload</button>
+          </div>
+
+          <!-- Clean Spacious Exercise List Cards -->
+          <div class="space-y-2.5 mb-5">
+            ${day.items.map((it) => {
               const ex = EXERCISES[it.exId];
               const pr = state.peakWeights[ex.id];
-              const photo = EX_IMAGES[ex.id] || '';
               return `
-                <div class="flex items-center gap-3 bg-[#1C1C1E]/60 hover:bg-[#1C1C1E] rounded-2xl p-2 border border-[#242426] transition-colors">
-                  <div class="relative w-32 h-[72px] rounded-xl overflow-hidden bg-[#2C2C2E] shrink-0">
-                    ${photo ? `<img src="${photo}" alt="${ex.name}" class="w-full h-full object-cover contrast-110" />` : ''}
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent"></div>
-                    <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/75 text-[10px] font-bold text-white">${i + 1} • ${it.sets}×${it.reps.replace(/\s+/g,'')}</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
+                <button class="today-ex-open w-full bg-[#1C1C1E] rounded-2xl px-4 py-4 flex items-center justify-between gap-3 text-left" data-exid="${ex.id}" data-rx="${it.sets} × ${it.reps} • Rest ${it.restLabel}">
+                  <div class="min-w-0">
                     <div class="text-sm font-bold text-white truncate">${ex.name}</div>
-                    <div class="text-xs text-[#8E8E93] mt-0.5">Rest ${it.restLabel}${pr ? ` • <span class="text-[#92E82A] font-semibold">PR ${pr.weight}${state.unit}×${pr.reps}</span>` : ''}</div>
-                    <div class="flex items-center gap-2 mt-1.5">
-                      <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="text-[11px] font-semibold text-[#92E82A]">Video ↗</a>
-                      ${ex.subs && ex.subs.length ? `<button class="today-alt-btn text-[11px] font-semibold text-[#8E8E93] hover:text-white" data-exid="${ex.id}">Alternatives (${ex.subs.length})</button>` : ''}
-                    </div>
+                    <div class="text-xs text-[#8E8E93] mt-0.5">${it.sets} × ${it.reps}${pr ? ` • <span class="text-[#92E82A] font-semibold">${pr.weight > 0 ? `${pr.weight}${state.unit}` : 'BW'}×${pr.reps}</span>` : ''}</div>
                   </div>
-                </div>
+                  <span class="text-[#8E8E93] text-base font-bold shrink-0">›</span>
+                </button>
               `;
             }).join('')}
+          </div>
+
+          <!-- 9-Week Training Rounds -->
+          <div class="pb-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xs font-bold text-[#8E8E93] uppercase tracking-wider">9-Week Rounds</div>
+              <button id="btnNewRoundTile" class="text-xs font-bold text-[#92E82A]">+ New 9 Weeks</button>
+            </div>
+            <div class="flex gap-2.5 overflow-x-auto pb-1">
+              <div class="w-36 shrink-0 rounded-2xl overflow-hidden bg-[#1C1C1E] border border-[#92E82A] relative h-16">
+                ${EX_IMAGES.pull_up ? `<img src="${EX_IMAGES.pull_up}" alt="Round ${state.roundNumber}" class="w-full h-full object-cover opacity-50" />` : ''}
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 to-transparent p-2.5 flex flex-col justify-end">
+                  <div class="text-xs font-extrabold text-white">Round ${state.roundNumber}</div>
+                  <div class="text-[10px] text-[#92E82A] font-semibold">Active • Wk ${state.selectedWeek}/9</div>
+                </div>
+              </div>
+              ${(state.savedRounds || []).map((sr, rIdx) => `
+                <button class="open-round-tile w-36 shrink-0 rounded-2xl bg-[#1C1C1E] border border-[#2C2C2E] p-2.5 text-left flex flex-col justify-end h-16" data-ridx="${rIdx}">
+                  <div class="text-xs font-bold text-white">Round ${sr.round} ✓</div>
+                  <div class="text-[10px] text-[#8E8E93]">${sr.completedAt}</div>
+                </button>
+              `).join('')}
+            </div>
           </div>
         `;
 
         wireHealthButton();
+        const heroBtn = document.getElementById('btnHeroStart');
+        if (heroBtn) heroBtn.addEventListener('click', () => {
+          if (state.activeSession) switchTab('train');
+          else startWorkoutForDay(state.currentDayIdx);
+        });
+
+        // Month Calendar + Consistency Streak Modal
+        const calBtn = document.getElementById('btnOpenMonthCal');
+        if (calBtn) calBtn.addEventListener('click', () => {
+          const now = new Date();
+          const year = now.getFullYear(), month = now.getMonth();
+          const monthName = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+          const firstDow = new Date(year, month, 1).getDay();
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          const cells = [];
+          for (let b = 0; b < firstDow; b++) cells.push('<div></div>');
+          for (let d = 1; d <= daysInMonth; d++) {
+            const iso = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+            const worked = workoutDays.has(iso);
+            const isT = iso === todayStr;
+            cells.push(`<div class="py-1.5 rounded-lg text-center text-xs font-bold tabular-nums ${isT ? 'bg-[#FA114F] text-white' : (worked ? 'bg-[#92E82A]/25 text-[#92E82A]' : 'text-[#8E8E93]')}">${d}</div>`);
+          }
+          const monthWorkouts = Array.from(workoutDays).filter((d) => d.startsWith(`${year}-${String(month + 1).padStart(2, '0')}`)).length;
+          openModal('CALENDAR', `
+            <div class="space-y-3">
+              <div class="text-center text-sm font-bold text-white">${monthName}</div>
+              <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-[#8E8E93] font-semibold">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+              </div>
+              <div class="grid grid-cols-7 gap-1">${cells.join('')}</div>
+              <div class="bg-[#2C2C2E]/70 rounded-xl p-3 flex items-center justify-between text-xs">
+                <div>
+                  <div class="text-[10px] text-[#8E8E93] font-bold">THIS MONTH</div>
+                  <div class="text-base font-extrabold text-[#92E82A]">${monthWorkouts} Workouts</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-[10px] text-[#8E8E93] font-bold">ROUND</div>
+                  <div class="text-base font-extrabold text-white">Round ${state.roundNumber}</div>
+                </div>
+              </div>
+            </div>
+          `);
+        });
+
+        root.querySelectorAll('.today-ex-open').forEach((btn) => btn.addEventListener('click', () => {
+          const ex = EXERCISES[btn.dataset.exid];
+          if (!ex) return;
+          const alts = (ex.subs || []).map((id) => EXERCISES[id]).filter(Boolean);
+          openModal(ex.name, `
+            <div class="space-y-3 text-xs">
+              <div class="text-[#8E8E93]">${btn.dataset.rx}</div>
+              <a href="${ex.url}" target="_blank" rel="noopener noreferrer" class="block w-full text-center py-2.5 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Open Exercise Video ↗</a>
+              ${alts.length ? `
+                <div>
+                  <div class="text-[10px] font-bold text-[#8E8E93] mb-1.5">ALTERNATIVES</div>
+                  <div class="space-y-1.5">
+                    ${alts.map((a) => `<a href="${a.url}" target="_blank" rel="noopener noreferrer" class="flex items-center justify-between p-2.5 rounded-xl bg-[#2C2C2E] text-white font-semibold"><span>${a.name}</span><span class="text-[#92E82A]">Video ↗</span></a>`).join('')}
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          `);
+        }));
+
+        root.querySelectorAll('.open-round-tile').forEach((btn) => btn.addEventListener('click', () => {
+          const sr = state.savedRounds[Number(btn.dataset.ridx)];
+          if (!sr) return;
+          const roundWorkouts = (state.history || []).filter((h) => h.round === sr.round);
+          const maxEntries = Object.entries(sr.maxes || {});
+          openModal(`Round ${sr.round} Archive (${sr.completedAt})`, `
+            <div class="space-y-3 text-xs">
+              <div>
+                <div class="text-[10px] font-bold text-[#92E82A] mb-1.5">SAVED MAXES (${maxEntries.length})</div>
+                ${maxEntries.length ? `<div class="space-y-1 max-h-40 overflow-y-auto">${maxEntries.map(([id, m]) => `<div class="flex justify-between py-1 border-b border-[#2C2C2E]"><span class="text-white font-semibold">${EXERCISES[id]?.name || id}</span><span class="text-[#92E82A] font-bold tabular-nums">${m.weight > 0 ? `${m.weight} ${state.unit}` : 'BW'} × ${m.reps}</span></div>`).join('')}</div>` : '<div class="text-[#636366]">No maxes archived.</div>'}
+              </div>
+              <div>
+                <div class="text-[10px] font-bold text-[#92E82A] mb-1.5">WORKOUTS (${roundWorkouts.length})</div>
+                ${roundWorkouts.length ? `<div class="space-y-1 max-h-36 overflow-y-auto">${roundWorkouts.map((w) => `<div class="py-1.5 px-2.5 rounded-xl bg-[#2C2C2E]/60 flex justify-between"><span class="text-white font-semibold">${w.title}</span><span class="text-[#8E8E93]">${w.isoDate || w.date}</span></div>`).join('')}</div>` : '<div class="text-[#636366]">No workouts tagged.</div>'}
+              </div>
+            </div>
+          `);
+        }));
+        const newRoundBtn = document.getElementById('btnNewRoundTile');
+        if (newRoundBtn) newRoundBtn.addEventListener('click', () => {
+          openModal(`Finish Round ${state.roundNumber}?`, `
+            <div class="space-y-3 text-xs">
+              <div class="text-[#E5E5EA]">Archive <strong>Round ${state.roundNumber}</strong> and start <strong>Round ${state.roundNumber + 1} • Week 1</strong>?</div>
+              <button id="btnConfirmNewRoundTile" class="w-full py-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold">Archive & Start Round ${state.roundNumber + 1}</button>
+            </div>
+          `);
+          document.getElementById('btnConfirmNewRoundTile').addEventListener('click', () => {
+            finishTrainingRound(`Week ${state.selectedWeek}`);
+            document.getElementById('modalOverlay').classList.add('hidden');
+            render();
+          });
+        });
+
         root.querySelectorAll('.split-jump').forEach((btn) => btn.addEventListener('click', () => {
           if (state.selectedWeek === 9) state.selectedWeek = state.lastNonDeloadWeek || 1;
           state.currentDayIdx = Number(btn.dataset.day);
@@ -1861,21 +2053,6 @@
           state.currentDayIdx = 0;
           render();
         }));
-        root.querySelectorAll('.today-alt-btn').forEach((btn) => {
-          btn.addEventListener('click', () => {
-            const ex = EXERCISES[btn.dataset.exid];
-            const alts = (ex.subs || []).map((id) => EXERCISES[id]).filter(Boolean);
-            openModal(`${ex.name} — FitnessFAQs Alternatives`, alts.map((a) => `
-              <div class="flex items-center justify-between p-3 rounded-xl bg-[#2C2C2E] mb-2 border border-[#2D2D37]">
-                <div>
-                  <div class="font-bold text-white">${a.name}</div>
-                  <div class="text-xs text-[#8E8E93]">${a.pattern}</div>
-                </div>
-                <a href="${a.url}" target="_blank" rel="noopener noreferrer" class="text-xs text-[#92E82A] font-semibold">Video ↗</a>
-              </div>
-            `).join(''));
-          });
-        });
       }
 
       else if (state.tab === 'train') {
@@ -1955,26 +2132,12 @@
 
                     <div class="flex items-center gap-4 mt-2 pt-2 border-t border-[#2C2C2E] mb-2.5">
                       <button class="add-set text-xs font-bold text-[#92E82A]" data-ex="${exIdx}" data-type="working">+ Set</button>
+                      <button class="rem-set text-xs font-bold text-[#FA114F]" data-ex="${exIdx}">- Set</button>
                       <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
                     </div>
 
-                    <!-- Gemini-Style Continuous Voice & Submit Arrow Bar -->
-                    <div class="space-y-1">
-                      <div class="flex items-center gap-1.5 bg-[#2C2C2E]/70 border border-white/10 rounded-full px-2 py-1">
-                        <div class="ex-wave hidden flex items-center gap-1 px-2 h-8 flex-1" data-ex="${exIdx}">
-                          ${[0, 120, 240, 80, 320, 160, 40, 280, 100, 200, 60, 180].map((d) => `<span class="wave-bar" style="animation-delay:${d}ms"></span>`).join('')}
-                          <span class="text-[11px] text-white/80 font-medium ml-1.5">Listening...</span>
-                        </div>
-                        <input class="ex-note-inp bg-transparent text-white text-xs px-2 h-8 flex-1 outline-none placeholder-[#8E8E93]" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Ask or speak: 25 lb for 8, 8, 7..." />
-                        <button class="ex-note-mic w-8 h-8 rounded-full bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0 transition-all" data-ex="${exIdx}" title="Tap to start/stop recording">
-                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                        </button>
-                        <button class="ex-ai-fill w-8 h-8 rounded-full bg-[#92E82A] text-[#000000] flex items-center justify-center shrink-0 font-bold" data-ex="${exIdx}" title="Submit to Gemini AI">
-                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                        </button>
-                      </div>
-                      <div class="ex-mic-hint hidden text-[10px] text-[#92E82A] pl-2" data-ex="${exIdx}"></div>
-                    </div>
+                    <!-- Exercise Note (Auto-Saved & Carried Over) -->
+                    <input class="ex-note-inp num-input text-left px-3 h-9 text-xs w-full" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Add note (e.g. swapped grip, felt heavy)..." />
                   `;
                 })()}
               </div>
@@ -2010,276 +2173,21 @@
           const item = state.activeSession.exercises[btn.dataset.ex];
           const last = item.sets[item.sets.length - 1] || { weight: '', reps: 10, rpe: 8 };
           const num = item.sets.filter((x) => x.type !== 'warmup').length + 1;
-          item.sets.push({ num, type: btn.dataset.type, weight: last.weight, reps: last.reps, rpe: last.rpe, done: false });
-          persistState();
+          item.sets.push({ num, type: btn.dataset.type || 'working', weight: last.weight, reps: last.reps, rpe: last.rpe, done: false });
+          syncActiveSessionProgress();
           render();
+        }));
+        root.querySelectorAll('.rem-set').forEach((btn) => btn.addEventListener('click', () => {
+          const item = state.activeSession.exercises[btn.dataset.ex];
+          if (item.sets.length > 1) {
+            item.sets.pop();
+            syncActiveSessionProgress();
+            render();
+          }
         }));
         root.querySelectorAll('.ex-note-inp').forEach((inp) => inp.addEventListener('input', (e) => {
           state.activeSession.exercises[inp.dataset.ex].note = e.target.value;
           syncActiveSessionProgress();
-        }));
-        const MIC_SVG = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
-        const STOP_SVG = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>';
-        let activeMicSession = null;
-
-        const setExRecordingUI = (exIdx, isRecording) => {
-          const btn = root.querySelector(`.ex-note-mic[data-ex="${exIdx}"]`);
-          const wave = root.querySelector(`.ex-wave[data-ex="${exIdx}"]`);
-          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
-          if (btn) {
-            btn.innerHTML = isRecording ? STOP_SVG : MIC_SVG;
-            btn.classList.toggle('bg-white', isRecording);
-            btn.classList.toggle('text-[#000000]', isRecording);
-            btn.classList.toggle('bg-[#2C2C2E]', !isRecording);
-            btn.classList.toggle('text-[#92E82A]', !isRecording);
-          }
-          if (wave) wave.classList.toggle('hidden', !isRecording);
-          if (inp) inp.classList.toggle('hidden', isRecording);
-        };
-
-        const parseAudioBlobWithGemini = async (exIdx, blob, mimeType, btnEl) => {
-          const target = sess.exercises[exIdx];
-          if (!target) return;
-          const exName = EXERCISES[target.exId].name;
-          if (!state.nutrition.geminiKey) {
-            openModal('Gemini Key Needed for Audio', '<div class="text-xs text-[#8E8E93]">Add your Gemini API key in <strong>Nutrition → ⚙</strong> to transcribe recorded voice directly.</div>');
-            return;
-          }
-          const origHtml = btnEl ? btnEl.innerHTML : '';
-          if (btnEl) btnEl.innerHTML = '<span class="text-[10px] font-bold">...</span>';
-          try {
-            const base64 = await new Promise((resolve, reject) => {
-              const r = new FileReader();
-              r.onloadend = () => resolve(String(r.result).split(',')[1]);
-              r.onerror = reject;
-              r.readAsDataURL(blob);
-            });
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { inlineData: { mimeType: mimeType || 'audio/mp4', data: base64 } },
-                    { text: `Listen to this spoken workout log for "${exName}" (target ${target.rx.sets}x${target.rx.reps}). Extract the sets (weight and reps) and any extra note. Return ONLY JSON: {"sets": [{"weight": number, "reps": number}], "note": string}. Use weight 0 for bodyweight.` }
-                  ]
-                }],
-                generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
-              })
-            });
-            const data = await res.json();
-            if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error(data.error?.message || 'API error');
-            const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-            if (btnEl) btnEl.innerHTML = origHtml;
-            const setsArr = Array.isArray(parsed) ? parsed : (parsed.sets || []);
-            const working = target.sets.filter((s) => s.type !== 'warmup');
-            setsArr.forEach((st, i) => {
-              if (!working[i]) {
-                const newS = { num: working.length + 1, type: 'working', weight: '', reps: 0, rpe: 8, done: false };
-                working.push(newS);
-                target.sets.push(newS);
-              }
-              if (st.weight !== undefined && st.weight !== null && st.weight !== '') working[i].weight = Number(st.weight);
-              if (st.reps !== undefined && st.reps !== null) working[i].reps = Number(st.reps);
-              working[i].done = true;
-            });
-            if (parsed.note) target.note = parsed.note;
-            syncActiveSessionProgress();
-            render();
-            startRestTimer(target.rx.restSec, exName);
-          } catch (err) {
-            if (btnEl) btnEl.innerHTML = origHtml;
-            openModal('Voice AI Error', `<div class="text-xs text-[#FA114F]">${err.message || 'Could not process audio.'}</div>`);
-          }
-        };
-
-        const fillSetsWithAi = async (exIdx, spokenText, btnEl) => {
-          if (!spokenText) return;
-          const target = sess.exercises[exIdx];
-          if (!target) return;
-          const exName = EXERCISES[target.exId].name;
-          target.note = spokenText;
-
-          const applyParsed = (setsArr, extraNote) => {
-            if (extraNote) target.note = extraNote;
-            const working = target.sets.filter((s) => s.type !== 'warmup');
-            (setsArr || []).forEach((st, i) => {
-              if (!working[i]) {
-                const newS = { num: working.length + 1, type: 'working', weight: '', reps: 0, rpe: 8, done: false };
-                working.push(newS);
-                target.sets.push(newS);
-              }
-              if (st.weight !== undefined && st.weight !== null && st.weight !== '') working[i].weight = Number(st.weight);
-              if (st.reps !== undefined && st.reps !== null) working[i].reps = Number(st.reps);
-              working[i].done = true;
-            });
-            syncActiveSessionProgress();
-            render();
-            startRestTimer(target.rx.restSec, exName);
-          };
-
-          if (state.nutrition.geminiKey) {
-            const origHtml = btnEl ? btnEl.innerHTML : '';
-            if (btnEl) btnEl.innerHTML = '<span class="text-[10px] font-bold">...</span>';
-            try {
-              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ parts: [{ text: `Parse this spoken workout log for "${exName}" (target ${target.rx.sets}x${target.rx.reps}) into weights, reps, and any form/swap note. Spoken: "${spokenText}". Return ONLY JSON object: {"sets": [{"weight": number, "reps": number}], "note": string}. Use weight 0 for bodyweight.` }] }],
-                  generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
-                })
-              });
-              const data = await res.json();
-              if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error(data.error?.message || 'API error');
-              const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
-              if (btnEl) btnEl.innerHTML = origHtml;
-              const setsArr = Array.isArray(parsed) ? parsed : (parsed.sets || []);
-              applyParsed(setsArr, parsed.note || spokenText);
-              return;
-            } catch (err) {
-              if (btnEl) btnEl.innerHTML = origHtml;
-              openModal('Gemini AI Error', `<div class="text-xs text-[#FA114F]">${err.message || 'Could not parse workout with Gemini.'}</div>`);
-              return;
-            }
-          }
-
-          const lower = spokenText.toLowerCase();
-          const setOfMatch = lower.match(/(\d+)\s*sets?\s*(?:of|x|×)?\s*(\d+)\s*(?:reps?)?(?:\s*(?:at|with|@)\s*(\d+(?:\.\d+)?))?/i);
-          if (setOfMatch) {
-            const cnt = Math.min(10, Math.max(1, Number(setOfMatch[1])));
-            const rep = Number(setOfMatch[2]);
-            const wt = setOfMatch[3] !== undefined ? Number(setOfMatch[3]) : (state.lastExerciseSets[target.exId]?.weight ?? 0);
-            applyParsed(Array.from({ length: cnt }, () => ({ weight: wt, reps: rep })), spokenText);
-            return;
-          }
-          const hasWeightUnit = /\d+\s*(?:lb|lbs|pounds?|kg)/i.test(lower) || /\bfor\b/i.test(lower);
-          const wMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pounds?|kg)?\s*(?:for|x|×|:|,)?/i);
-          const weight = (hasWeightUnit && wMatch) ? Number(wMatch[1]) : (state.lastExerciseSets[target.exId]?.weight ?? '');
-          const afterW = (hasWeightUnit && wMatch) ? lower.slice(wMatch.index + wMatch[0].length) : lower;
-          const repsArr = (afterW.match(/\d+/g) || []).map(Number).filter((n) => n > 0 && n <= 60);
-          if (repsArr.length) {
-            const expanded = (repsArr.length === 1 && target.sets.length > 1 && /\ball\b|\beach\b/i.test(lower))
-              ? Array.from({ length: target.sets.filter((s) => s.type !== 'warmup').length }, () => repsArr[0])
-              : repsArr;
-            applyParsed(expanded.map((r) => ({ weight, reps: r })), spokenText);
-          } else {
-            syncActiveSessionProgress();
-          }
-        };
-
-        const submitMicOrText = (exIdx) => {
-          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
-          const fillBtn = root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`);
-          if (activeMicSession && activeMicSession.exIdx === exIdx) {
-            const sessMic = activeMicSession;
-            activeMicSession = null;
-            if (sessMic.type === 'sr') {
-              try { sessMic.rec.stop(); } catch (e) {}
-              if (inp && inp.value.trim()) fillSetsWithAi(exIdx, inp.value.trim(), fillBtn);
-            } else if (sessMic.type === 'mr') {
-              sessMic.onStopAction = (blob, mime) => parseAudioBlobWithGemini(exIdx, blob, mime, fillBtn);
-              try { sessMic.mr.stop(); } catch (e) {}
-            }
-            return;
-          }
-          if (inp && inp.value.trim()) fillSetsWithAi(exIdx, inp.value.trim(), fillBtn);
-        };
-
-        root.querySelectorAll('.ex-ai-fill').forEach((btn) => btn.addEventListener('click', () => {
-          submitMicOrText(Number(btn.dataset.ex));
-        }));
-        root.querySelectorAll('.ex-note-inp').forEach((inp) => inp.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') submitMicOrText(Number(inp.dataset.ex));
-        }));
-        root.querySelectorAll('.ex-note-mic').forEach((btn) => btn.addEventListener('click', async () => {
-          const exIdx = Number(btn.dataset.ex);
-          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
-          const hint = root.querySelector(`.ex-mic-hint[data-ex="${exIdx}"]`);
-
-          // If already recording for this exercise, stop & keep text (user taps ↑ to submit, or tap mic again to stop)
-          if (activeMicSession && activeMicSession.exIdx === exIdx) {
-            const sessMic = activeMicSession;
-            activeMicSession = null;
-            setExRecordingUI(exIdx, false);
-            if (hint) hint.classList.add('hidden');
-            if (sessMic.type === 'sr') {
-              try { sessMic.rec.stop(); } catch (e) {}
-              if (inp && inp.value.trim()) fillSetsWithAi(exIdx, inp.value.trim(), root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`));
-            }
-            else if (sessMic.type === 'mr') {
-              sessMic.onStopAction = (blob, mime) => parseAudioBlobWithGemini(exIdx, blob, mime, root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`));
-              try { sessMic.mr.stop(); } catch (e) {}
-            }
-            return;
-          }
-
-          // Prefer MediaRecorder -> Gemini Audio if available & Gemini key is set (works reliably in iOS PWAs and stays open until ↑!)
-          if (state.nutrition.geminiKey && navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined') {
-            try {
-              const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-              const chunks = [];
-              const mr = new MediaRecorder(stream);
-              const sessObj = { type: 'mr', exIdx, mr, stream, onStopAction: null };
-              activeMicSession = sessObj;
-              mr.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
-              mr.onstop = () => {
-                stream.getTracks().forEach((t) => t.stop());
-                setExRecordingUI(exIdx, false);
-                if (hint) hint.classList.add('hidden');
-                const cleanMime = (mr.mimeType || 'audio/mp4').split(';')[0].trim();
-                const blob = new Blob(chunks, { type: cleanMime });
-                if (sessObj.onStopAction) sessObj.onStopAction(blob, cleanMime);
-              };
-              mr.start();
-              setExRecordingUI(exIdx, true);
-              if (hint) {
-                hint.textContent = 'Recording... speak freely, then tap ↑ to submit.';
-                hint.classList.remove('hidden');
-              }
-              return;
-            } catch (err) {}
-          }
-
-          // Fallback to continuous SpeechRecognition (stays open until user taps ↑!)
-          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-          if (!SR) {
-            if (inp) inp.focus();
-            if (hint) {
-              hint.textContent = 'Tap your iPhone keyboard 🎤 mic, then tap ↑.';
-              hint.classList.remove('hidden');
-            }
-            return;
-          }
-          try {
-            const rec = new SR();
-            rec.lang = 'en-US';
-            rec.continuous = true;
-            rec.interimResults = true;
-            let finalTxt = inp ? inp.value.trim() : '';
-            activeMicSession = { type: 'sr', exIdx, rec };
-            setExRecordingUI(exIdx, true);
-            if (hint) {
-              hint.textContent = 'Listening... tap ↑ when done speaking.';
-              hint.classList.remove('hidden');
-            }
-            rec.onresult = (ev) => {
-              let interim = '';
-              for (let i = ev.resultIndex; i < ev.results.length; i++) {
-                if (ev.results[i].isFinal) finalTxt += (finalTxt ? ' ' : '') + ev.results[i][0].transcript;
-                else interim += ev.results[i][0].transcript;
-              }
-              if (inp) inp.value = (finalTxt + (interim ? ' ' + interim : '')).trim();
-            };
-            rec.onend = () => {
-              setExRecordingUI(exIdx, false);
-              if (hint) hint.classList.add('hidden');
-              if (activeMicSession && activeMicSession.exIdx === exIdx) activeMicSession = null;
-            };
-            rec.start();
-          } catch (e) {
-            if (inp) inp.focus();
-          }
         }));
 
         root.querySelectorAll('.start-rec-timer').forEach((btn) => btn.addEventListener('click', () => {
@@ -3220,6 +3128,24 @@
             </div>
           </div>
           <div class="bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3.5 mb-3">
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-sm font-bold text-white">Past Workouts</div>
+              <span class="text-[11px] text-[#8E8E93]">${state.history.length} logged</span>
+            </div>
+            <div class="space-y-1.5 max-h-64 overflow-y-auto pr-1">
+              ${state.history.length ? state.history.map((h, idx) => `
+                <button class="past-wo-btn w-full text-left py-2.5 px-3 rounded-xl bg-[#2C2C2E]/60 hover:bg-[#2C2C2E] flex items-center justify-between gap-2 text-xs" data-idx="${idx}">
+                  <div class="min-w-0">
+                    <div class="font-bold text-white truncate">${h.title}</div>
+                    <div class="text-[10px] text-[#8E8E93]">${h.isoDate || h.date} • ${h.sets} sets • ${h.volume} ${state.unit}</div>
+                  </div>
+                  <span class="text-[#92E82A] font-bold shrink-0">View ›</span>
+                </button>
+              `).join('') : '<div class="text-xs text-[#636366]">Completed workouts will appear here with all sets and notes.</div>'}
+            </div>
+          </div>
+
+          <div class="bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3.5 mb-3">
             <div class="text-sm font-bold text-white mb-2">Saved Round Maxes (Previous Runs)</div>
             ${state.savedRounds && state.savedRounds.length ? state.savedRounds.map((sr) => `
               <div class="py-2 border-t border-[#1F1F26] text-xs">
@@ -3252,6 +3178,23 @@
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#8E8E93' }, grid: { display: false } }, y: { ticks: { color: '#8E8E93' }, grid: { color: '#2C2C2E' } } } },
           });
         }
+        root.querySelectorAll('.past-wo-btn').forEach((btn) => btn.addEventListener('click', () => {
+          const h = state.history[Number(btn.dataset.idx)];
+          if (!h) return;
+          const exList = h.exercises || [];
+          openModal(h.title, `
+            <div class="space-y-2.5 text-xs">
+              <div class="text-[#8E8E93]">${h.isoDate || h.date} • ${h.sets} sets • ${h.volume} ${state.unit}</div>
+              ${exList.length ? exList.map((e) => `
+                <div class="bg-[#2C2C2E]/70 rounded-xl p-2.5">
+                  <div class="font-bold text-[#92E82A] mb-1">${e.name}</div>
+                  <div class="text-white tabular-nums">${e.sets.map((s) => `${s.weight > 0 ? `${s.weight}${state.unit}` : 'BW'} × ${s.reps}`).join(' • ')}</div>
+                  ${e.note ? `<div class="text-[#8E8E93] mt-1 italic">Note: "${e.note}"</div>` : ''}
+                </div>
+              `).join('') : '<div class="text-[#636366]">Summary-only workout entry.</div>'}
+            </div>
+          `);
+        }));
         document.getElementById('btnSavePr').addEventListener('click', () => {
           const exId = document.getElementById('prExSelect').value;
           const rawW = document.getElementById('prWeightInput').value.trim();
@@ -3477,6 +3420,20 @@
       }
     });
     render();
+    idbGet('main_backup').then((idbData) => {
+      if (!idbData) return;
+      const idbDays = Object.keys(idbData.nutrition?.logsByDate || {}).length;
+      const curDays = Object.keys(state.nutrition?.logsByDate || {}).length;
+      const idbHist = (idbData.history || []).length;
+      if (idbDays > curDays || idbHist > state.history.length) {
+        if (idbData.nutrition && idbDays > curDays) state.nutrition = idbData.nutrition;
+        if (Array.isArray(idbData.history) && idbHist > state.history.length) state.history = idbData.history;
+        if (idbData.peakWeights) state.peakWeights = { ...idbData.peakWeights, ...state.peakWeights };
+        if (idbData.lastExerciseSets) state.lastExerciseSets = { ...idbData.lastExerciseSets, ...state.lastExerciseSets };
+        if (Array.isArray(idbData.savedRounds) && idbData.savedRounds.length > state.savedRounds.length) state.savedRounds = idbData.savedRounds;
+        render();
+      }
+    });
   </script>
 </body>
 </html>
