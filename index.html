@@ -2139,17 +2139,33 @@
               return;
             } catch (err) {
               if (btnEl) btnEl.innerHTML = origHtml;
+              openModal('Gemini AI Error', `<div class="text-xs text-[#FA114F]">${err.message || 'Could not parse workout with Gemini.'}</div>`);
+              return;
             }
           }
 
           const lower = spokenText.toLowerCase();
+          const setOfMatch = lower.match(/(\d+)\s*sets?\s*(?:of|x|×)?\s*(\d+)\s*(?:reps?)?(?:\s*(?:at|with|@)\s*(\d+(?:\.\d+)?))?/i);
+          if (setOfMatch) {
+            const cnt = Math.min(10, Math.max(1, Number(setOfMatch[1])));
+            const rep = Number(setOfMatch[2]);
+            const wt = setOfMatch[3] !== undefined ? Number(setOfMatch[3]) : (state.lastExerciseSets[target.exId]?.weight ?? 0);
+            applyParsed(Array.from({ length: cnt }, () => ({ weight: wt, reps: rep })), spokenText);
+            return;
+          }
           const hasWeightUnit = /\d+\s*(?:lb|lbs|pounds?|kg)/i.test(lower) || /\bfor\b/i.test(lower);
           const wMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pounds?|kg)?\s*(?:for|x|×|:|,)?/i);
           const weight = (hasWeightUnit && wMatch) ? Number(wMatch[1]) : (state.lastExerciseSets[target.exId]?.weight ?? '');
           const afterW = (hasWeightUnit && wMatch) ? lower.slice(wMatch.index + wMatch[0].length) : lower;
           const repsArr = (afterW.match(/\d+/g) || []).map(Number).filter((n) => n > 0 && n <= 60);
-          if (repsArr.length) applyParsed(repsArr.map((r) => ({ weight, reps: r })), spokenText);
-          else syncActiveSessionProgress();
+          if (repsArr.length) {
+            const expanded = (repsArr.length === 1 && target.sets.length > 1 && /\ball\b|\beach\b/i.test(lower))
+              ? Array.from({ length: target.sets.filter((s) => s.type !== 'warmup').length }, () => repsArr[0])
+              : repsArr;
+            applyParsed(expanded.map((r) => ({ weight, reps: r })), spokenText);
+          } else {
+            syncActiveSessionProgress();
+          }
         };
 
         const submitMicOrText = (exIdx) => {
@@ -2187,7 +2203,10 @@
             activeMicSession = null;
             setExRecordingUI(exIdx, false);
             if (hint) hint.classList.add('hidden');
-            if (sessMic.type === 'sr') { try { sessMic.rec.stop(); } catch (e) {} }
+            if (sessMic.type === 'sr') {
+              try { sessMic.rec.stop(); } catch (e) {}
+              if (inp && inp.value.trim()) fillSetsWithAi(exIdx, inp.value.trim(), root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`));
+            }
             else if (sessMic.type === 'mr') {
               sessMic.onStopAction = (blob, mime) => parseAudioBlobWithGemini(exIdx, blob, mime, root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`));
               try { sessMic.mr.stop(); } catch (e) {}
@@ -2208,8 +2227,9 @@
                 stream.getTracks().forEach((t) => t.stop());
                 setExRecordingUI(exIdx, false);
                 if (hint) hint.classList.add('hidden');
-                const blob = new Blob(chunks, { type: mr.mimeType || 'audio/mp4' });
-                if (sessObj.onStopAction) sessObj.onStopAction(blob, mr.mimeType || 'audio/mp4');
+                const cleanMime = (mr.mimeType || 'audio/mp4').split(';')[0].trim();
+                const blob = new Blob(chunks, { type: cleanMime });
+                if (sessObj.onStopAction) sessObj.onStopAction(blob, cleanMime);
               };
               mr.start();
               setExRecordingUI(exIdx, true);
