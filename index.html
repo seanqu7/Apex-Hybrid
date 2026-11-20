@@ -585,8 +585,10 @@
           selectedWeek: state.selectedWeek,
           currentDayIdx: state.currentDayIdx,
           completedDays: state.completedDays,
+          activeSession: state.activeSession,
           history: state.history,
           peakWeights: state.peakWeights,
+          lastExerciseSets: state.lastExerciseSets,
           roundNumber: state.roundNumber,
           savedRounds: state.savedRounds,
           health: state.health,
@@ -606,9 +608,11 @@
       selectedWeek: saved.selectedWeek || 1,
       currentDayIdx: saved.currentDayIdx || 0,
       completedDays: Array.isArray(saved.completedDays) ? saved.completedDays : [],
-      activeSession: null,
+      activeSession: saved.activeSession || null,
       history: Array.isArray(saved.history) ? saved.history : [],
       peakWeights: saved.peakWeights || {},
+      lastExerciseSets: saved.lastExerciseSets || {},
+      timerExpanded: false,
       roundNumber: saved.roundNumber || 1,
       savedRounds: Array.isArray(saved.savedRounds) ? saved.savedRounds : [],
       nutrition: saved.nutrition || {
@@ -638,6 +642,54 @@
       chartInstance: null,
     };
 
+    function syncActiveSessionProgress() {
+      const sess = state.activeSession;
+      if (!sess) return;
+      const isCounted = (s) => s.done || (s.type !== 'warmup' && Number(s.weight || 0) > 0);
+      const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter(isCounted).length, 0);
+      if (doneSets === 0) { persistState(); return; }
+      const vol = sess.exercises.reduce((a, e) => a + e.sets.reduce((b, s) => b + (isCounted(s) && s.type !== 'warmup' ? Number(s.weight || 0) * Number(s.reps || 0) : 0), 0), 0);
+
+      sess.exercises.forEach((e) => {
+        const doneWorking = e.sets.filter((s) => s.type !== 'warmup' && (s.done || Number(s.weight || 0) > 0));
+        if (!doneWorking.length) return;
+        doneWorking.forEach((s) => {
+          const w = Number(s.weight || 0);
+          const r = Number(s.reps || 0);
+          if (w > 0 || (s.done && r > 0)) {
+            const prev = state.peakWeights[e.exId];
+            if (!prev || w > prev.weight || (w === prev.weight && r > prev.reps)) {
+              state.peakWeights[e.exId] = { weight: w, reps: r, date: new Date().toLocaleDateString() };
+            }
+          }
+        });
+        const bestSet = doneWorking.slice().sort((a, b) => Number(b.weight || 0) - Number(a.weight || 0))[0];
+        const sumStr = doneWorking.map((s) => `${s.weight ? `${s.weight}${state.unit}` : 'BW'}×${s.reps}`).join(', ');
+        state.lastExerciseSets[e.exId] = {
+          weight: Number(bestSet.weight || 0),
+          reps: Number(bestSet.reps || 0),
+          summary: sumStr,
+          note: e.note || '',
+          date: getLocalTodayStr(),
+          week: state.selectedWeek
+        };
+      });
+
+      const entry = {
+        sessionId: sess.sessionId || String(sess.startedAt),
+        title: sess.title,
+        sets: doneSets,
+        volume: Math.round(vol),
+        date: new Date().toLocaleDateString(),
+        isoDate: getLocalTodayStr()
+      };
+      const existingIdx = state.history.findIndex((h) => h.sessionId && h.sessionId === entry.sessionId);
+      if (existingIdx >= 0) state.history[existingIdx] = entry;
+      else state.history.unshift(entry);
+      if (!state.completedDays.includes(sess.dayIdx)) state.completedDays.push(sess.dayIdx);
+      persistState();
+    }
+
     function startWorkoutForDay(dayIdx) {
       const day = getDaysForWeek(state.selectedWeek)[dayIdx];
       const exercises = day.items.map((item) => {
@@ -648,7 +700,7 @@
         }));
         return { exId: item.exId, rx: item, sets, loadMode: 'added', sugDismissed: false, activeRpeSetIdx: null };
       });
-      state.activeSession = { dayIdx, title: `WEEK ${state.selectedWeek} • ${day.name}`, startedAt: Date.now(), exercises };
+      state.activeSession = { sessionId: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, dayIdx, title: `WEEK ${state.selectedWeek} • ${day.name}`, startedAt: Date.now(), exercises };
       switchTab('train');
     }
 
@@ -668,10 +720,22 @@
       if (left === 0 && !rt.paused) { rt.running = false; clearInterval(state.timerInterval); bar.classList.add('hidden'); return; }
       const m = Math.floor(left / 60);
       const s = left % 60;
-      document.getElementById('restTimeText').textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+      const timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+      document.getElementById('restTimeText').textContent = timeStr;
       document.getElementById('restExText').textContent = rt.exName;
       document.getElementById('btnRestPause').textContent = rt.paused ? 'Resume' : 'Pause';
       document.getElementById('restProgress').style.width = `${Math.min(100, (left / rt.total) * 100)}%`;
+      const lpTime = document.getElementById('leftClockTime');
+      const lpEx = document.getElementById('leftClockEx');
+      const lpPause = document.getElementById('leftClockPause');
+      const lpRing = document.getElementById('leftClockRing');
+      if (lpTime) lpTime.textContent = timeStr;
+      if (lpEx) lpEx.textContent = rt.exName || 'Rest Timer';
+      if (lpPause) lpPause.textContent = rt.paused ? 'Resume' : 'Pause';
+      if (lpRing) {
+        const c = 2 * Math.PI * 84;
+        lpRing.setAttribute('stroke-dashoffset', String(c * (1 - Math.min(1, left / Math.max(1, rt.total)))));
+      }
     }
 
     document.getElementById('btnRestMinus').addEventListener('click', () => {
@@ -1358,46 +1422,132 @@
         return;
       }
 
-      // 2. TRAIN -> Active Session Checklist & Exercise Jump
+      // 2. TRAIN -> Expandable Rest Clock + Active Session Checklist
       if (state.tab === 'train') {
         const sess = state.activeSession;
-        if (!sess) {
+        const rt = state.restTimer;
+        const leftSec = rt.running
+          ? (rt.paused ? rt.pausedLeft : Math.max(0, Math.ceil((rt.endMs - Date.now()) / 1000)))
+          : (rt.total || 180);
+        const rm = Math.floor(leftSec / 60);
+        const rs = leftSec % 60;
+        const clockStr = `${rm}:${rs < 10 ? '0' : ''}${rs}`;
+        const ringR = 84, ringC = 2 * Math.PI * ringR;
+        const ringPct = rt.running ? Math.min(1, leftSec / Math.max(1, rt.total)) : 1;
+
+        if (state.timerExpanded) {
+          left.innerHTML = `
+            <div id="leftClockExpandArea" class="h-full flex flex-col justify-between items-center text-center py-2">
+              <div class="w-full flex items-center justify-between">
+                <span class="text-[11px] font-bold tracking-widest text-[#92E82A]">REST CLOCK</span>
+                <button id="btnToggleLeftClock" class="px-3 py-1 rounded-full bg-[#2C2C2E] text-xs font-bold text-white">Minimize ⤡</button>
+              </div>
+              <div class="relative w-56 h-56 flex items-center justify-center my-auto">
+                <svg class="w-56 h-56 -rotate-90" viewBox="0 0 190 190">
+                  <circle cx="95" cy="95" r="${ringR}" fill="none" stroke="#2C2C2E" stroke-width="10" />
+                  <circle id="leftClockRing" cx="95" cy="95" r="${ringR}" fill="none" stroke="#92E82A" stroke-width="10" stroke-linecap="round"
+                    stroke-dasharray="${ringC}" stroke-dashoffset="${ringC * (1 - ringPct)}" />
+                </svg>
+                <div class="absolute inset-0 flex flex-col items-center justify-center px-4">
+                  <div id="leftClockTime" class="text-5xl font-extrabold text-white tabular-nums tracking-tight">${clockStr}</div>
+                  <div id="leftClockEx" class="text-xs text-[#8E8E93] mt-1.5 truncate max-w-[160px]">${rt.exName || 'Ready'}</div>
+                </div>
+              </div>
+              <div class="w-full space-y-2.5">
+                <div class="grid grid-cols-3 gap-2">
+                  <button id="leftClockMinus" class="py-3 rounded-2xl bg-[#1C1C1E] text-white font-bold text-sm">-30s</button>
+                  <button id="leftClockPause" class="py-3 rounded-2xl bg-[#92E82A] text-[#000000] font-bold text-sm">${rt.running ? (rt.paused ? 'Resume' : 'Pause') : 'Start 3m'}</button>
+                  <button id="leftClockPlus" class="py-3 rounded-2xl bg-[#1C1C1E] text-white font-bold text-sm">+30s</button>
+                </div>
+                <div class="text-[10px] text-[#636366]">Swipe down or tap Minimize to return to checklist</div>
+              </div>
+            </div>
+          `;
+        } else if (!sess) {
           left.innerHTML = `
             <div class="mb-3">
               <div class="text-[11px] font-bold tracking-widest text-[#92E82A]">WORKOUT OVERVIEW</div>
               <div class="text-lg font-bold text-white mt-0.5">Ready to Train</div>
             </div>
             <div class="bg-[#1C1C1E] rounded-2xl p-4 text-xs text-[#8E8E93] leading-relaxed">
-              Start any workout from <strong class="text-white">Today</strong> or <strong class="text-white">Program</strong> to see your live exercise checklist, rest timer, and round maxes here.
+              Start any workout from <strong class="text-white">Today</strong> or <strong class="text-white">Program</strong> to see your live exercise checklist, voice AI logging, and full-screen rest clock here.
             </div>
           `;
           return;
-        }
-        const totalSets = sess.exercises.reduce((a, e) => a + e.sets.length, 0);
-        const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
-        left.innerHTML = `
-          <div class="mb-3">
-            <div class="text-[11px] font-bold tracking-widest text-[#92E82A]">WORKOUT OVERVIEW</div>
-            <div class="text-lg font-bold text-white mt-0.5">${sess.title}</div>
-            <div class="text-xs text-[#8E8E93] mt-0.5">${doneSets}/${totalSets} sets completed</div>
-          </div>
-          <div class="space-y-2">
-            ${sess.exercises.map((item, idx) => {
-              const ex = EXERCISES[item.exId];
-              const exDone = item.sets.filter((s) => s.done).length;
-              const allDone = exDone === item.sets.length && item.sets.length > 0;
-              return `
-                <div class="bg-[#1C1C1E] rounded-2xl p-3 flex items-center justify-between gap-2">
-                  <div class="min-w-0">
-                    <div class="text-xs font-bold ${allDone ? 'text-[#92E82A]' : 'text-white'} truncate">${idx + 1}. ${ex.name}</div>
-                    <div class="text-[11px] text-[#8E8E93]">${exDone}/${item.sets.length} sets • ${item.rx.reps}</div>
-                  </div>
-                  <span class="text-xs font-bold ${allDone ? 'text-[#92E82A]' : 'text-[#8E8E93]'}">${allDone ? '✓' : `${exDone}/${item.sets.length}`}</span>
+        } else {
+          const totalSets = sess.exercises.reduce((a, e) => a + e.sets.length, 0);
+          const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
+          left.innerHTML = `
+            <!-- Docked Rest Clock Preview (Swipe Up or Tap Expand) -->
+            <div id="leftClockExpandArea" class="bg-[#1C1C1E] rounded-2xl p-3.5 mb-3 cursor-pointer">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[10px] font-bold tracking-widest text-[#92E82A]">REST CLOCK</span>
+                <button id="btnToggleLeftClock" class="text-[11px] font-bold text-white bg-[#2C2C2E] px-2.5 py-0.5 rounded-full">Expand ⤢</button>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div id="leftClockTime" class="text-3xl font-extrabold text-white tabular-nums leading-none">${clockStr}</div>
+                  <div id="leftClockEx" class="text-[11px] text-[#8E8E93] mt-1 truncate max-w-[150px]">${rt.exName || 'Tap ⏱ or Swipe Up'}</div>
                 </div>
-              `;
-            }).join('')}
-          </div>
-        `;
+                <div class="flex gap-1.5">
+                  <button id="leftClockMinus" class="px-2.5 py-1.5 rounded-xl bg-[#2C2C2E] text-xs font-bold text-white">-30s</button>
+                  <button id="leftClockPause" class="px-2.5 py-1.5 rounded-xl bg-[#92E82A] text-xs font-bold text-[#000000]">${rt.running ? (rt.paused ? 'Resume' : 'Pause') : 'Start'}</button>
+                  <button id="leftClockPlus" class="px-2.5 py-1.5 rounded-xl bg-[#2C2C2E] text-xs font-bold text-white">+30s</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-2.5">
+              <div class="text-sm font-bold text-white">${sess.title}</div>
+              <div class="text-xs text-[#8E8E93]">${doneSets}/${totalSets} sets completed</div>
+            </div>
+            <div class="space-y-2">
+              ${sess.exercises.map((item, idx) => {
+                const ex = EXERCISES[item.exId];
+                const exDone = item.sets.filter((s) => s.done).length;
+                const allDone = exDone === item.sets.length && item.sets.length > 0;
+                return `
+                  <div class="bg-[#1C1C1E] rounded-2xl p-3 flex items-center justify-between gap-2">
+                    <div class="min-w-0">
+                      <div class="text-xs font-bold ${allDone ? 'text-[#92E82A]' : 'text-white'} truncate">${idx + 1}. ${ex.name}</div>
+                      <div class="text-[11px] text-[#8E8E93]">Target: ${item.rx.reps} • ${exDone}/${item.sets.length}</div>
+                    </div>
+                    <span class="text-xs font-bold ${allDone ? 'text-[#92E82A]' : 'text-[#8E8E93]'}">${allDone ? '✓' : `${exDone}/${item.sets.length}`}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        // Wire Left Clock Expand / Swipe + Controls
+        const togBtn = document.getElementById('btnToggleLeftClock');
+        if (togBtn) togBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.timerExpanded = !state.timerExpanded;
+          render();
+        });
+        const expArea = document.getElementById('leftClockExpandArea');
+        if (expArea) {
+          let touchStartY = 0;
+          expArea.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; }, { passive: true });
+          expArea.addEventListener('touchend', (e) => {
+            const dy = touchStartY - e.changedTouches[0].clientY;
+            if (dy > 35 && !state.timerExpanded) { state.timerExpanded = true; render(); }
+            else if (dy < -35 && state.timerExpanded) { state.timerExpanded = false; render(); }
+          }, { passive: true });
+        }
+        const mBtn = document.getElementById('leftClockMinus');
+        const pBtn = document.getElementById('leftClockPlus');
+        const psBtn = document.getElementById('leftClockPause');
+        if (mBtn) mBtn.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('btnRestMinus').click(); });
+        if (pBtn) pBtn.addEventListener('click', (e) => { e.stopPropagation(); document.getElementById('btnRestPlus').click(); });
+        if (psBtn) psBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!state.restTimer.running) startRestTimer(180, sess ? sess.title : 'Rest Timer');
+          else document.getElementById('btnRestPause').click();
+          render();
+        });
         return;
       }
 
@@ -1731,13 +1881,15 @@
 
         const sess = state.activeSession;
         root.innerHTML = `
-          <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-3.5 mb-3">
+          <div class="flex items-center justify-between bg-[#1C1C1E] rounded-2xl p-3.5 mb-2.5">
             <div>
               <div class="text-sm font-bold text-white">${sess.title}</div>
               <div class="text-[11px] text-[#8E8E93]">Round ${state.roundNumber} • Auto-saved locally</div>
             </div>
             <button id="btnEndWorkout" class="px-4 py-2 rounded-full bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Finish</button>
           </div>
+
+
 
           ${sess.exercises.map((item, exIdx) => {
             const ex = EXERCISES[item.exId];
@@ -1751,32 +1903,58 @@
                 <div class="flex items-start justify-between mb-2.5 gap-2">
                   <div class="min-w-0">
                     <div class="text-base font-bold text-[#92E82A] truncate">${ex.name}</div>
-                    <div class="text-[11px] text-[#8E8E93]">${item.rx.sets} × ${item.rx.reps} • Rest ${item.rx.restLabel}${refMax ? ` • <span class="text-white font-semibold">${prevMax ? 'Last Rnd' : 'Max'}: ${refMax.weight}${state.unit}×${refMax.reps}</span>` : ''}</div>
+                    <div class="text-[11px] text-[#8E8E93]">Target: <strong class="text-white">${item.rx.sets} × ${item.rx.reps}</strong> • Rest ${item.rx.restLabel}${state.lastExerciseSets[ex.id] ? ` • <span class="text-[#92E82A] font-semibold">Last Wk: ${state.lastExerciseSets[ex.id].weight}${state.unit}×${state.lastExerciseSets[ex.id].reps}</span>` : (refMax ? ` • <span class="text-white font-semibold">Max: ${refMax.weight}${state.unit}×${refMax.reps}</span>` : '')}</div>
                   </div>
                   <div class="flex gap-1.5 shrink-0">
-                    <button class="start-rec-timer inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#2C2C2E] text-[11px] text-[#92E82A] font-bold" data-ex="${exIdx}">⏱ ${Math.floor(item.rx.restSec / 60)}m</button>
+                    <button class="start-rec-timer inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#2C2C2E] text-[11px] text-[#92E82A] font-bold" data-ex="${exIdx}">
+                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 1.5"/><path d="M9 2h6"/></svg>
+                      <span>${Math.floor(item.rx.restSec / 60)}m</span>
+                    </button>
                     <button class="ex-more-btn px-2.5 py-1 rounded-full bg-[#2C2C2E] text-[11px] text-white font-bold" data-ex="${exIdx}">⋯</button>
                   </div>
                 </div>
 
-                <div class="grid grid-cols-[28px_1fr_1fr_40px] gap-2 text-[10px] font-bold text-[#636366] text-center pb-1 border-b border-[#2C2C2E] mb-1.5">
-                  <div>SET</div><div>${loadLabel}</div><div>REPS</div><div>✓</div>
-                </div>
+                ${(() => {
+                  const lastWk = state.lastExerciseSets[ex.id];
+                  const rxParts = String(item.rx.reps || '').match(/\d+/g) || [];
+                  const rxTop = rxParts.length ? Number(rxParts[rxParts.length - 1]) : null;
+                  const hitTop = lastWk && rxTop && Number(lastWk.reps || 0) >= rxTop;
+                  const incAmt = state.unit === 'lb' ? 5 : 2.5;
+                  return `
+                    <!-- Recommended & Last Week Strip -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 bg-[#2C2C2E]/40 rounded-xl px-3 py-2 mb-2.5 text-[11px]">
+                      <div><span class="text-[#8E8E93]">Target:</span> <strong class="text-white">${item.rx.sets} × ${item.rx.reps}</strong></div>
+                      <div><span class="text-[#8E8E93]">Last Wk:</span> <strong class="${lastWk ? 'text-[#92E82A]' : 'text-[#636366]'}">${lastWk ? (lastWk.summary || `${lastWk.weight > 0 ? `${lastWk.weight}${state.unit}` : 'BW'} × ${lastWk.reps}`) : 'None yet'}</strong></div>
+                      ${lastWk ? `<div class="w-full text-[10px] ${hitTop ? 'text-[#92E82A] font-semibold' : 'text-[#8E8E93]'}">${hitTop ? `Hit top reps — try +${incAmt} ${state.unit} today` : `Aim to beat ${lastWk.reps} reps`}${lastWk.note ? ` • Note: "${lastWk.note}"` : ''}</div>` : ''}
+                    </div>
 
-                ${item.sets.map((s, sIdx) => `
-                  <div class="grid grid-cols-[28px_1fr_1fr_40px] gap-2 items-center py-1 rounded-lg ${s.done ? 'bg-[#22C55E]/10' : ''}">
-                    <div class="text-center text-xs font-bold ${s.type === 'warmup' ? 'text-[#92E82A]' : 'text-white'}">${s.type === 'warmup' ? 'W' : s.num}</div>
-                    <input class="num-input set-w" data-ex="${exIdx}" data-s="${sIdx}" type="number" placeholder="${refMax ? refMax.weight : state.unit}" value="${s.weight ?? ''}" />
-                    <input class="num-input set-r" data-ex="${exIdx}" data-s="${sIdx}" type="number" value="${s.reps}" />
-                    <button class="set-done h-9 rounded-lg flex items-center justify-center font-bold text-sm ${s.done ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-s="${sIdx}">✓</button>
-                  </div>
-                `).join('')}
+                    <!-- Clean Sets Table (SET | LB | REPS | ✓) -->
+                    <div class="grid grid-cols-[26px_1fr_1fr_38px] gap-2 text-[10px] font-bold text-[#636366] text-center pb-1 border-b border-[#2C2C2E] mb-1.5">
+                      <div>SET</div><div>${loadLabel}</div><div>REPS</div><div>✓</div>
+                    </div>
+                    ${item.sets.map((s, sIdx) => `
+                      <div class="grid grid-cols-[26px_1fr_1fr_38px] gap-2 items-center py-1 rounded-lg ${s.done ? 'bg-[#22C55E]/10' : ''}">
+                        <div class="text-center text-xs font-bold ${s.type === 'warmup' ? 'text-[#92E82A]' : 'text-white'}">${s.type === 'warmup' ? 'W' : s.num}</div>
+                        <input class="num-input set-w" data-ex="${exIdx}" data-s="${sIdx}" type="number" placeholder="${lastWk ? (lastWk.weight || 'BW') : (refMax ? refMax.weight : state.unit)}" value="${s.weight ?? ''}" />
+                        <input class="num-input set-r" data-ex="${exIdx}" data-s="${sIdx}" type="number" value="${s.reps}" />
+                        <button class="set-done h-9 rounded-lg flex items-center justify-center font-bold text-sm ${s.done ? 'bg-[#92E82A] text-[#0B0B0D]' : 'bg-[#2C2C2E] text-[#8E8E93]'}" data-ex="${exIdx}" data-s="${sIdx}">✓</button>
+                      </div>
+                    `).join('')}
 
-                <div class="flex items-center gap-4 mt-2.5 pt-2 border-t border-[#2C2C2E]">
-                  <button class="add-set text-xs font-bold text-[#92E82A]" data-ex="${exIdx}" data-type="working">+ Set</button>
-                  <button class="add-set text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}" data-type="warmup">+ Warm-up</button>
-                  <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
-                </div>
+                    <div class="flex items-center gap-4 mt-2 pt-2 border-t border-[#2C2C2E] mb-2.5">
+                      <button class="add-set text-xs font-bold text-[#92E82A]" data-ex="${exIdx}" data-type="working">+ Set</button>
+                      <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
+                    </div>
+
+                    <!-- Speak / Type Additional Notes -->
+                    <div class="flex items-center gap-1.5">
+                      <button class="ex-note-mic w-8 h-8 rounded-lg bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0" data-ex="${exIdx}" title="Speak note for ${ex.name}">
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                      </button>
+                      <input class="ex-note-inp num-input text-left px-3 h-8 text-[11px] flex-1" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Speak or type note (e.g. swapped grip, felt light)..." />
+                    </div>
+                  `;
+                })()}
               </div>
             `;
           }).join('')}
@@ -1784,23 +1962,57 @@
 
         root.querySelectorAll('.set-w').forEach((inp) => inp.addEventListener('input', (e) => {
           state.activeSession.exercises[inp.dataset.ex].sets[inp.dataset.s].weight = e.target.value === '' ? '' : Number(e.target.value);
+          syncActiveSessionProgress();
         }));
         root.querySelectorAll('.set-r').forEach((inp) => inp.addEventListener('input', (e) => {
           state.activeSession.exercises[inp.dataset.ex].sets[inp.dataset.s].reps = Number(e.target.value || 0);
+          syncActiveSessionProgress();
         }));
         root.querySelectorAll('.copy-down').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
           const firstWorking = item.sets.find((s) => s.type !== 'warmup');
           if (!firstWorking) return;
           item.sets.forEach((s) => { if (s.type !== 'warmup') { s.weight = firstWorking.weight; s.reps = firstWorking.reps; } });
+          syncActiveSessionProgress();
           render();
         }));
         root.querySelectorAll('.set-done').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
           const s = item.sets[btn.dataset.s];
           s.done = !s.done;
+          syncActiveSessionProgress();
           if (s.done) startRestTimer(item.rx.restSec, EXERCISES[item.exId].name);
           render();
+        }));
+        root.querySelectorAll('.add-set').forEach((btn) => btn.addEventListener('click', () => {
+          const item = state.activeSession.exercises[btn.dataset.ex];
+          const last = item.sets[item.sets.length - 1] || { weight: '', reps: 10, rpe: 8 };
+          const num = item.sets.filter((x) => x.type !== 'warmup').length + 1;
+          item.sets.push({ num, type: btn.dataset.type, weight: last.weight, reps: last.reps, rpe: last.rpe, done: false });
+          persistState();
+          render();
+        }));
+        root.querySelectorAll('.ex-note-inp').forEach((inp) => inp.addEventListener('input', (e) => {
+          state.activeSession.exercises[inp.dataset.ex].note = e.target.value;
+          syncActiveSessionProgress();
+        }));
+        root.querySelectorAll('.ex-note-mic').forEach((btn) => btn.addEventListener('click', () => {
+          const exIdx = Number(btn.dataset.ex);
+          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
+          const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+          if (!SR) { if (inp) { inp.focus(); inp.placeholder = 'Tap iPhone keyboard mic to dictate note!'; } return; }
+          const rec = new SR(); rec.lang = 'en-US'; rec.interimResults = false;
+          btn.classList.add('bg-[#FA114F]', 'text-white');
+          rec.onresult = (ev) => {
+            const t = ev.results[0][0].transcript;
+            state.activeSession.exercises[exIdx].note = t;
+            if (inp) inp.value = t;
+            btn.classList.remove('bg-[#FA114F]', 'text-white');
+            persistState();
+          };
+          rec.onerror = () => btn.classList.remove('bg-[#FA114F]', 'text-white');
+          rec.onend = () => btn.classList.remove('bg-[#FA114F]', 'text-white');
+          rec.start();
         }));
         root.querySelectorAll('.start-rec-timer').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
@@ -1862,26 +2074,12 @@
         }));
 
         document.getElementById('btnEndWorkout').addEventListener('click', () => {
-          const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done).length, 0);
-          const vol = sess.exercises.reduce((a, e) => a + e.sets.reduce((b, s) => b + (s.done && s.type !== 'warmup' ? Number(s.weight || 0) * Number(s.reps || 0) : 0), 0), 0);
-          sess.exercises.forEach((e) => {
-            e.sets.forEach((s) => {
-              const w = Number(s.weight || 0);
-              const r = Number(s.reps || 0);
-              if (s.done && s.type !== 'warmup' && w > 0) {
-                const prev = state.peakWeights[e.exId];
-                if (!prev || w > prev.weight || (w === prev.weight && r > prev.reps)) {
-                  state.peakWeights[e.exId] = { weight: w, reps: r, date: new Date().toLocaleDateString() };
-                }
-              }
-            });
-          });
-          savePrs(state.peakWeights);
-          state.history.unshift({ title: sess.title, sets: doneSets, volume: Math.round(vol), date: new Date().toLocaleDateString(), isoDate: getLocalTodayStr() });
-          if (!state.completedDays.includes(sess.dayIdx)) state.completedDays.push(sess.dayIdx);
+          syncActiveSessionProgress();
+          const doneSets = sess.exercises.reduce((a, e) => a + e.sets.filter((s) => s.done || (s.type !== 'warmup' && Number(s.weight || 0) > 0)).length, 0);
           state.health.moveCal += Math.max(120, Math.round(doneSets * 12));
           state.health.exMin += Math.max(20, Math.round(doneSets * 2.5));
           state.activeSession = null;
+          persistState();
 
           // If finishing Week 8 or Week 9 (Deload) last day, offer 1-tap Round Completion
           const finishedWeek8Or9 = state.selectedWeek >= 8 && state.completedDays.length >= 6;
@@ -2709,20 +2907,48 @@
             <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-3"><div class="text-[10px] font-bold text-[#636366]">VOLUME</div><div class="text-lg font-bold text-white">${totalVol} ${state.unit}</div></div>
           </div>
           <div class="bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3.5 mb-3">
-            <div class="text-sm font-bold text-white mb-2">Movement Peak Weights (PR Reference)</div>
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-sm font-bold text-white">Movement Weights & PRs</div>
+              <span class="text-[10px] text-[#8E8E93]">0 = Bodyweight (BW)</span>
+            </div>
             <div class="grid grid-cols-[1.4fr_0.7fr_0.6fr_auto] gap-1.5 mb-3">
               <select id="prExSelect" class="bg-[#2C2C2E] text-white text-xs rounded-lg px-2 h-9 outline-none">
                 ${Object.values(EXERCISES).map((ex) => `<option value="${ex.id}">${ex.name}</option>`).join('')}
               </select>
-              <input id="prWeightInput" type="number" step="0.5" placeholder="${state.unit}" class="num-input" />
+              <input id="prWeightInput" type="number" step="0.5" placeholder="0=BW" class="num-input" />
               <input id="prRepsInput" type="number" placeholder="Reps" class="num-input" />
               <button id="btnSavePr" class="px-3 h-9 rounded-lg bg-[#92E82A] text-[#0B0B0D] font-bold text-xs">Save</button>
             </div>
-            <div class="space-y-1.5">
-              ${Object.keys(state.peakWeights).length ? Object.entries(state.peakWeights).map(([exId, pr]) => {
-                const e1rm = pr.reps > 1 ? Math.round(pr.weight * (1 + pr.reps / 30) * 10) / 10 : pr.weight;
-                return `<div class="flex items-center justify-between py-2 border-t border-[#1F1F26] text-xs"><div><div class="text-white font-semibold">${EXERCISES[exId]?.name || exId}</div><div class="text-[10px] text-[#636366]">Updated ${pr.date}</div></div><div class="text-right"><div class="text-[#92E82A] font-bold">${pr.weight} ${state.unit} × ${pr.reps}</div><div class="text-[10px] text-[#8E8E93]">Est. 1RM: ${e1rm} ${state.unit}</div></div></div>`;
-              }).join('') : '<div class="text-xs text-[#636366]">No peak weights logged yet.</div>'}
+            <div class="space-y-1 max-h-80 overflow-y-auto pr-1">
+              ${Object.values(EXERCISES).sort((a, b) => {
+                const ha = (state.lastExerciseSets[a.id] || state.peakWeights[a.id]) ? 1 : 0;
+                const hb = (state.lastExerciseSets[b.id] || state.peakWeights[b.id]) ? 1 : 0;
+                return hb - ha;
+              }).map((ex) => {
+                const cur = state.lastExerciseSets[ex.id];
+                const pr = state.peakWeights[ex.id];
+                const curDisp = cur
+                  ? (cur.summary || `${cur.weight > 0 ? `${cur.weight} ${state.unit}` : 'BW'} × ${cur.reps}`)
+                  : '—';
+                const prDisp = pr
+                  ? `${pr.weight > 0 ? `${pr.weight} ${state.unit}` : 'BW'} × ${pr.reps}`
+                  : '';
+                const e1rm = (pr && pr.weight > 0)
+                  ? (pr.reps > 1 ? Math.round(pr.weight * (1 + pr.reps / 30) * 10) / 10 : pr.weight)
+                  : null;
+                return `
+                  <div class="flex items-center justify-between py-2 border-t border-[#2C2C2E]/70 text-xs gap-2">
+                    <div class="min-w-0">
+                      <div class="text-white font-semibold truncate">${ex.name}</div>
+                      <div class="text-[10px] text-[#8E8E93]">${cur ? `Last: ${cur.date}` : (pr ? `PR: ${pr.date}` : (ex.type === 'bodyweight_plus_weight' ? 'Bodyweight' : 'Not logged yet'))}</div>
+                    </div>
+                    <div class="text-right shrink-0">
+                      <div class="${(cur || pr) ? 'text-[#92E82A] font-bold' : 'text-[#636366]'} tabular-nums">${cur ? curDisp : (prDisp || '—')}</div>
+                      ${e1rm ? `<div class="text-[10px] text-[#8E8E93] tabular-nums">PR: ${prDisp} • 1RM ${e1rm}</div>` : (pr && pr.weight === 0 ? `<div class="text-[10px] text-[#8E8E93]">Best: BW × ${pr.reps}</div>` : '')}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
             </div>
           </div>
           <div class="bg-[#1C1C1E] border border-[#2D2D37] rounded-xl p-3.5 mb-3">
@@ -2760,10 +2986,19 @@
         }
         document.getElementById('btnSavePr').addEventListener('click', () => {
           const exId = document.getElementById('prExSelect').value;
-          const w = Number(document.getElementById('prWeightInput').value);
+          const rawW = document.getElementById('prWeightInput').value.trim();
+          const w = rawW === '' ? 0 : Number(rawW);
           const r = Number(document.getElementById('prRepsInput').value) || 1;
-          if (!Number.isFinite(w) || w <= 0) return;
-          state.peakWeights[exId] = { weight: w, reps: r, date: new Date().toLocaleDateString() };
+          if (!Number.isFinite(w) || w < 0 || r <= 0) return;
+          const todayLbl = new Date().toLocaleDateString();
+          state.peakWeights[exId] = { weight: w, reps: r, date: todayLbl };
+          state.lastExerciseSets[exId] = {
+            weight: w,
+            reps: r,
+            summary: `${w > 0 ? `${w}${state.unit}` : 'BW'}×${r}`,
+            date: getLocalTodayStr(),
+            week: state.selectedWeek
+          };
           savePrs(state.peakWeights);
           render();
         });
@@ -2792,6 +3027,18 @@
             </div>
           </div>
 
+          <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-4 mb-3">
+            <div class="text-[10px] font-bold text-[#92E82A] mb-1">ICLOUD DRIVE SAVE FILE (ALL DATA)</div>
+            <div class="text-xs text-[#8E8E93] mb-3">Save both your Training & Nutrition to a single <strong class="text-white">apex-hybrid-save.json</strong> file in iCloud Drive, or reload from it anytime.</div>
+            <div class="grid grid-cols-2 gap-2">
+              <button id="btnSaveIcloudAll" class="py-2.5 px-3 rounded-xl bg-[#92E82A] text-[#000000] font-bold text-xs">Save to iCloud File</button>
+              <label class="py-2.5 px-3 rounded-xl bg-[#2C2C2E] text-white font-bold text-xs text-center cursor-pointer">
+                Load iCloud File
+                <input id="inpLoadIcloudAll" type="file" accept=".json,application/json" class="hidden" />
+              </label>
+            </div>
+          </div>
+
           <div class="bg-[#1C1C1E] border border-[#1F1F26] rounded-xl p-4">
             <div class="text-[10px] font-bold text-[#92E82A] mb-1">TRAINING BACKUP & RESTORE</div>
             <div class="text-xs text-[#8E8E93] mb-3">Export or import your workouts, Peak Weights / PRs, and Apple Health entries separately from nutrition.</div>
@@ -2805,6 +3052,76 @@
             </div>
           </div>
         `;
+        document.getElementById('btnSaveIcloudAll').addEventListener('click', async () => {
+          const fullPayload = {
+            type: 'apex-hybrid-full-save',
+            version: 3,
+            savedAt: new Date().toISOString(),
+            unit: state.unit,
+            selectedWeek: state.selectedWeek,
+            currentDayIdx: state.currentDayIdx,
+            completedDays: state.completedDays,
+            activeSession: state.activeSession,
+            history: state.history,
+            peakWeights: state.peakWeights,
+            roundNumber: state.roundNumber,
+            savedRounds: state.savedRounds,
+            health: state.health,
+            nutrition: state.nutrition,
+          };
+          const jsonStr = JSON.stringify(fullPayload, null, 2);
+          if (window.showSaveFilePicker) {
+            try {
+              const handle = await window.showSaveFilePicker({
+                suggestedName: 'apex-hybrid-save.json',
+                types: [{ description: 'APEX HYBRID Save', accept: { 'application/json': ['.json'] } }]
+              });
+              const writable = await handle.createWritable();
+              await writable.write(jsonStr);
+              await writable.close();
+              openModal('Saved to File', '<div class="text-xs text-white">Updated <strong>apex-hybrid-save.json</strong> with all training and nutrition data.</div>');
+              return;
+            } catch (err) {
+              if (err && err.name === 'AbortError') return;
+            }
+          }
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'apex-hybrid-save.json';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        });
+        document.getElementById('inpLoadIcloudAll').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const data = JSON.parse(String(reader.result || '{}'));
+              if (data.unit) state.unit = data.unit;
+              if (data.selectedWeek) state.selectedWeek = data.selectedWeek;
+              if (typeof data.currentDayIdx === 'number') state.currentDayIdx = data.currentDayIdx;
+              if (Array.isArray(data.completedDays)) state.completedDays = data.completedDays;
+              if (data.activeSession !== undefined) state.activeSession = data.activeSession;
+              if (Array.isArray(data.history)) state.history = data.history;
+              if (data.peakWeights) state.peakWeights = data.peakWeights;
+              if (data.roundNumber) state.roundNumber = data.roundNumber;
+              if (Array.isArray(data.savedRounds)) state.savedRounds = data.savedRounds;
+              if (data.health) state.health = data.health;
+              if (data.nutrition) state.nutrition = data.nutrition;
+              persistState();
+              render();
+              openModal('iCloud Save Loaded', `<div class="text-xs text-white">Loaded ${state.history.length} workout(s), ${Object.keys(state.peakWeights).length} PR(s), and ${getAllLoggedNutritionDates().length} nutrition day(s).</div>`);
+            } catch (err) {
+              openModal('Load Error', '<div class="text-xs text-[#FA114F]">Could not read apex-hybrid-save.json.</div>');
+            }
+          };
+          reader.readAsText(file);
+        });
         document.getElementById('unitLb').addEventListener('click', () => { state.unit = 'lb'; render(); });
         document.getElementById('unitKg').addEventListener('click', () => { state.unit = 'kg'; render(); });
         document.getElementById('btnExportTrainingCsv').addEventListener('click', () => {
@@ -2885,6 +3202,12 @@
       }
     }
 
+    window.addEventListener('pagehide', () => { if (state.activeSession) syncActiveSessionProgress(); else persistState(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        if (state.activeSession) syncActiveSessionProgress(); else persistState();
+      }
+    });
     render();
   </script>
 </body>
