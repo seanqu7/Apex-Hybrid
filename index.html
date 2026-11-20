@@ -1312,7 +1312,7 @@
     function renderLeftPane() {
       const left = document.getElementById('leftPane');
 
-      // 1. TODAY -> Activity Rings + Nutrition Summary
+      // 1. TODAY -> Activity Rings + Nutrition Summary + Weekly Workout Calendar
       if (state.tab === 'today') {
         const todayStr = getLocalTodayStr();
         const [ty, tm, td] = todayStr.split('-').map(Number);
@@ -1320,7 +1320,7 @@
         const workoutDays = new Set((state.history || []).map((h) => {
           if (h.isoDate) return h.isoDate;
           const d = new Date(h.date);
-          return !isNaN(d.getTime()) ? d.toISOString().slice(0, 10) : '';
+          return !isNaN(d.getTime()) ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` : '';
         }).filter(Boolean));
         const wkCal = [];
         for (let i = 0; i < 7; i++) {
@@ -1611,6 +1611,9 @@
         const day = getDaysForWeek(state.selectedWeek)[state.currentDayIdx];
         const totalSets = day.items.reduce((x, y) => x + y.sets, 0);
         const estMin = Math.max(30, totalSets * 3);
+        const curSplit = getSplitType(day.day);
+        const isDeload = state.selectedWeek === 9;
+        const activeSplitStyle = 'style="background: rgba(146, 232, 42, 0.20) !important; border-color: #92E82A !important; box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), 0 4px 16px rgba(146,232,42,0.18) !important;"';
 
         root.innerHTML = `
           <div class="md:hidden">${renderAppleFitnessBento()}</div>
@@ -1618,24 +1621,24 @@
           <div class="mb-4 pt-2 border-t border-[#1C1C1E]">
             <div class="flex items-center justify-between mb-2">
               <div class="text-sm font-bold text-white">Browse Split</div>
-              <span class="text-xs font-semibold text-[#92E82A]">Round ${state.roundNumber} • ${state.selectedWeek === 9 ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
+              <span class="text-xs font-semibold text-[#92E82A]">Round ${state.roundNumber} • ${isDeload ? 'Deload' : `Week ${state.selectedWeek}/9`}</span>
             </div>
             <div class="grid grid-cols-4 gap-2">
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="0">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Pull' ? activeSplitStyle : ''} data-day="0">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Pull', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold text-white">Pull</div>
+                <div class="text-xs font-bold ${!isDeload && curSplit === 'Pull' ? 'text-[#92E82A]' : 'text-white'}">Pull</div>
               </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="1">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Push' ? activeSplitStyle : ''} data-day="1">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Push', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold text-white">Push</div>
+                <div class="text-xs font-bold ${!isDeload && curSplit === 'Push' ? 'text-[#92E82A]' : 'text-white'}">Push</div>
               </button>
-              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]" data-day="2">
+              <button class="split-jump rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${!isDeload && curSplit === 'Legs' ? activeSplitStyle : ''} data-day="2">
                 <div class="text-[#92E82A] mb-1">${getSplitIcon('Legs', 'w-5 h-5')}</div>
-                <div class="text-xs font-bold text-white">Legs</div>
+                <div class="text-xs font-bold ${!isDeload && curSplit === 'Legs' ? 'text-[#92E82A]' : 'text-white'}">Legs</div>
               </button>
-              <button class="split-jump-deload rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E] hover:bg-[#2C2C2E]">
-                <div class="text-[#A1A1AA] mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
-                <div class="text-xs font-bold text-white">Deload</div>
+              <button class="split-jump-deload rounded-2xl p-2.5 text-left bg-[#1C1C1E] border border-[#2C2C2E]" ${isDeload ? activeSplitStyle : ''}>
+                <div class="${isDeload ? 'text-[#92E82A]' : 'text-[#D1D1D6]'} mb-1"><svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
+                <div class="text-xs font-bold ${isDeload ? 'text-[#92E82A]' : 'text-white'}">Deload</div>
               </button>
             </div>
           </div>
@@ -1682,8 +1685,6 @@
               `;
             }).join('')}
           </div>
-
-
         `;
 
         wireHealthButton();
