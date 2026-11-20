@@ -201,6 +201,18 @@
       -webkit-backdrop-filter: blur(18px);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 8px 24px rgba(146, 232, 42, 0.25) !important;
     }
+    @keyframes geminiWaveBar {
+      0%, 100% { transform: scaleY(0.28); opacity: 0.65; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    .wave-bar {
+      width: 2.5px;
+      height: 18px;
+      border-radius: 9999px;
+      background: #FFFFFF;
+      transform-origin: center;
+      animation: geminiWaveBar 0.75s ease-in-out infinite;
+    }
   </style>
 </head>
 <body>
@@ -1949,6 +1961,10 @@
                     <!-- Gemini-Style Continuous Voice & Submit Arrow Bar -->
                     <div class="space-y-1">
                       <div class="flex items-center gap-1.5 bg-[#2C2C2E]/70 border border-white/10 rounded-full px-2 py-1">
+                        <div class="ex-wave hidden flex items-center gap-1 px-2 h-8 flex-1" data-ex="${exIdx}">
+                          ${[0, 120, 240, 80, 320, 160, 40, 280, 100, 200, 60, 180].map((d) => `<span class="wave-bar" style="animation-delay:${d}ms"></span>`).join('')}
+                          <span class="text-[11px] text-white/80 font-medium ml-1.5">Listening...</span>
+                        </div>
                         <input class="ex-note-inp bg-transparent text-white text-xs px-2 h-8 flex-1 outline-none placeholder-[#8E8E93]" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Ask or speak: 25 lb for 8, 8, 7..." />
                         <button class="ex-note-mic w-8 h-8 rounded-full bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0 transition-all" data-ex="${exIdx}" title="Tap to start/stop recording">
                           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
@@ -2002,7 +2018,24 @@
           state.activeSession.exercises[inp.dataset.ex].note = e.target.value;
           syncActiveSessionProgress();
         }));
+        const MIC_SVG = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>';
+        const STOP_SVG = '<svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2.5"/></svg>';
         let activeMicSession = null;
+
+        const setExRecordingUI = (exIdx, isRecording) => {
+          const btn = root.querySelector(`.ex-note-mic[data-ex="${exIdx}"]`);
+          const wave = root.querySelector(`.ex-wave[data-ex="${exIdx}"]`);
+          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
+          if (btn) {
+            btn.innerHTML = isRecording ? STOP_SVG : MIC_SVG;
+            btn.classList.toggle('bg-white', isRecording);
+            btn.classList.toggle('text-[#000000]', isRecording);
+            btn.classList.toggle('bg-[#2C2C2E]', !isRecording);
+            btn.classList.toggle('text-[#92E82A]', !isRecording);
+          }
+          if (wave) wave.classList.toggle('hidden', !isRecording);
+          if (inp) inp.classList.toggle('hidden', isRecording);
+        };
 
         const parseAudioBlobWithGemini = async (exIdx, blob, mimeType, btnEl) => {
           const target = sess.exercises[exIdx];
@@ -2152,7 +2185,7 @@
           if (activeMicSession && activeMicSession.exIdx === exIdx) {
             const sessMic = activeMicSession;
             activeMicSession = null;
-            btn.classList.remove('bg-[#FA114F]', 'text-white', 'animate-pulse');
+            setExRecordingUI(exIdx, false);
             if (hint) hint.classList.add('hidden');
             if (sessMic.type === 'sr') { try { sessMic.rec.stop(); } catch (e) {} }
             else if (sessMic.type === 'mr') {
@@ -2173,13 +2206,13 @@
               mr.ondataavailable = (ev) => { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
               mr.onstop = () => {
                 stream.getTracks().forEach((t) => t.stop());
-                btn.classList.remove('bg-[#FA114F]', 'text-white', 'animate-pulse');
+                setExRecordingUI(exIdx, false);
                 if (hint) hint.classList.add('hidden');
                 const blob = new Blob(chunks, { type: mr.mimeType || 'audio/mp4' });
                 if (sessObj.onStopAction) sessObj.onStopAction(blob, mr.mimeType || 'audio/mp4');
               };
               mr.start();
-              btn.classList.add('bg-[#FA114F]', 'text-white', 'animate-pulse');
+              setExRecordingUI(exIdx, true);
               if (hint) {
                 hint.textContent = 'Recording... speak freely, then tap ↑ to submit.';
                 hint.classList.remove('hidden');
@@ -2205,7 +2238,7 @@
             rec.interimResults = true;
             let finalTxt = inp ? inp.value.trim() : '';
             activeMicSession = { type: 'sr', exIdx, rec };
-            btn.classList.add('bg-[#FA114F]', 'text-white', 'animate-pulse');
+            setExRecordingUI(exIdx, true);
             if (hint) {
               hint.textContent = 'Listening... tap ↑ when done speaking.';
               hint.classList.remove('hidden');
@@ -2219,7 +2252,7 @@
               if (inp) inp.value = (finalTxt + (interim ? ' ' + interim : '')).trim();
             };
             rec.onend = () => {
-              btn.classList.remove('bg-[#FA114F]', 'text-white', 'animate-pulse');
+              setExRecordingUI(exIdx, false);
               if (hint) hint.classList.add('hidden');
               if (activeMicSession && activeMicSession.exIdx === exIdx) activeMicSession = null;
             };
