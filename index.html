@@ -1946,12 +1946,16 @@
                       <button class="copy-down text-xs font-bold text-[#8E8E93]" data-ex="${exIdx}">Copy ↓</button>
                     </div>
 
-                    <!-- Speak / Type Additional Notes -->
-                    <div class="flex items-center gap-1.5">
-                      <button class="ex-note-mic w-8 h-8 rounded-lg bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0" data-ex="${exIdx}" title="Speak note for ${ex.name}">
-                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-                      </button>
-                      <input class="ex-note-inp num-input text-left px-3 h-8 text-[11px] flex-1" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Speak or type note (e.g. swapped grip, felt light)..." />
+                    <!-- Speak / Type to Gemini AI to Auto-Fill Weights, Reps & Notes -->
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-1.5">
+                        <button class="ex-note-mic w-9 h-9 rounded-lg bg-[#2C2C2E] text-[#92E82A] flex items-center justify-center shrink-0" data-ex="${exIdx}" title="Speak sets & notes for ${ex.name}">
+                          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+                        </button>
+                        <input class="ex-note-inp num-input text-left px-3 h-9 text-xs flex-1" data-ex="${exIdx}" type="text" value="${item.note || ''}" placeholder="Speak or type: 25 lb for 8, 8, 7 reps..." />
+                        <button class="ex-ai-fill h-9 px-3 rounded-lg bg-[#92E82A] text-[#000000] font-bold text-xs shrink-0" data-ex="${exIdx}">Fill AI</button>
+                      </div>
+                      <div class="ex-mic-hint hidden text-[10px] text-[#92E82A] pl-1" data-ex="${exIdx}"></div>
                     </div>
                   `;
                 })()}
@@ -1996,24 +2000,130 @@
           state.activeSession.exercises[inp.dataset.ex].note = e.target.value;
           syncActiveSessionProgress();
         }));
+        const fillSetsWithAi = async (exIdx, spokenText, btnEl) => {
+          if (!spokenText) return;
+          const target = sess.exercises[exIdx];
+          if (!target) return;
+          const exName = EXERCISES[target.exId].name;
+          target.note = spokenText;
+
+          const applyParsed = (setsArr, extraNote) => {
+            if (extraNote) target.note = extraNote;
+            const working = target.sets.filter((s) => s.type !== 'warmup');
+            (setsArr || []).forEach((st, i) => {
+              if (!working[i]) {
+                const newS = { num: working.length + 1, type: 'working', weight: '', reps: 0, rpe: 8, done: false };
+                working.push(newS);
+                target.sets.push(newS);
+              }
+              if (st.weight !== undefined && st.weight !== null && st.weight !== '') working[i].weight = Number(st.weight);
+              if (st.reps !== undefined && st.reps !== null) working[i].reps = Number(st.reps);
+              working[i].done = true;
+            });
+            syncActiveSessionProgress();
+            render();
+            startRestTimer(target.rx.restSec, exName);
+          };
+
+          if (state.nutrition.geminiKey) {
+            const orig = btnEl ? btnEl.textContent : 'Fill AI';
+            if (btnEl) btnEl.textContent = '...';
+            try {
+              const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(state.nutrition.geminiKey)}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: `Parse this spoken workout log for "${exName}" (target ${target.rx.sets}x${target.rx.reps}) into weights, reps, and any form/swap note. Spoken: "${spokenText}". Return ONLY JSON object: {"sets": [{"weight": number, "reps": number}], "note": string}. Use weight 0 for bodyweight.` }] }],
+                  generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+                })
+              });
+              const data = await res.json();
+              if (!res.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) throw new Error(data.error?.message || 'API error');
+              const parsed = JSON.parse(data.candidates[0].content.parts[0].text);
+              if (btnEl) btnEl.textContent = orig;
+              const setsArr = Array.isArray(parsed) ? parsed : (parsed.sets || []);
+              applyParsed(setsArr, parsed.note || spokenText);
+              return;
+            } catch (err) {
+              if (btnEl) btnEl.textContent = orig;
+            }
+          }
+
+          // Smart local fallback if no Gemini key or offline
+          const lower = spokenText.toLowerCase();
+          const hasWeightUnit = /\d+\s*(?:lb|lbs|pounds?|kg)/i.test(lower) || /\bfor\b/i.test(lower);
+          const wMatch = lower.match(/(\d+(?:\.\d+)?)\s*(?:lb|lbs|pounds?|kg)?\s*(?:for|x|×|:|,)?/i);
+          const weight = (hasWeightUnit && wMatch) ? Number(wMatch[1]) : (state.lastExerciseSets[target.exId]?.weight ?? '');
+          const afterW = (hasWeightUnit && wMatch) ? lower.slice(wMatch.index + wMatch[0].length) : lower;
+          const repsArr = (afterW.match(/\d+/g) || []).map(Number).filter((n) => n > 0 && n <= 60);
+          if (repsArr.length) {
+            applyParsed(repsArr.map((r) => ({ weight, reps: r })), spokenText);
+          } else {
+            syncActiveSessionProgress();
+          }
+        };
+
+        root.querySelectorAll('.ex-ai-fill').forEach((btn) => btn.addEventListener('click', () => {
+          const exIdx = Number(btn.dataset.ex);
+          const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
+          if (inp) fillSetsWithAi(exIdx, inp.value.trim(), btn);
+        }));
+        root.querySelectorAll('.ex-note-inp').forEach((inp) => inp.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            const exIdx = Number(inp.dataset.ex);
+            const btn = root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`);
+            fillSetsWithAi(exIdx, inp.value.trim(), btn);
+          }
+        }));
         root.querySelectorAll('.ex-note-mic').forEach((btn) => btn.addEventListener('click', () => {
           const exIdx = Number(btn.dataset.ex);
           const inp = root.querySelector(`.ex-note-inp[data-ex="${exIdx}"]`);
+          const fillBtn = root.querySelector(`.ex-ai-fill[data-ex="${exIdx}"]`);
+          const hint = root.querySelector(`.ex-mic-hint[data-ex="${exIdx}"]`);
           const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-          if (!SR) { if (inp) { inp.focus(); inp.placeholder = 'Tap iPhone keyboard mic to dictate note!'; } return; }
-          const rec = new SR(); rec.lang = 'en-US'; rec.interimResults = false;
-          btn.classList.add('bg-[#FA114F]', 'text-white');
-          rec.onresult = (ev) => {
-            const t = ev.results[0][0].transcript;
-            state.activeSession.exercises[exIdx].note = t;
-            if (inp) inp.value = t;
-            btn.classList.remove('bg-[#FA114F]', 'text-white');
-            persistState();
-          };
-          rec.onerror = () => btn.classList.remove('bg-[#FA114F]', 'text-white');
-          rec.onend = () => btn.classList.remove('bg-[#FA114F]', 'text-white');
-          rec.start();
+          if (!SR) {
+            if (inp) inp.focus();
+            if (hint) {
+              hint.textContent = 'Tap your iPhone keyboard 🎤 mic to speak, then tap Fill AI.';
+              hint.classList.remove('hidden');
+            }
+            return;
+          }
+          try {
+            const rec = new SR();
+            rec.lang = 'en-US';
+            rec.interimResults = false;
+            btn.classList.add('bg-[#FA114F]', 'text-white');
+            if (hint) {
+              hint.textContent = 'Listening... speak your weight, reps & notes.';
+              hint.classList.remove('hidden');
+            }
+            rec.onresult = (ev) => {
+              const t = ev.results[0][0].transcript;
+              if (inp) inp.value = t;
+              btn.classList.remove('bg-[#FA114F]', 'text-white');
+              if (hint) hint.classList.add('hidden');
+              fillSetsWithAi(exIdx, t, fillBtn);
+            };
+            rec.onerror = () => {
+              btn.classList.remove('bg-[#FA114F]', 'text-white');
+              if (inp) inp.focus();
+              if (hint) {
+                hint.textContent = 'Voice unavailable here — tap keyboard 🎤 mic, then Fill AI.';
+                hint.classList.remove('hidden');
+              }
+            };
+            rec.onend = () => btn.classList.remove('bg-[#FA114F]', 'text-white');
+            rec.start();
+          } catch (err) {
+            if (inp) inp.focus();
+            if (hint) {
+              hint.textContent = 'Tap your iPhone keyboard 🎤 mic to speak, then tap Fill AI.';
+              hint.classList.remove('hidden');
+            }
+          }
         }));
+
         root.querySelectorAll('.start-rec-timer').forEach((btn) => btn.addEventListener('click', () => {
           const item = state.activeSession.exercises[btn.dataset.ex];
           startRestTimer(item.rx.restSec, EXERCISES[item.exId].name);
