@@ -1689,10 +1689,12 @@
 
         wireHealthButton();
         root.querySelectorAll('.split-jump').forEach((btn) => btn.addEventListener('click', () => {
+          if (state.selectedWeek === 9) state.selectedWeek = state.lastNonDeloadWeek || 1;
           state.currentDayIdx = Number(btn.dataset.day);
           render();
         }));
         root.querySelectorAll('.split-jump-deload').forEach((btn) => btn.addEventListener('click', () => {
+          if (state.selectedWeek !== 9) state.lastNonDeloadWeek = state.selectedWeek;
           state.selectedWeek = 9;
           state.currentDayIdx = 0;
           render();
